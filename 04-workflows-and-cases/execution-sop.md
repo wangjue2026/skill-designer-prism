@@ -70,10 +70,13 @@ graph TD
 
 #### Step 3: 检索设计经验与推演解题策略 (Strategy Formulation)
 * **执行动作**：
-  1. 调取Prism **六大底层设计哲学** 与实战经验库：
+  1. 调取 Prism **六大底层设计哲学** 与实战经验库：
      * **宏观策略**（[`01-macro-solution/`](../01-macro-solution/)）：端到端拓扑链路、In-situ 原地闭环、同源数据聚合、三级联动排障流；
      * **微观策略**（[`02-micro-detail/`](../02-micro-detail/)）：去框线化、8px 网格留白、Outfit 等宽数字字体、中性浅灰底降噪。
-  2. 形成结构化的设计策略方案（Design Rationale）。
+  2. **强制执行【情境三审与手法发散】（Anti-Hardcoding Check）**：
+     * 区分“本质设计意图（道）”与“参考范例（术）”，严禁无脑硬搬代码片段；
+     * 审视现场宿主的载体形态（圆环 vs 长方卡片）、空间限制（1440px 下是否逼仄）与现有技术栈，评估历史手法是否适用；若受限则主动调取备选解法（如降阶为纯文本/微圆点/抽屉下钻）。
+  3. 形成结构化的设计策略方案（Design Rationale）。
 
 #### Step 4: 调取分层设计参考规范 (Retrieve Hierarchical Specs)
 * **执行动作**：
@@ -81,8 +84,8 @@ graph TD
   * **全局原子规范**（`global-styles/` & `tokens-cheatsheet.md`）：标准色阶 Hex、8px 网格间距（`p-4 (16px)`, `gap-3 (12px)`）、字阶公式（`line-height = font-size + 8px`）、数字专用字体（`Outfit` + `tabular-nums`）、24 栅格。
   * **基础组件规范**（`components/`）：
     * 表格 ➔ `comp-table.md`：表头 32px (`bg-[#EDF1F7]`)、单行行高 40px、无圆角、数字右对齐、操作列文字链接蓝 `text-[#1C6EFF]`、横向滚动冻结操作列；
-    * 搜索 ➔ `comp-pro-search.md`：高度 32px、前置放大镜、折叠联动；
-    * 按钮 ➔ `comp-button.md`：双字按钮固定 56px、字号 12px（弹窗 14px）、圆角 2px；
+    * 搜索 ➔ `comp-pro-search.md`：高度 32px、前置放大镜、自适应/固定宽度；
+    * 按钮 ➔ `comp-button.md`：双字按钮推荐 56px、字号 12px（图文按钮自适应内边距）；
     * 弹窗/抽屉 ➔ `comp-modal.md` / `comp-drawer.md`：遮罩层级 `z-50`、标准阴影 S3。
 
 ---
@@ -91,8 +94,8 @@ graph TD
 
 #### Step 5: 确定像素级与交互执行细节 (Determine Execution Details)
 * **执行动作**：
-  1. 明确精确的 DOM 结构（Grid / Flex 骨架）；
-  2. 注入语义化色彩三元组（**浅底 LightBg + 深字 DeepText + 浅边框 Border**，如 `bg-[#FFF1F0] text-[#D9363E] border-[#FFA39E]`）；
+  1. 结合当前页面真实的 DOM 骨架与技术栈（Tailwind / 纯 CSS）进行量体裁衣；
+  2. 注入符合信噪比的色彩层级（核心阻断故障用高危三元组，次要待处理用中性浅灰胶囊或纯文本，已恢复彻底去标签）；
   3. 细化交互态反馈（Hover 微悬浮 `hover:shadow-sm`、Active 点击、Focus 聚焦蓝光圈）；
   4. 明确状态机驱动逻辑（同步中/异常状态下禁用操作按钮并挂载 Tooltip 解释）。
 
@@ -116,9 +119,11 @@ graph TD
   * **若为微观局部调优** ➔ 调用 [`02-micro-detail/micro-prompt-template.md`](../02-micro-detail/micro-prompt-template.md)；
   * 同时生成：
     1. **输出 A：面向规划的设计思考解释**（大白话讲清因果、审美与业务收益）；
-    2. **输出 B：面向 Coding AI 的高保真执行 Prompt**（带 DOM、Token、组件硬指标、四重安全带）。
+    2. **输出 B：面向 Coding AI 的高保真执行 Prompt**（带 DOM、Token、组件硬指标、四重安全带，按当前代码量体裁衣）。
 
 #### Step 8: 交付 Coding AI 执行与闭环验收 (Handover & Acceptance)
 * **执行动作**：
-  1. 将输出 B 交付给 Coding AI（Antigravity / Cursor / Claude 等）进行代码直出或补丁修改；
-  2. 依照对应组件规范中的 **【验收标准 (Acceptance Criteria)】** 对生成代码进行闭环验证（如核对表头是否 32px、按钮是否 56px、数字是否右对齐、是否有未定义的纯色等）。
+  1. 将输出 B 交付给 Coding AI 进行代码直出或补丁修改；
+  2. **双维闭环验收（Dual Acceptance）**：
+     * **硬性基准验证**：核对核心硬指标（如表头是否吸顶、数字是否右对齐、长文本是否截断）；
+     * **本质体验验证**：审视改动是否真正达成底层设计意图（如是否真正实现去红降噪、是否有横向滚动条溢出、是否有机械套用造成的视觉滑稽），杜绝“指标达标但体验更烂”的形式主义。
