@@ -1,8 +1,8 @@
-# Prism 体验设计智脑：全链路执行工作流 SOP 说明书 (Execution Workflow SOP)
+# 织雨体验设计智脑：全链路执行工作流 SOP 说明书 (Execution Workflow SOP)
 
 > 💡 **中枢定位**：
-> 本文档是Prism 体验设计智脑（Virtual Designer Xiao Wang）的标准作业程序（SOP 说明书）。
-> 它将资深 B 端体验设计师的“脑内诊断与决策过程”抽象为严密的 **4 大阶段、8 步标准流水线**，指导Prism从规划人员的模糊输入出发，输出兼具“业务共识（面向规划）”与“像素级精准（面向 AI）”的高保真执行指令。
+> 本文档是织雨体验设计智脑（Virtual Designer Zhiyu）作为个人设计 Agent 的标准作业程序。
+> 它将资深体验设计师的思考执行全景图，严格沉淀为 **两大赛道（方案系统设计 vs 设计细节调优）** 的端到端标准流水线。
 
 ---
 
@@ -10,115 +10,107 @@
 
 ```mermaid
 graph TD
-    Start["👤 规划人员输入<br>(原始PRD / 模糊吐槽 / 页面截图)"] --> P1
+    Start["👤 规划人员输入<br>(原始PRD / 模糊吐槽 / 页面截图)"] --> Triage["🧭 00-triage-and-routing/ 意图分诊"]
 
-    subgraph Phase1 ["第一阶段：意图解析与现场勘查 (Understand & Diagnose)"]
-        P1["Step 1: 现场勘查与上下文提取<br>(识别场景: 宏观0➔1方案 vs 微观局部调优)"]
-        P2["Step 2: 意图分类与真实病因诊断<br>(比对病因决策树，挖掘底层痛点)"]
-        P1 --> P2
-    end
+    Triage -->|"方案系统设计"| S1["1. 需求理解与分析 (①需求理解与分析/)"]
+    S1 --> S2["2. 设计发力点提炼与范式匹配 (②设计点思考/)"]
+    S3["3. 未来旅程流程图 (③未来旅程/)"]
+    S2 --> S3
+    S3 --> S4["4. 布局结构与组件映射 (④布局与结构/)"]
+    S4 --> S5["5. 输出完整设计说明书 (⑤设计说明书/)"]
+    S5 --> Gate{"🚦 人类共识确认闸门"}
+    Gate -->|"用户确认"| S6["6. AI Coding 与回测 (⑥AI coding 要求/)"]
 
-    subgraph Phase2 ["第二阶段：策略推演与规范匹配 (Strategy & Specs)"]
-        P3["Step 3: 检索设计经验与推演解题策略<br>(宏观方案经验 vs 微观转译经验)"]
-        P4["Step 4: 调取分层设计参考规范<br>(03-design-standards: 原子Token + 基础组件)"]
-        P2 --> P3
-        P3 --> P4
-    end
-
-    subgraph Phase3 ["第三阶段：精细装配与防破坏约束 (Precision & Guardrails)"]
-        P5["Step 5: 确定像素级与交互执行细节<br>(DOM骨架 / 间距 / 色彩三元组 / 状态机)"]
-        P6["Step 6: 注入防破坏负向安全带<br>(外层Shell保护 / 长文本截断 / 兜底空状态)"]
-        P4 --> P5
-        P5 --> P6
-    end
-
-    subgraph Phase4 ["第四阶段：双输出合成与闭环交付 (Synthesis & Handover)"]
-        P7["Step 7: 组装双输出交付成果<br>(输出A: 通俗设计思考 / 输出B: 代码级Prompt)"]
-        P8["Step 8: 交付 Coding AI 执行与验收<br>(按组件验收标准进行闭环把关)"]
-        P6 --> P7
-        P7 --> P8
-    end
-
-    P8 --> Done["🏁 高保真代码落地 & 规划达成审美共识"]
+    Triage -->|"设计细节调优"| Redline{"触碰转轨红线? (triage-rules)"}
+    Redline -->|"是"| S1
+    Redline -->|"否"| M2["b. 调优策略三查 (b-tuning-strategy/)"]
+    M2 --> M3["c. 执行像素级补丁修改 (c-execute-tuning/)"]
 ```
 
 ---
 
-## 📋 8 步标准作业程序逐层详解 (Step-by-Step Breakdown)
+## 📋 方案系统设计主线 6 步规程 (System Solution SOP)
+
+1. **Step 1: 需求理解与分析**（调用 `01-system-solution-design/①需求理解与分析/`）：
+   * 调取 [`requirements-understanding.md`](../01-system-solution-design/①需求理解与分析/requirements-understanding.md) 明确目标角色画像，深挖现状物理卡点与心智摩擦，抽象黄金路径与本质任务（JTBD）；
+   * 调取 [`experience-goals.md`](../01-system-solution-design/①需求理解与分析/experience-goals.md) 按照务实版规则（产品改造动作->操作变化->历史痛点->量化收益）确立可衡量的体验目标。
+2. **Step 2: 设计发力点提炼与专家范式匹配**（调用 `01-system-solution-design/②设计点思考/` 与 `03-design-assets/patterns/`）：
+   * 调取 [`2.1-patterns-taxonomy-and-cheatsheet.md`](../01-system-solution-design/②设计点思考/2.1-patterns-taxonomy-and-cheatsheet.md) 承接步骤 1 的场景痛点与体验目标，按四步法提炼**设计发力方向（方向级）**，并明确业务属性与严肃程度定性；
+   * 到设计资产库 [`patterns/patterns-cheatsheet.md`](../03-design-assets/patterns/patterns-cheatsheet.md) 按业务本质反查能承载该方向的范式，再展开 `pattern-pXX-*.md` 取高阶解题机制（P-01 ~ P-08）。
+3. **Step 3: 未来旅程构建与流程建模**（调用 `01-system-solution-design/③未来旅程/`）：
+   * 调取 `3.1-journey-flow-modeling.md` 贯彻黄金路径与 In-situ 原地闭环策略，绘制出严密的 Mermaid 业务流转流程图；预留流程图脚本工具和模板扩展。
+4. **Step 4: 布局结构与组件映射**（调用 `01-system-solution-design/④布局与结构/` 与 `03-design-assets/`）：
+   * 调取 `4.1-framework-headers-selection.md` 从 `page-templates/` 选取最贴切的业务框架套头（如监控大盘标准套头）；
+   * 调取 `4.2-components-mapping-list.md` 将业务能力清单逐一映射到底层组件，并注入硬性尺寸约束。
+5. **Step 5: 生成完整设计说明书并等待确认**（调用 `01-system-solution-design/⑤设计说明书/` 与 `agent-interaction-protocol.md`）：
+   * 汇总前 4 步推演成果，生成结构化《设计说明书》；
+   * **强制停下，向规划人员汇报并等待确认，达成业务与设计共识**。
+6. **Step 6: AI Coding 方案输出与反向回测**（调用 `01-system-solution-design/⑥AI coding 要求/`）：
+   * 收到用户确认后，生成高保真 Demo 代码；
+   * 对照第 4 步清单严格回测框架套头与组件硬指标，输出最终交付报告。
 
 ---
 
-### 🔍 第一阶段：意图解析与现场勘查 (Understand & Diagnose)
+## 📋 设计细节调优主线 4 阶精密闭环规程 (Detail Tuning 4-Stage SOP)
 
-#### Step 1: 现场勘查与上下文提取 (Context Investigation)
-* **执行动作**：
-  1. 勘查规划人员的输入载体（文本描述、页面截图、现有代码片段或 PRD 文档）；
-  2. 判定业务场景层级：
-     * **宏观方案层**：承接 0 到 1 全新业务页面、全链路流程重构、大盘看板重构；
-     * **微观细节层**：已有界面的细节微调（间距、字号、颜色、表格操作列、按钮尺寸等吐槽）。
-  3. 锚定核心业务对象：明确当前模块属于网络拓扑、指标监控看板、配置向导表单、还是数据流列表。
+> 📌 **前置关卡（属分诊层，不单列为步骤）**：**意图三层穿透 + 转轨红线检查**已统一归口 [`00-triage-and-routing/triage-rules.md`](../00-triage-and-routing/triage-rules.md)；其心法与诊断报告结构见 [`b.1-detail-tuning-dictionary.md`](../02-detail-tuning-design/b-tuning-strategy/b.1-detail-tuning-dictionary.md) 的「零、转译心法」。
+> 若检查触碰转轨红线（改动超 3 个模块、改变主任务流、认知错位），**必须强制停下并主动建议转轨至方案系统设计**。
 
-#### Step 2: 意图分类与真实病因诊断 (Root Cause Diagnosis)
-* **执行动作**：
-  1. 将规划的口语化吐槽归类至对应设计维度；
-  2. 调取 [`02-micro-detail/detail-tuning-dictionary.md`](../02-micro-detail/detail-tuning-dictionary.md) 或 [`01-macro-solution/journey-and-flow-strategies.md`](../01-macro-solution/journey-and-flow-strategies.md)；
-  3. 穿透表面吐槽，识别**真实设计病因**（例如：“太挤”往往不是字太大，而是缺少 8px 网格基准与行高压迫；“定界太假”是缺少可解释的联动证据链）。
+### 细节调优 4 阶精密闭环执行流水线
 
----
-
-### 🧠 第二阶段：策略推演与规范匹配 (Strategy & Specs)
-
-#### Step 3: 检索设计经验与推演解题策略 (Strategy Formulation)
-* **执行动作**：
-  1. 调取Prism **六大底层设计哲学** 与实战经验库：
-     * **宏观策略**（[`01-macro-solution/`](../01-macro-solution/)）：端到端拓扑链路、In-situ 原地闭环、同源数据聚合、三级联动排障流；
-     * **微观策略**（[`02-micro-detail/`](../02-micro-detail/)）：去框线化、8px 网格留白、Outfit 等宽数字字体、中性浅灰底降噪。
-  2. 形成结构化的设计策略方案（Design Rationale）。
-
-#### Step 4: 调取分层设计参考规范 (Retrieve Hierarchical Specs)
-* **执行动作**：
-  从 [`03-design-standards/`](../03-design-standards/) 精准调取对应客观标准：
-  * **全局原子规范**（`global-styles/` & `tokens-cheatsheet.md`）：标准色阶 Hex、8px 网格间距（`p-4 (16px)`, `gap-3 (12px)`）、字阶公式（`line-height = font-size + 8px`）、数字专用字体（`Outfit` + `tabular-nums`）、24 栅格。
-  * **基础组件规范**（`components/`）：
-    * 表格 ➔ `comp-table.md`：表头 32px (`bg-[#EDF1F7]`)、单行行高 40px、无圆角、数字右对齐、操作列文字链接蓝 `text-[#1C6EFF]`、横向滚动冻结操作列；
-    * 搜索 ➔ `comp-pro-search.md`：高度 32px、前置放大镜、折叠联动；
-    * 按钮 ➔ `comp-button.md`：双字按钮固定 56px、字号 12px（弹窗 14px）、圆角 2px；
-    * 弹窗/抽屉 ➔ `comp-modal.md` / `comp-drawer.md`：遮罩层级 `z-50`、标准阴影 S3。
+```mermaid
+graph TD
+    UserFeedback["🗣️ 规划人员大白话吐槽<br>(例: 这个操作列太乱了, 按钮点得好别扭)"] --> TriageCheck{"🛑 转轨红线自检<br>(00-triage-and-routing)"}
+    
+    TriageCheck -- 触碰红线 --> SwitchMacro["🚨 主动预警并转轨至<br>方案系统设计主线 (步骤 1~6)"]
+    
+    TriageCheck -- 未触碰红线 --> Stage1["阶段 1: 对症抓主诉 (查 b.1 词典)<br>• 意图三层穿透 (表象 ➔ 意图 ➔ 物理病因)<br>• 锁定意图维度与正向设计决策及代码片段"]
+    
+    Stage1 --> Stage2["阶段 2: 连带全身体检 (查 b.2 走查库与原则)<br>• 以该组件为中心, 沿 8 大走查维度扫描同模块隐藏暗病<br>• 调取尼尔森可用性原则作为设计解释依据"]
+    
+    Stage2 --> Stage3["阶段 3: 装配负向防线 (查 b.3 坏味道与安全带)<br>• 匹配 15 项 AI 直出坏味道拦截规则<br>• 强制勾选注入八重防破坏安全带 (Regression Guard)"]
+    
+    Stage3 --> Stage4["阶段 4: 双重产物合成交付 (调用 c-micro-patch-template)<br>• 📤 输出 A: 面向规划人员的通俗设计说服与收益解释<br>• 💻 输出 B: 面向 Coding AI 带八重安全带的像素级补丁 Prompt"]
+```
 
 ---
 
-### 🛠️ 第三阶段：精细装配与防破坏约束 (Precision & Guardrails)
+### 4 阶段详细操作规范与交付物标准
 
-#### Step 5: 确定像素级与交互执行细节 (Determine Execution Details)
-* **执行动作**：
-  1. 明确精确的 DOM 结构（Grid / Flex 骨架）；
-  2. 注入语义化色彩三元组（**浅底 LightBg + 深字 DeepText + 浅边框 Border**，如 `bg-[#FFF1F0] text-[#D9363E] border-[#FFA39E]`）；
-  3. 细化交互态反馈（Hover 微悬浮 `hover:shadow-sm`、Active 点击、Focus 聚焦蓝光圈）；
-  4. 明确状态机驱动逻辑（同步中/异常状态下禁用操作按钮并挂载 Tooltip 解释）。
+#### 阶段 1：对症抓主诉 ➔ 意图穿透与词典查表 (调取 `b.1`)
+* **输入条件**：规划人员针对局部界面提出的口语化反馈（如“太挤了”、“颜色土”、“一滚就对不准”、“没有反馈”）。
+* **核心动作**：
+  1. **三层穿透**：执行 `表象层 (口语) ➔ 意图层 (挫折点) ➔ 物理层 (CSS/DOM 病因)` 穿透推导，杜绝字面“头痛医头”；
+  2. **直达词典查表**：检索 [`b.1-detail-tuning-dictionary.md`](../02-detail-tuning-design/b-tuning-strategy/b.1-detail-tuning-dictionary.md)，定位到 6 大意图分类之一；
+  3. **提取正向决策**：获取标准设计推导（Design Rationale）与基础类名/代码片段。
+* **交付物标准**：输出包含“原始吐槽、意图归类、真实物理病因、优化目标”的《调优诊断微报告》。
 
-#### Step 6: 注入防破坏负向安全带 (Inject Regression Guardrails - 强制)
-* **执行动作**：
-  从 [`02-micro-detail/heuristic-guardrails.md`](../02-micro-detail/heuristic-guardrails.md) 中提取针对性的四重安全带：
-  * 🛑 **防外层破坏**：严禁破坏外层 Shell（导航栏/侧边栏）与响应式容器宽度；
-  * 🛑 **防数据丢失**：严禁破坏既有数据绑定（如 Vue `v-model` / React Props）；
-  * 🛑 **防边界崩溃**：极端长文本必须补充 `truncate` + `title`/Tooltip 提示；
-  * 🛑 **防体验裸奔**：必须配备 Empty 空状态与 Loading 骨架屏兜底；
-  * 🛑 **防遮罩穿透**：弹窗与抽屉必须具备 `z-50` 遮罩与防背景滚动锁定。
+#### 阶段 2：连带全身体检 ➔ 8 维度扫描暗病与理论背书 (调取 `b.2`)
+* **输入条件**：已定位的目标组件与其所在的局部父容器。
+* **核心动作**：
+  1. **同区域连带扫描**：规划人员往往只抱怨最扎眼的 1 个表象，智脑必须对照 [`b.2-ux-audit-and-heuristics.md`](../02-detail-tuning-design/b-tuning-strategy/b.2-ux-audit-and-heuristics.md) 的 **8 大走查维度**（空间、色彩、数据呈现、交互防呆、文案语义、链路闭环、工程还原度、反馈透明度），对该组件及其连带上下文做一次“微型全面体检”；
+  2. **打包隐形硬伤**：排查是否存在“数字未右对齐”、“禁用按钮无解释气泡”、“破坏性操作未列影响清单”、“横向滚动未做左右冻结”、“死胡同弹窗”等暗病，将其一并纳入本次修复范围，杜绝二次返工；
+  3. **调取理论依据**：对照 B 端深度定制的 10 项尼尔森可用性原则（如系统状态可见性、防错原则、就地闭环），提炼支撑本次重构的设计心理学与业务依据。
+* **交付物标准**：明确记录“本次连带走查查出的共生缺陷项清单”与“可用性原则依据”。
 
----
+#### 阶段 3：装配负向防线 ➔ 坏味道拦截与安全带注入 (调取 `b.3`)
+* **输入条件**：阶段 1 与阶段 2 汇集的待修改项集合。
+* **核心动作**：
+  1. **坏味道匹配**：对照 [`b.3-practical-lessons-and-guardrails.md`](../02-detail-tuning-design/b-tuning-strategy/b.3-practical-lessons-and-guardrails.md) 的 **15 项高频坏味道拦截清单**（❌1~❌15），显式下达“禁止做什么”的负向提示；
+  2. **安全带强制装配**：针对本次改动的特征，从【八重防破坏安全带 (Regression Guard)】中强制勾选适用条款：
+     - 修改卡片/布局 ➔ 注入 `🛑 防外层破坏` + `🛑 防边界崩溃 (truncate+Tooltip)`；
+     - 修改操作/表单 ➔ 注入 `🛑 防数据破坏 (@click/v-model不变)` + `🛑 防禁用黑盒`；
+     - 修改删除/解散 ➔ 注入 `🛑 防高危裸奔 (阻断Modal+影响清单+口令验证)`；
+     - 修改弹窗/抽屉 ➔ 注入 `🛑 防交互穿透 (z-50遮罩+防滚动)` + `🛑 防设计碎片化 (复用标准组件)`；
+     - 涉及跳出跨页 ➔ 注入 `🛑 防外跳无提示 (必须带 ↗ 图标)`。
+* **交付物标准**：组装完成带有负向约束与八重安全带的代码前置条件。
 
-### 📤 第四阶段：双输出合成与闭环交付 (Synthesis & Handover)
+#### 阶段 4：双重产物合成交付 ➔ 规划说服与安全代码 (调取 `c 模板`)
+* **输入条件**：阶段 1~3 产生的所有正向方案、连带修复项与负向安全带。
+* **核心动作**：调取 [`c-micro-patch-template.md`](../02-detail-tuning-design/c-execute-tuning/c-micro-patch-template.md)，严谨组装双重交付物：
+  1. **生成 📤 输出 A（面向规划人员）**：
+     - 用通俗自然语言 + `b.2` 可用性依据，向规划人员解释痛点病因、本次做了哪些精细提升（涵盖主诉与连带体检项），以及预期的业务与质感收益；
+  2. **生成 💻 输出 B（面向 Coding AI）**：
+     - 严格遵循 `任务目标 ➔ 模块硬指标尺寸 ➔ 视觉三元组 ➔ 防破坏安全带` 四段式结构，生成像素级、即插即用、且绝对安全的执行 Prompt。
+* **交付物标准**：在会话中完整交付输出 A 与输出 B，并提示用户由 Coding AI 执行并验证效果。
 
-#### Step 7: 组装双输出交付成果 (Assemble Dual Deliverables)
-* **执行动作**：
-  根据任务层级调用对应的 Prompt 模板：
-  * **若为宏观 0 到 1 方案** ➔ 调用 [`01-macro-solution/macro-prompt-template.md`](../01-macro-solution/macro-prompt-template.md)；
-  * **若为微观局部调优** ➔ 调用 [`02-micro-detail/micro-prompt-template.md`](../02-micro-detail/micro-prompt-template.md)；
-  * 同时生成：
-    1. **输出 A：面向规划的设计思考解释**（大白话讲清因果、审美与业务收益）；
-    2. **输出 B：面向 Coding AI 的高保真执行 Prompt**（带 DOM、Token、组件硬指标、四重安全带）。
-
-#### Step 8: 交付 Coding AI 执行与闭环验收 (Handover & Acceptance)
-* **执行动作**：
-  1. 将输出 B 交付给 Coding AI（Antigravity / Cursor / Claude 等）进行代码直出或补丁修改；
-  2. 依照对应组件规范中的 **【验收标准 (Acceptance Criteria)】** 对生成代码进行闭环验证（如核对表头是否 32px、按钮是否 56px、数字是否右对齐、是否有未定义的纯色等）。
