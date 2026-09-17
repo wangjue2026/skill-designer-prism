@@ -60,29 +60,29 @@ skill-designer-prism/
 │
 ├── 01-system-solution-design/                       # 【方案系统设计主线 (1~6 步)】
 │   ├── ①需求理解与分析/                            # 步骤 1：需求理解与分析 (精简为 2 篇核心指南)
-│   │   ├── requirements-understanding.md        # 涵盖现状痛点穿透 + 目标用户主要任务旅程 (JTBD)
-│   │   └── experience-goals.md                  # 涵盖体验收益与务实版体验目标推导指南 (去口号化)
+│   │   ├── 1.1-需求理解与现状旅程.md        # 涵盖现状痛点穿透 + 目标用户主要任务旅程 (JTBD)
+│   │   └── 1.2-体验目标.md                  # 涵盖体验收益与务实版体验目标推导指南 (去口号化)
 │   ├── ②设计点思考/                                # 步骤 2：设计点思考与专家范式分类
-│   │   └── 2.1-patterns-taxonomy-and-cheatsheet.md  # 2.1 范式大类分类目录、定性矩阵与核心解题机制
+│   │   └── 2.1-设计思考与发力点.md  # 2.1 范式大类分类目录、定性矩阵与核心解题机制
 │   ├── ③未来旅程/                                  # 步骤 3：未来旅程构建与流程建模
-│   │   └── 3.1-journey-flow-modeling.md             # 3.1 本质任务旅程与 Mermaid 规划流程图
+│   │   └── 3.1-未来旅程.md             # 3.1 本质任务旅程与 Mermaid 规划流程图
 │   ├── ④布局与结构/                                # 步骤 4：布局结构与组件映射
-│   │   ├── 4.0-framework-and-components-overview.md # 步骤 4 双清单推导总览与交付模板
-│   │   ├── 4.1-framework-headers-selection.md       # 4.1 业务框架套头选型清单
-│   │   └── 4.2-components-mapping-list.md           # 4.2 业务能力 ➔ 组件硬指标映射清单
+│   │   ├── 4.1-业务页面框架选型指引.md # 步骤 4 双清单推导总览与交付模板
+│   │   ├── 4.1-业务页面框架选型指引.md       # 4.1 业务框架套头选型清单
+│   │   └── 4.2-业务能力与组件选型指引.md           # 4.2 业务能力 ➔ 组件硬指标映射清单
 │   ├── ⑤设计说明书/                                # 步骤 5：生成完整设计说明书
-│   │   └── 5.0-design-spec-template.md              # 5.0 标准设计说明书模板 (人机共识确认关卡)
+│   │   └── 5.0-设计说明书标准模板.md              # 5.0 标准设计说明书模板 (人机共识确认关卡)
 │   └── ⑥AI coding 要求/                             # 步骤 6：前端 Demo 输出与回测
-│       └── 6.0-frontend-demo-and-verification.md    # 6.0 前端 Demo 输出规则与清单反向回测
+│       └── 6.0-前端 demo 输出要求.md    # 6.0 前端 Demo 输出规则与清单反向回测
 │
 ├── 02-detail-tuning-design/                         # 【设计细节调优主线 (4 阶闭环)】
-│   ├── detail-tuning-pipeline-guide.md              # 调优中枢指南：4 阶精密闭环作业法
+│   ├── 细节调优中枢调度指南.md              # 调优中枢指南：4 阶精密闭环作业法
 │   ├── b-tuning-strategy/                           # 步骤 b：调优策略思考三要素
-│   │   ├── b.1-detail-tuning-dictionary.md          # b.1 40+ 细节点吐槽转译词典
-│   │   ├── b.2-ux-audit-and-heuristics.md           # b.2 UI/UX 走查评审缺陷库与可用性原则
-│   │   └── b.3-practical-lessons-and-guardrails.md  # b.3 环节实战避坑经验与八重防破坏安全带
+│   │   ├── b.1-设计细节吐槽转译词典.md          # b.1 40+ 细节点吐槽转译词典
+│   │   ├── b.2-界面体验与可用性.md           # b.2 UI/UX 走查评审缺陷库与可用性原则
+│   │   └── b.3-避坑指南.md  # b.3 环节实战避坑经验与八重防破坏安全带
 │   └── c-execute-tuning/                            # 步骤 c：执行调优修改
-│       └── c-micro-patch-template.md                # c 局部调优补丁执行 Prompt 模板
+│       └── c-局部调优补丁执行模板.md                # c 局部调优补丁执行 Prompt 模板
 │
 ├── 03-design-assets/                                # 【设计资产库基座】
 │   ├── components/                                  # 20+ 基础原子组件规范 (Table, Button, Pro-Search等)

@@ -58,7 +58,7 @@
   * 规划人员当时吐槽了什么？（“太挤”、“小标题碎”、“折线像刷子”、“操作列太乱”）
   * 资深设计师诊断出的**真实物理病因**是什么？（缺少 8px 网格？大框套小框？stroke 太粗？缺乏主次颜色？）
 * **蒸馏产物**：
-  * 形成一条新的 **“规划口语 ➔ 真实病因 ➔ 专业决策 ➔ AI 精准 Prompt 片段”** 映射，补充进 `02-detail-tuning-design/b-tuning-strategy/`；意图穿透心法注入 `b-tuning-strategy/b.1-detail-tuning-dictionary.md` 引言。
+  * 形成一条新的 **“规划口语 ➔ 真实病因 ➔ 专业决策 ➔ AI 精准 Prompt 片段”** 映射，补充进 `02-detail-tuning-design/b-tuning-strategy/`；意图穿透心法注入 `b-tuning-strategy/b.1-设计细节吐槽转译词典.md` 引言。
 
 ### 3. 客观尺度与组件/套头硬指标 ➔ 注入 `03-design-assets/`
 * **识别点**：

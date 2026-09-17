@@ -73,16 +73,16 @@ graph TD
 | **`00-triage-and-routing/`** | **【分诊与转轨中枢】** | **判定宏观方案 vs 微观调优，定义向上转轨红线** |
 | └─ [`triage-rules.md`](00-triage-and-routing/triage-rules.md) | **分诊与转轨决策规则** | 识别全新业务架构 vs 局部吐槽，防止以局部补丁强行敷衍大问题。 |
 | **`01-system-solution-design/`** | **【方案系统设计主线 (1~6步)】**| **解决从 0 到 1 架构、端到端闭环与全页面高保真输出** |
-| ├─ [`①需求理解与分析/`](01-system-solution-design/①需求理解与分析/) | **1. 需求理解与分析** | 包含 2 篇核心指南：<br>1. [`requirements-understanding.md`](01-system-solution-design/①需求理解与分析/requirements-understanding.md) (痛点穿透与主要任务旅程)<br>2. [`experience-goals.md`](01-system-solution-design/①需求理解与分析/experience-goals.md) (体验收益与务实目标) |
-| ├─ [`②设计点思考/`](01-system-solution-design/②设计点思考/) | **2. 设计点思考与范式** | 先由场景痛点提炼「设计发力方向」，再挂靠范式/机制（2.1）；范式库实体归口 `03-design-assets/patterns/`。 |
-| ├─ [`③未来旅程/`](01-system-solution-design/③未来旅程/) | **3. 未来旅程与流程建模** | 优化后的用户任务流转，绘制标准 Mermaid 规划流程图（3.1）。 |
-| ├─ [`④布局与结构/`](01-system-solution-design/④布局与结构/) | **4. 布局结构与组件映射** | 选定页面框架套头（4.1），梳理业务能力并精确映射到底层组件硬指标（4.2）。 |
-| ├─ [`⑤设计说明书/`](01-system-solution-design/⑤设计说明书/) | **5. 标准设计说明书模板** | **【共识关卡】**汇总设计思考与细节，等待规划人员确认后再执行代码（5.0）。 |
-| └─ [`⑥AI coding 要求/`](01-system-solution-design/⑥AI coding 要求/) | **6. AI Coding 与回测** | 确认后输出高保真 Demo，严格反向回测第 4 步套头与组件达标度（6.0）。 |
+| ├─ [`①需求理解与分析/`](01-system-solution-design/①需求理解与分析/) | **1. 需求理解与分析** | 包含 2 篇核心指南：<br>1. [`1.1-需求理解与现状旅程.md`](01-system-solution-design/①需求理解与分析/1.1-需求理解与现状旅程.md) (痛点穿透与主要任务旅程)<br>2. [`1.2-体验目标.md`](01-system-solution-design/①需求理解与分析/1.2-体验目标.md) (体验收益与务实目标) |
+| ├─ [`②设计点思考/`](01-system-solution-design/②设计点思考/) | **2. 需求定性、标杆学习与发力点** | 包含 2 篇核心资产：<br>1. [`2.2-标杆案例库.md`](01-system-solution-design/②设计点思考/2.2-标杆案例库.md) (6大需求类型全景图、通用场景考量清单、SASE/AES/配置同步标杆深度蒸馏与Why因果推演)<br>2. [`2.1-设计思考与发力点.md`](01-system-solution-design/②设计点思考/2.1-设计思考与发力点.md) (设计发力点提炼与专家范式匹配) |
+| ├─ [`③未来旅程/`](01-system-solution-design/③未来旅程/) | **3. 未来旅程与流程建模** | 包含 1 篇核心指南：[`3.1-未来旅程.md`](01-system-solution-design/③未来旅程/3.1-未来旅程.md) (优化后的用户任务流转，绘制标准 Mermaid 规划流程图)。 |
+| ├─ [`④布局与结构/`](01-system-solution-design/④布局与结构/) | **4. 布局结构与组件映射** | 包含 2 篇核心指南：<br>1. [`4.1-业务页面框架选型指引.md`](01-system-solution-design/④布局与结构/4.1-业务页面框架选型指引.md) (选定页面框架套头与总览交付)<br>2. [`4.2-业务能力与组件选型指引.md`](01-system-solution-design/④布局与结构/4.2-业务能力与组件选型指引.md) (梳理业务能力并精确映射到底层组件硬指标) |
+| ├─ [`⑤设计说明书/`](01-system-solution-design/⑤设计说明书/) | **5. 标准设计说明书模板** | **【共识关卡】** [`5.0-设计说明书标准模板.md`](01-system-solution-design/⑤设计说明书/5.0-设计说明书标准模板.md) (汇总设计思考与细节，等待规划人员确认后再执行代码)。 |
+| └─ [`⑥AI coding 要求/`](01-system-solution-design/⑥AI coding 要求/) | **6. AI Coding 与回测** | [`6.0-前端 demo 输出要求.md`](01-system-solution-design/⑥AI coding 要求/6.0-前端 demo 输出要求.md) (确认后输出高保真 Demo，严格反向回测第 4 步套头与组件达标度)。 |
 | **`02-detail-tuning-design/`** | **【设计细节调优主线 (4阶闭环)】**| **解决局部样式、间距排版、组件硬指标修复与槽点根除（意图穿透与转轨红线由 `00-triage-and-routing/` 统一承载）** |
-| ├─ [`detail-tuning-pipeline-guide.md`](02-detail-tuning-design/detail-tuning-pipeline-guide.md) | **调优中枢调度指南** | 定义 4 阶精密闭环作业法（主诉查表 ➔ 连带体检 ➔ 装配防线 ➔ 双重交付）。 |
-| ├─ [`b-tuning-strategy/`](02-detail-tuning-design/b-tuning-strategy/) | **b. 调优策略思考三要素** | 40+ 细节点吐槽转译词典（b.1）、UI走查体检库（b.2）、八重防破坏安全带（b.3）。 |
-| └─ [`c-execute-tuning/`](02-detail-tuning-design/c-execute-tuning/) | **c. 局部调优补丁执行** | 生成针对局部模块的精准补丁 Prompt 与通俗设计说明。 |
+| ├─ [`细节调优中枢调度指南.md`](02-detail-tuning-design/细节调优中枢调度指南.md) | **调优中枢调度指南** | 定义 4 阶精密闭环作业法（主诉查表 ➔ 连带体检 ➔ 装配防线 ➔ 双重交付）。 |
+| ├─ [`b-tuning-strategy/`](02-detail-tuning-design/b-tuning-strategy/) | **b. 调优策略思考三要素** | 包含 3 篇核心资产：<br>1. [`b.1-设计细节吐槽转译词典.md`](02-detail-tuning-design/b-tuning-strategy/b.1-设计细节吐槽转译词典.md)<br>2. [`b.2-界面体验与可用性.md`](02-detail-tuning-design/b-tuning-strategy/b.2-界面体验与可用性.md)<br>3. [`b.3-避坑指南.md`](02-detail-tuning-design/b-tuning-strategy/b.3-避坑指南.md) |
+| └─ [`c-execute-tuning/`](02-detail-tuning-design/c-execute-tuning/) | **c. 局部调优补丁执行** | [`c-局部调优补丁执行模板.md`](02-detail-tuning-design/c-execute-tuning/c-局部调优补丁执行模板.md) (生成针对局部模块的精准补丁 Prompt 与通俗设计说明)。 |
 | **`03-design-assets/`** | **【统一设计资产库基座】** | **提供客观数值、组件、页面模板、专家范式与产线知识支撑（找设计资产统一入口）** |
 | ├─ [`components/`](03-design-assets/components/) | **基础原子组件规范 (20+)** | Table (表头32px/行高40px/右对齐)、Pro-Search (32px)、Button (56px) 等。 |
 | ├─ [`page-templates/`](03-design-assets/page-templates/) | **页面模板与业务框架套头**| 监控大盘标准套头、配置向导骨架、对象管理两栏套头。 |

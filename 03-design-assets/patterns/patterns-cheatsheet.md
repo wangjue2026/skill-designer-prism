@@ -5,7 +5,7 @@
 > 步骤 2 定出「设计发力方向」后，在此定位能承载它的范式，再展开对应范式文件取机制/骨架/闭环。
 >
 > 📁 **同目录资产**：每个范式的详情见 `pattern-pXX-*.md`；本表只做索引与反查，不复制机制细节。
-> 🔗 **上游**：[`2.1-patterns-taxonomy-and-cheatsheet.md`](../../01-system-solution-design/②设计点思考/2.1-patterns-taxonomy-and-cheatsheet.md)（步骤 2：怎么从场景痛点提炼发力方向）
+> 🔗 **上游**：[`2.1-设计思考与发力点.md`](../../01-system-solution-design/②设计点思考/2.1-设计思考与发力点.md)（步骤 2：怎么从场景痛点提炼发力方向）
 
 ---
 

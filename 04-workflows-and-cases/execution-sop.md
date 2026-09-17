@@ -32,16 +32,18 @@ graph TD
 ## 📋 方案系统设计主线 6 步规程 (System Solution SOP)
 
 1. **Step 1: 需求理解与分析**（调用 `01-system-solution-design/①需求理解与分析/`）：
-   * 调取 [`requirements-understanding.md`](../01-system-solution-design/①需求理解与分析/requirements-understanding.md) 明确目标角色画像，深挖现状物理卡点与心智摩擦，抽象黄金路径与本质任务（JTBD）；
-   * 调取 [`experience-goals.md`](../01-system-solution-design/①需求理解与分析/experience-goals.md) 按照务实版规则（产品改造动作->操作变化->历史痛点->量化收益）确立可衡量的体验目标。
-2. **Step 2: 设计发力点提炼与专家范式匹配**（调用 `01-system-solution-design/②设计点思考/` 与 `03-design-assets/patterns/`）：
-   * 调取 [`2.1-patterns-taxonomy-and-cheatsheet.md`](../01-system-solution-design/②设计点思考/2.1-patterns-taxonomy-and-cheatsheet.md) 承接步骤 1 的场景痛点与体验目标，按四步法提炼**设计发力方向（方向级）**，并明确业务属性与严肃程度定性；
+   * 调取 [`1.1-需求理解与现状旅程.md`](../01-system-solution-design/①需求理解与分析/1.1-需求理解与现状旅程.md) 明确目标角色画像，深挖现状物理卡点与心智摩擦，抽象黄金路径与本质任务（JTBD）；
+   * 调取 [`1.2-体验目标.md`](../01-system-solution-design/①需求理解与分析/1.2-体验目标.md) 按照务实版规则（产品改造动作->操作变化->历史痛点->量化收益）确立可衡量的体验目标；
+   * **前置定性**：对照标杆案例库前置类型表，快速完成业务需求类型定性（Type-01~06）。
+2. **Step 2: 标杆案例借鉴、发力点提炼与专家范式匹配**（调用 `01-system-solution-design/②设计点思考/` 与 `03-design-assets/patterns/`）：
+   * **强制查阅标杆**：调取 [`2.2-标杆案例库.md`](../01-system-solution-design/②设计点思考/2.2-标杆案例库.md)，对照该需求类型的【通用设计场景清单】进行完整度自检，并深度学习业内成熟标杆（如 SASE 终端管理、AES 资产管理、数据集成管道）的落地方案与“Why 因果推演”，提取复用点；
+   * 调取 [`2.1-设计思考与发力点.md`](../01-system-solution-design/②设计点思考/2.1-设计思考与发力点.md) 承接步骤 1 的场景痛点与体验目标，按四步法提炼**设计发力方向（L1 方向级）**，并明确业务属性与严肃程度定性；
    * 到设计资产库 [`patterns/patterns-cheatsheet.md`](../03-design-assets/patterns/patterns-cheatsheet.md) 按业务本质反查能承载该方向的范式，再展开 `pattern-pXX-*.md` 取高阶解题机制（P-01 ~ P-08）。
 3. **Step 3: 未来旅程构建与流程建模**（调用 `01-system-solution-design/③未来旅程/`）：
-   * 调取 `3.1-journey-flow-modeling.md` 贯彻黄金路径与 In-situ 原地闭环策略，绘制出严密的 Mermaid 业务流转流程图；预留流程图脚本工具和模板扩展。
+   * 调取 `3.1-未来旅程.md` 贯彻黄金路径与 In-situ 原地闭环策略，绘制出严密的 Mermaid 业务流转流程图；预留流程图脚本工具和模板扩展。
 4. **Step 4: 布局结构与组件映射**（调用 `01-system-solution-design/④布局与结构/` 与 `03-design-assets/`）：
-   * 调取 `4.1-framework-headers-selection.md` 从 `page-templates/` 选取最贴切的业务框架套头（如监控大盘标准套头）；
-   * 调取 `4.2-components-mapping-list.md` 将业务能力清单逐一映射到底层组件，并注入硬性尺寸约束。
+   * 调取 `4.1-业务页面框架选型指引.md` 从 `page-templates/` 选取最贴切的业务框架套头（如监控大盘标准套头）；
+   * 调取 `4.2-业务能力与组件选型指引.md` 将业务能力清单逐一映射到底层组件，并注入硬性尺寸约束。
 5. **Step 5: 生成完整设计说明书并等待确认**（调用 `01-system-solution-design/⑤设计说明书/` 与 `agent-interaction-protocol.md`）：
    * 汇总前 4 步推演成果，生成结构化《设计说明书》；
    * **强制停下，向规划人员汇报并等待确认，达成业务与设计共识**。
@@ -53,7 +55,7 @@ graph TD
 
 ## 📋 设计细节调优主线 4 阶精密闭环规程 (Detail Tuning 4-Stage SOP)
 
-> 📌 **前置关卡（属分诊层，不单列为步骤）**：**意图三层穿透 + 转轨红线检查**已统一归口 [`00-triage-and-routing/triage-rules.md`](../00-triage-and-routing/triage-rules.md)；其心法与诊断报告结构见 [`b.1-detail-tuning-dictionary.md`](../02-detail-tuning-design/b-tuning-strategy/b.1-detail-tuning-dictionary.md) 的「零、转译心法」。
+> 📌 **前置关卡（属分诊层，不单列为步骤）**：**意图三层穿透 + 转轨红线检查**已统一归口 [`00-triage-and-routing/triage-rules.md`](../00-triage-and-routing/triage-rules.md)；其心法与诊断报告结构见 [`b.1-设计细节吐槽转译词典.md`](../02-detail-tuning-design/b-tuning-strategy/b.1-设计细节吐槽转译词典.md) 的「零、转译心法」。
 > 若检查触碰转轨红线（改动超 3 个模块、改变主任务流、认知错位），**必须强制停下并主动建议转轨至方案系统设计**。
 
 ### 细节调优 4 阶精密闭环执行流水线
@@ -70,7 +72,7 @@ graph TD
     
     Stage2 --> Stage3["阶段 3: 装配负向防线 (查 b.3 坏味道与安全带)<br>• 匹配 15 项 AI 直出坏味道拦截规则<br>• 强制勾选注入八重防破坏安全带 (Regression Guard)"]
     
-    Stage3 --> Stage4["阶段 4: 双重产物合成交付 (调用 c-micro-patch-template)<br>• 📤 输出 A: 面向规划人员的通俗设计说服与收益解释<br>• 💻 输出 B: 面向 Coding AI 带八重安全带的像素级补丁 Prompt"]
+    Stage3 --> Stage4["阶段 4: 双重产物合成交付 (调用 c-局部调优补丁执行模板)<br>• 📤 输出 A: 面向规划人员的通俗设计说服与收益解释<br>• 💻 输出 B: 面向 Coding AI 带八重安全带的像素级补丁 Prompt"]
 ```
 
 ---
@@ -81,14 +83,14 @@ graph TD
 * **输入条件**：规划人员针对局部界面提出的口语化反馈（如“太挤了”、“颜色土”、“一滚就对不准”、“没有反馈”）。
 * **核心动作**：
   1. **三层穿透**：执行 `表象层 (口语) ➔ 意图层 (挫折点) ➔ 物理层 (CSS/DOM 病因)` 穿透推导，杜绝字面“头痛医头”；
-  2. **直达词典查表**：检索 [`b.1-detail-tuning-dictionary.md`](../02-detail-tuning-design/b-tuning-strategy/b.1-detail-tuning-dictionary.md)，定位到 6 大意图分类之一；
+  2. **直达词典查表**：检索 [`b.1-设计细节吐槽转译词典.md`](../02-detail-tuning-design/b-tuning-strategy/b.1-设计细节吐槽转译词典.md)，定位到 6 大意图分类之一；
   3. **提取正向决策**：获取标准设计推导（Design Rationale）与基础类名/代码片段。
 * **交付物标准**：输出包含“原始吐槽、意图归类、真实物理病因、优化目标”的《调优诊断微报告》。
 
 #### 阶段 2：连带全身体检 ➔ 8 维度扫描暗病与理论背书 (调取 `b.2`)
 * **输入条件**：已定位的目标组件与其所在的局部父容器。
 * **核心动作**：
-  1. **同区域连带扫描**：规划人员往往只抱怨最扎眼的 1 个表象，智脑必须对照 [`b.2-ux-audit-and-heuristics.md`](../02-detail-tuning-design/b-tuning-strategy/b.2-ux-audit-and-heuristics.md) 的 **8 大走查维度**（空间、色彩、数据呈现、交互防呆、文案语义、链路闭环、工程还原度、反馈透明度），对该组件及其连带上下文做一次“微型全面体检”；
+  1. **同区域连带扫描**：规划人员往往只抱怨最扎眼的 1 个表象，智脑必须对照 [`b.2-界面体验与可用性.md`](../02-detail-tuning-design/b-tuning-strategy/b.2-界面体验与可用性.md) 的 **8 大走查维度**（空间、色彩、数据呈现、交互防呆、文案语义、链路闭环、工程还原度、反馈透明度），对该组件及其连带上下文做一次“微型全面体检”；
   2. **打包隐形硬伤**：排查是否存在“数字未右对齐”、“禁用按钮无解释气泡”、“破坏性操作未列影响清单”、“横向滚动未做左右冻结”、“死胡同弹窗”等暗病，将其一并纳入本次修复范围，杜绝二次返工；
   3. **调取理论依据**：对照 B 端深度定制的 10 项尼尔森可用性原则（如系统状态可见性、防错原则、就地闭环），提炼支撑本次重构的设计心理学与业务依据。
 * **交付物标准**：明确记录“本次连带走查查出的共生缺陷项清单”与“可用性原则依据”。
@@ -96,7 +98,7 @@ graph TD
 #### 阶段 3：装配负向防线 ➔ 坏味道拦截与安全带注入 (调取 `b.3`)
 * **输入条件**：阶段 1 与阶段 2 汇集的待修改项集合。
 * **核心动作**：
-  1. **坏味道匹配**：对照 [`b.3-practical-lessons-and-guardrails.md`](../02-detail-tuning-design/b-tuning-strategy/b.3-practical-lessons-and-guardrails.md) 的 **15 项高频坏味道拦截清单**（❌1~❌15），显式下达“禁止做什么”的负向提示；
+  1. **坏味道匹配**：对照 [`b.3-避坑指南.md`](../02-detail-tuning-design/b-tuning-strategy/b.3-避坑指南.md) 的 **15 项高频坏味道拦截清单**（❌1~❌15），显式下达“禁止做什么”的负向提示；
   2. **安全带强制装配**：针对本次改动的特征，从【八重防破坏安全带 (Regression Guard)】中强制勾选适用条款：
      - 修改卡片/布局 ➔ 注入 `🛑 防外层破坏` + `🛑 防边界崩溃 (truncate+Tooltip)`；
      - 修改操作/表单 ➔ 注入 `🛑 防数据破坏 (@click/v-model不变)` + `🛑 防禁用黑盒`；
@@ -107,7 +109,7 @@ graph TD
 
 #### 阶段 4：双重产物合成交付 ➔ 规划说服与安全代码 (调取 `c 模板`)
 * **输入条件**：阶段 1~3 产生的所有正向方案、连带修复项与负向安全带。
-* **核心动作**：调取 [`c-micro-patch-template.md`](../02-detail-tuning-design/c-execute-tuning/c-micro-patch-template.md)，严谨组装双重交付物：
+* **核心动作**：调取 [`c-局部调优补丁执行模板.md`](../02-detail-tuning-design/c-execute-tuning/c-局部调优补丁执行模板.md)，严谨组装双重交付物：
   1. **生成 📤 输出 A（面向规划人员）**：
      - 用通俗自然语言 + `b.2` 可用性依据，向规划人员解释痛点病因、本次做了哪些精细提升（涵盖主诉与连带体检项），以及预期的业务与质感收益；
   2. **生成 💻 输出 B（面向 Coding AI）**：
