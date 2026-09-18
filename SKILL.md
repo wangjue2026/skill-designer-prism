@@ -95,6 +95,8 @@ graph TD
 | ├─ [`execution-sop.md`](04-workflows-and-cases/execution-sop.md) | **8 步执行工作流 SOP 说明书**| 端到端流水线作业程序。 |
 | └─ [`few-shots.md`](04-workflows-and-cases/few-shots.md) | **经典实战 Few-Shot 样本库** | 真实案例前后对比与代码级标杆 Prompt。 |
 | **`learning-materials/`** | **【知识蒸馏收件箱】** | **接收用户临时投喂资料，深度蒸馏后合入系统核心库** |
+| **`tools/`** | **【工程工具】** | **执行环节所需的脚本工具（非设计知识）** |
+| ├─ [`internal-reverse-proxy.js`](tools/internal-reverse-proxy.js) | **内网系统访问通道** | 当内网系统因自建 CA 证书不被信任（`ERR_CERT_AUTHORITY_INVALID`）而无法在浏览器直连时，用它在本地开一条访问通道，供蒸馏取证。用法见 [`tools/README.md`](tools/README.md)。 |
 
 ---
 

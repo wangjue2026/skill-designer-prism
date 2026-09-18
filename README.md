@@ -102,9 +102,13 @@ skill-designer-prism/
 │   ├── execution-sop.md                             # 8 步端到端执行作业程序
 │   └── few-shots.md                                 # 标杆实战 Few-Shot 样本库
 │
-└── learning-materials/                              # 【资料投喂与蒸馏暂存收件箱】
-    ├── learning-materials-guide.md                  # 经验蒸馏手册
-    └── (随时投喂原始 PRD 或复盘资料，蒸馏后随时清理)
+├── learning-materials/                              # 【资料投喂与蒸馏暂存收件箱】
+│   ├── learning-materials-guide.md                  # 经验蒸馏手册
+│   └── (随时投喂原始 PRD 或复盘资料，蒸馏后随时清理)
+│
+└── tools/                                           # 【工程工具】(非设计知识)
+    ├── README.md                                    # 工具目录说明与用法指引
+    └── internal-reverse-proxy.js                    # 内网系统访问通道 (供蒸馏取证)
 ```
 
 ---
