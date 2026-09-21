@@ -288,7 +288,7 @@
           <td><b>合规检测任务制定与下发</b><br/><span style="color:var(--text-sub);font-size:12px;">痛点：规则繁琐易错、影响面未知</span></td>
           <td><b>【Job 1：创建并运行任务】</b><br/><span style="color:var(--text-sub);font-size:12px;">流程：录入配置并圈选对象</span></td>
           <td><b>降低配置心智负荷与前置防呆</b>：入口深度、表单承载形态、对象圈选与大数约束暴露时机。</td>
-          <td>采纳 <b>EP-03</b>（720px 右侧抽屉轻量配置）、<b>EP-04</b>（圈选范围即时测算防呆）、<b>EP-05</b>（单一确定按钮+立即执行）。</td>
+          <td>采纳 <b>EP-03</b>（800px 右侧抽屉轻量配置）、<b>EP-04</b>（圈选范围即时测算防呆）、<b>EP-05</b>（单一确定按钮+立即执行）。</td>
         </tr>
         <tr>
           <td><b>S2</b></td>
@@ -344,7 +344,7 @@
           <td><b>预置常用库 + 即时测算</b>：将必装软件与违规进程沉淀为可多选的预置库；选择部门或标签时，即时计算出受检终端总量（2,450 台），让任务影响范围在保存前清晰可见。</td>
           <td>
             • 单列卡片流承载大数 (<span class="tag-exp">EP-01</span>)<br/>
-            • 720px 抽屉轻量配置 (<span class="tag-exp">EP-03</span>)<br/>
+            • 800px 抽屉轻量配置 (<span class="tag-exp">EP-03</span>)<br/>
             • 目标范围即时测算 (<span class="tag-exp">EP-04</span>)<br/>
             • 单一主按钮消除二义性 (<span class="tag-exp">EP-05</span>)
           </td>
@@ -426,7 +426,7 @@
           <td><b>右侧抽屉轻量新建 (Drawer)</b></td>
           <td>SASE</td>
           <td><b>【首选基线】</b></td>
-          <td>新建任务用 720px 右侧抽屉，表单填完即走，不跳出当前主列表。</td>
+          <td>新建任务用 800px 右侧抽屉（对齐 SASE 现行统一规范），表单填完即走，不跳出当前主列表。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-04</span></td>
@@ -571,7 +571,7 @@ graph LR
         <tr>
           <td><b>Page-02</b></td>
           <td>新建/编辑检测任务抽屉</td>
-          <td>右侧抽屉 (Drawer 720px)</td>
+          <td>右侧抽屉 (Drawer 800px)</td>
           <td><b>任务配置项 (Config)</b></td>
           <td><code>page-form-drawer</code> 抽屉表单页</td>
           <td>就地装配必装软件与黑名单进程规则，选择部门树与标签，即时计算目标覆盖终端大数，支持「保存任务」并勾选「立即执行」。</td>
@@ -834,7 +834,7 @@ graph LR
     <h3>5.2 Page-02：新建/编辑合规检测任务抽屉 (配置下发阶段)</h3>
     <ul>
       <li><b>页面定位与核心 Job</b>：在不离开主列表的前提下，快速装配必装软件与黑名单规则，圈选目标终端并即时测算覆盖大数，支持一键下发或周期调度。</li>
-      <li><b>页面模板选用</b>：<code>page-form-drawer</code>（抽屉表单页），右侧滑出宽度 <code>720px</code>。</li>
+      <li><b>页面模板选用</b>：<code>page-form-drawer</code>（抽屉表单页），右侧滑出宽度 <code>800px</code>（对齐 SASE 现行统一规范）。</li>
     </ul>
 
     <div class="wf-container">
@@ -921,7 +921,7 @@ graph LR
           <td>配置抽屉容器</td>
           <td><code>IxDrawer</code></td>
           <td>comp-drawer.md</td>
-          <td>宽度固定 <code>720px</code>、右侧滑出、遮罩 <code>z-50</code>、标题外置通透</td>
+          <td>宽度固定 <code>800px</code> (对齐 SASE 现行规范)、右侧滑出、遮罩 <code>z-50</code>、标题外置通透</td>
           <td><span class="tag-exp">EP-03</span> 右侧抽屉轻量新建</td>
           <td>标杆复用</td>
         </tr>
