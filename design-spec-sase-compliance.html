@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>织雨体验设计方案说明书：SASE 终端安全合规基线检测任务</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #F7F9FC;
+      --card: #FFFFFF;
+      --border: #E1E5EB;
+      --text: #2F3540;
+      --text-sub: #6F7785;
+      --text-mute: #A1A7B3;
+      --blue: #1C6EFF;
+      --blue-l: #E8F4FF;
+      --blue-border: #BAE6FD;
+      --warn-t: #FA8C16;
+      --warn-b: #FFFBE6;
+      --warn-bd: #FFE58F;
+      --green-t: #15803D;
+      --green-b: #F0FDF4;
+      --green-bd: #BBF7D0;
+      --danger-t: #D9363E;
+      --danger-b: #FEF2F2;
+      --danger-bd: #FFA39E;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px; }
+    .doc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 40px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    h1 { font-size: 22px; line-height: 32px; font-weight: 700; margin: 0 0 16px; color: #1E293B; }
+    h2 {
+      font-size: 16px; line-height: 24px; font-weight: 600;
+      margin: 38px 0 16px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border); color: #1E293B;
+    }
+    h3 { font-size: 14px; font-weight: 600; margin: 24px 0 10px; color: #334155; }
+    h4 { font-size: 13px; font-weight: 600; margin: 18px 0 8px; color: var(--text-sub); }
+    
+    .meta-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 12px;
+      line-height: 2;
+      color: var(--text-sub);
+    }
+    .meta-box b { color: var(--text); }
+    .status-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 2px;
+      background: var(--warn-b); color: var(--warn-t); border: 1px solid var(--warn-bd);
+      font-size: 11px; font-weight: 500;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 12px; }
+    th {
+      background: #EDF1F7; color: #454C59; font-weight: 500; text-align: left;
+      height: 32px; padding: 0 12px; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td { height: 38px; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    
+    .tag {
+      display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px;
+      background: var(--blue-l); color: var(--blue); border: 1px solid var(--blue-border);
+    }
+    .tag-exp {
+      display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px;
+      background: var(--green-b); color: var(--green-t); border: 1px solid var(--green-bd); font-weight: 600;
+    }
+    .flag {
+      display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 11px;
+      background: var(--danger-b); color: var(--danger-t); border: 1px solid var(--danger-bd); font-weight: 500;
+    }
+    .code-inline {
+      font-family: monospace; background: #F1F5F9; color: #0F172A;
+      padding: 1px 5px; border-radius: 2px; font-size: 11px;
+    }
+
+    .mermaid {
+      background: #F8FAFC; border: 1px solid var(--border); border-radius: 4px;
+      padding: 16px; margin: 16px 0; text-align: center; overflow-x: auto;
+    }
+    ul { margin: 8px 0; padding-left: 22px; }
+    li { margin: 5px 0; }
+
+    /* ========== Wireframe UI 视觉盒模型 ========== */
+    .wf-container {
+      background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px;
+      padding: 16px; margin: 16px 0 20px;
+    }
+    .wf-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .wf-shell {
+      background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden;
+    }
+    .wf-header {
+      background: #F1F5F9; border-bottom: 1px solid #E2E8F0; padding: 8px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; font-weight: 600; color: #334155;
+    }
+    .wf-body { padding: 14px; }
+    .wf-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: stretch; }
+    .wf-col { flex: 1; }
+    .wf-card {
+      background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 3px;
+      padding: 10px 12px; font-size: 11px;
+    }
+    .wf-card-title { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+    .wf-card-val { font-size: 16px; font-weight: 700; font-family: monospace; }
+    .wf-toolbar {
+      background: #F1F5F9; border-radius: 3px; padding: 6px 10px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+    }
+    .wf-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .wf-table th { background: #EDF1F7; padding: 7px 10px; border-bottom: 1px solid #E2E8F0; text-align: left; height: auto; }
+    .wf-table td { padding: 7px 10px; border-bottom: 1px dashed #E2E8F0; color: #64748B; height: auto; }
+    
+    .wf-drawer-overlay {
+      display: flex; background: rgba(15, 23, 42, 0.18); border: 1px dashed #94A3B8;
+      border-radius: 4px; min-height: 280px; position: relative;
+    }
+    .wf-drawer-bg { flex: 1; padding: 16px; color: #94A3B8; font-size: 11px; font-style: italic; }
+    .wf-drawer-body {
+      background: #FFFFFF; border-left: 2px solid var(--blue); padding: 14px;
+      margin-left: auto; box-shadow: -4px 0 16px rgba(0,0,0,0.08); display: flex; flex-direction: column;
+    }
+    .wf-annotation {
+      font-size: 11.5px; color: #1E40AF; background: #EFF6FF; padding: 6px 10px;
+      border-radius: 3px; border-left: 3px solid var(--blue); margin-top: 10px; line-height: 1.6;
+    }
+
+    .checkpoint {
+      background: var(--blue-l); border: 1px solid #BFDBFE; border-radius: 6px;
+      padding: 20px 24px; margin-top: 40px; font-size: 12.5px; color: #1E40AF; line-height: 1.9;
+    }
+    .checkpoint b { display: block; margin-bottom: 8px; font-size: 14px; color: #1E3A8A; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="doc">
+    <h1>🎨 织雨体验设计方案说明书：SASE 终端安全合规基线检测任务</h1>
+    
+    <div class="meta-box">
+      <b>方案制定者</b>：设计师织雨 (Virtual Designer Zhiyu)<br/>
+      <b>归属产品线</b>：SASE 智能云安全平台 ➔ 终端管理 ➔ 终端管控 ➔ 合规基线检测<br/>
+      <b>需求类型定性</b>：<span class="tag-exp">Type-07 检测任务与批量巡检类</span><br/>
+      <b>输入需求依据</b>：<a href="04-workflows-and-cases/cases/sase-endpoint-compliance-prd.md" target="_blank">cases/sase-endpoint-compliance-prd.md</a><br/>
+      <b>当前协同状态</b>：<span class="status-badge">⏳ 步骤 5 交付完成 · 待规划人员评审确认 (Pending Human Review)</span>
+    </div>
+
+    <!-- ==================== 第一章 ==================== -->
+    <h2>一、需求洞察与体验目标</h2>
+
+    <h3>1. 目标用户角色与本质任务 (JTBD)</h3>
+    <ul>
+      <li><b>企业安全运维管理员 (SecOps - 最高频主战角色)</b>：
+        <ul>
+          <li><b>使用情境与心智</b>：求稳、防背锅、怕误杀、怕盲盒；日常负责全公司 2,000~50,000 台混合办公 PC 的安全基线管控，最怕规则配错导致全员报障，最怕巡检耗时数小时不知道卡在何处。</li>
+          <li><b>核心用户本质任务 (JTBD)</b>：“我需要能按部门或标签一键装配规则并下发巡检，在 3 秒内看清执行健康度与离线跳过状态，并能在不跳页的情况下定位违规根因并完成批量处置。”</li>
+        </ul>
+      </li>
+      <li><b>企业安全合规负责人 (CISO / 审计员)</b>：
+        <ul>
+          <li><b>核心用户本质任务 (JTBD)</b>：“我需要宏观掌握企业整体合规率趋势，能一键导出满足《等保 2.0》规范的合规证明报告，确保高危终端均已进入受控闭环。”</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>2. 主场景清单与现状痛点剖析 (As-Is 现状插旗)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>场景编号</th>
+          <th>主场景名称</th>
+          <th>触发情境</th>
+          <th>主要角色</th>
+          <th>现状卡点与心智摩擦 (痛点插旗)</th>
+          <th>相关度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>S1</b></td>
+          <td>合规任务制定与策略下发</td>
+          <td>季度例行基线巡检或突发高危安全排查</td>
+          <td>SecOps 管理员</td>
+          <td><span class="flag">🚩 S1-P1 规则配置繁琐易错</span> 缺乏预置软件库，手工填写进程/注册表极易拼错导致误报漏报；无目标终端大数即时测算，影响面未知。</td>
+          <td>高</td>
+        </tr>
+        <tr>
+          <td><b>S2</b></td>
+          <td>巡检下发与执行过程监控</td>
+          <td>任务启动后等待终端执行与数据回传</td>
+          <td>SecOps 管理员</td>
+          <td><span class="flag">🚩 S2-P2 长耗时黑盒无感知</span> 界面仅有静态表格或无刷新转圈；离线终端大量超时挂死无心跳，不知道当前进度与预计剩余时间。</td>
+          <td>高</td>
+        </tr>
+        <tr>
+          <td><b>S3</b></td>
+          <td>合规大盘查看与终端排障</td>
+          <td>巡检完成后查看结果并定位违规原因</td>
+          <td>SecOps 管理员 / 审计员</td>
+          <td><span class="flag">🚩 S3-P3 结果离散与跳页断流</span> 结果全为底层日志流水，缺乏宏观达标看板；点击单台终端强制跳到底层全量日志页，打断巡检主视线。</td>
+          <td>高</td>
+        </tr>
+        <tr>
+          <td><b>S4</b></td>
+          <td>违规终端批量处置与闭环</td>
+          <td>对违规终端进行提醒、隔离或例外放行</td>
+          <td>SecOps 管理员</td>
+          <td><span class="flag">🚩 S4-P4 处置脱节无法闭环</span> 无法与 SASE 零信任网络访问联动，只能线下人工联系员工；缺乏强弱分级处置通道（提醒 vs 动态隔离）。</td>
+          <td>高</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 务实体验目标（A ➔ B 对比跨越与量化度量）</h3>
+    <ul>
+      <li><b>体验目标 1（配置效率与确定性 · 翻转 🚩 S1-P1）</b>：
+        通过提供【必装+黑名单】预置规则勾选库与部门树即时测算 ➔ 用户由手工拼写参数变为 3 步勾选 ➔ 彻底解决配置易错与盲盒心理 ➔ <b>任务装配耗时从 30 分钟 ➔ ≤ 30 秒，覆盖终端大数秒级透明可见</b>。
+      </li>
+      <li><b>体验目标 2（巡检监控确定性 · 翻转 🚩 S2-P2）</b>：
+        通过三态机进度控制（达标/违规/跳过）与 10min 超时自动熔断 ➔ 用户随时掌握执行健康度 ➔ 消除长时间未知等待的焦虑 ➔ <b>巡检进度从“黑盒死信挂起” ➔ “三态进度秒级可见，离线超时 100% 自动跳过”</b>。
+      </li>
+      <li><b>体验目标 3（排障闭环与联动阻断 · 翻转 🚩 S3-P3 / S4-P4）</b>：
+        通过 In-situ 原地抽屉体检单与 SASE 零信任动态降权联动 ➔ 用户在当前页直接定界违规项并一键发起阻断 ➔ 消除跳页断流与线下催办脱节 ➔ <b>排障跳页 6 次 ➔ 0 跳页原地闭环，高危终端处置响应从天级 ➔ 秒级联动阻断</b>。
+      </li>
+    </ul>
+
+    <!-- ==================== 第二章 ==================== -->
+    <h2>二、设计思考、发力点与标杆经验选型</h2>
+
+    <h3>1. 业务属性与严肃程度定性 (定“度”，不定“向”)</h3>
+    <ul>
+      <li><b>业务属性与严肃度</b>：<b>企业安全管控与合规巡检 / 极高严肃度 (Mission-Critical)</b>。高危阻断直接影响员工能否正常接入公司网络，交互必须极度克制、理性且具备严密防呆。</li>
+      <li><b>色彩基调与视觉风格</b>：<b>深沉克制 / 石墨冷灰底色 (`#F7F9FC`)</b>，全面去框线化，仅高危违规状态启用柔和珊瑚红（`#FEF2F2` 浅底 + `#D9363E` 深字三元组），确保操作专注且无色彩噪音。</li>
+    </ul>
+
+    <h3>2. 核心设计思考与发力点提炼 (源自 2.1 思考模型)</h3>
+    <div style="background:#F8FAFC;border-left:3px solid var(--blue);padding:8px 14px;margin-bottom:14px;font-size:12px;color:#475569;">
+      💡 <b>设计思考中枢</b>：在深入标杆案例库前，先思考**本次需求的重要设计点在哪儿、核心矛盾是什么**，从而明确在向标杆案例库学习时**重点汲取哪些机制与组件样式，有所侧重地进行经验装配**，拒绝漫无目的堆砌。
+    </div>
+    <ul>
+      <li><b>核心业务矛盾穿透</b>：本次合规检测的核心矛盾是<b>“海量终端覆盖的广度”与“管理员单机排障定界的深度”之间的断层</b>，以及<b>“安全强管控”与“员工正常办公低打扰”之间的冲突</b>。</li>
+    </ul>
+
+    <table>
+      <thead>
+        <tr>
+          <th>核心设计发力点 (L1 方向)</th>
+          <th>来源场景 / 痛点旗帜</th>
+          <th>体验维度</th>
+          <th>标杆案例学习侧重点 (向标杆找什么)</th>
+          <th>期望达成的 A ➔ B 体验跨越</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>发力点 1：让规则装配轻量就地化，影响面秒级可预知</b></td>
+          <td>S1 / <span class="flag">🚩 S1-P1</span></td>
+          <td>防呆确定性 / 稳</td>
+          <td>重点学习 XDR/SASE 的轻量抽屉下发 (EP-01) 与目标即时测算机制 (EP-02)</td>
+          <td>配置规则繁琐易错 ➔ 预置双库 30 秒装配，覆盖终端数秒级即时回显</td>
+        </tr>
+        <tr>
+          <td><b>发力点 2：让长耗时巡检进度透明，心跳超时自动熔断防死信</b></td>
+          <td>S2 / <span class="flag">🚩 S2-P2</span></td>
+          <td>可见性 / 掌控感</td>
+          <td>重点学习任务三态机进度控制 (EP-04) 与超时离线跳过防死信机制</td>
+          <td>长耗时黑盒盲等 ➔ 达标/违规/跳过三态实时可见，超时 10min 自动跳过</td>
+        </tr>
+        <tr>
+          <td><b>发力点 3：让单台终端原地体检定界，强弱分级联动零信任闭环</b></td>
+          <td>S3, S4 / <span class="flag">🚩 S3-P3</span>, <span class="flag">🚩 S4-P4</span></td>
+          <td>最简闭环 / 信任感</td>
+          <td>重点学习 In-situ 抽屉排障 (EP-07) 与零信任动态隔离/例外白名单 (EP-10)</td>
+          <td>查明细强制跳页 ➔ 原地体检单秒级定界，弱提醒弹窗 + 强管控动态隔离双闭环</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 选定专家范式与系统机制 (L2 承载机制)</h3>
+    <ul>
+      <li><b>专家范式选型</b>：<span class="tag">P-07 全生命周期巡检与合规</span> + <span class="tag">P-05 多维下钻联动排障</span></li>
+      <li><b>元设计机制</b>：
+        <ul>
+          <li><b>实时目标预估测算状态机</b>（动态监听部门树勾选，即时拉取后端资产大数）；</li>
+          <li><b>任务三态机流转机制</b>（进行中、合规达标、违规检出、离线跳过）；</li>
+          <li><b>In-situ 原地抽屉双轴排障单元</b>（左侧必装核对 + 右侧违规进程证据链）；</li>
+          <li><b>零信任策略动态隔离联动通道</b>（调用安全网关 API 将终端置入隔离安全组）。</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>4. 标杆案例经验有侧重的传承与装配矩阵 (从 Type-07 靶向提取)</h3>
+    <div style="color:var(--text-sub);font-size:12px;margin-bottom:8px;">
+      紧扣上述确立的 3 大设计发力点，从 Type-07 标杆分册中靶向提取成熟经验与组件样式：
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>经验编号</th>
+          <th>经验名称与解法机制</th>
+          <th>对齐产线</th>
+          <th>裁决定位</th>
+          <th>承载的发力点及在本方案中的落地 (Why 因果)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag-exp">EP-01</span></td>
+          <td><b>轻量抽屉快速配置</b></td>
+          <td>XDR / SASE</td>
+          <td><b>【首选基线】</b></td>
+          <td><b>承载发力点 1</b>：采用右侧 640px 抽屉（<code>IxDrawer</code>）承载检测任务下发，管理员主视线保留在主列表，降低跳页认知损耗。</td>
+        </tr>
+        <tr>
+          <td><span class="tag-exp">EP-02</span></td>
+          <td><b>任务即时模拟测算</b></td>
+          <td>XDR</td>
+          <td><b>【体验推荐】</b></td>
+          <td><b>承载发力点 1</b>：在抽屉选择部门与标签后，右侧卡片即时计算命中总数（2,450 台，在线 2,180，离线 270），消除下发影响面盲盒心理。</td>
+        </tr>
+        <tr>
+          <td><span class="tag-exp">EP-04</span></td>
+          <td><b>任务三态机进度控制</b></td>
+          <td>XDR / SASE / aES</td>
+          <td><b>【首选基线】</b></td>
+          <td><b>承载发力点 2</b>：采用 <code>IxProgress</code> 实时聚合展现“完成/达标/违规/跳过”；若终端离线超时 10min 自动标记跳过，杜绝死信挂死。</td>
+        </tr>
+        <tr>
+          <td><span class="tag-exp">EP-07</span></td>
+          <td><b>In-situ 原地抽屉下钻排障</b></td>
+          <td>XDR / SASE</td>
+          <td><b>【首选基线】</b></td>
+          <td><b>承载发力点 3</b>：点击终端名称，右侧滑出 800px 诊断抽屉，完整呈现该机器必装达标项与违规进程路径，拒绝跳页断流。</td>
+        </tr>
+        <tr>
+          <td><span class="tag-exp">EP-08</span></td>
+          <td><b>诊断证据链可视化</b></td>
+          <td>XDR / aES</td>
+          <td><b>【首选基线】</b></td>
+          <td><b>承载发力点 3</b>：抽屉内精准回显违规进程 PID、绝对文件路径、触发时间与风险等级，让管理员敢于采信结论。</td>
+        </tr>
+        <tr>
+          <td><span class="tag-exp">EP-10</span></td>
+          <td><b>强弱分级处置闭环</b></td>
+          <td>SASE</td>
+          <td><b>【首选基线】</b></td>
+          <td><b>承载发力点 3</b>：普通违规下发客户端弹窗提醒自愈；高危违规联动 SASE 零信任动态隔离，兼顾办公连续性与安全底线。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== 第三章 ==================== -->
+    <h2>三、优化后各场景任务旅程</h2>
+
+    <h3>1. 痛点翻转闭环总览表</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>场景</th>
+          <th>历史现状痛点</th>
+          <th>本次优化动作</th>
+          <th>未来黄金旅程落地节点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>S1 配置阶段</b></td>
+          <td><span class="flag">🚩 S1-P1</span> 规则配置繁琐易错且无测算</td>
+          <td>轻量抽屉表单 + 预置双库勾选 + 目标终端即时模拟测算 (EP-01/02)</td>
+          <td>节点 2「抽屉内轻量装配与预校验」</td>
+        </tr>
+        <tr>
+          <td><b>S2 监控阶段</b></td>
+          <td><span class="flag">🚩 S2-P2</span> 巡检如黑盒且超时卡死</td>
+          <td>大盘三态进度条（达标/违规/跳过） + 10min 超时自动熔断跳过 (EP-04)</td>
+          <td>节点 3「全局进度可见与超时自愈」</td>
+        </tr>
+        <tr>
+          <td><b>S3 排障阶段</b></td>
+          <td><span class="flag">🚩 S3-P3</span> 结果离散且强制跳页断流</td>
+          <td>顶层合规率大盘 + In-situ 终端体检诊断抽屉 (EP-06/07/08)</td>
+          <td>节点 4「原地体检诊断与证据链定界」</td>
+        </tr>
+        <tr>
+          <td><b>S4 处置阶段</b></td>
+          <td><span class="flag">🚩 S4-P4</span> 处置脱节无法形成安全闭环</td>
+          <td>客户端弱提醒弹窗 + SASE 零信任网络动态隔离阻断 (EP-10)</td>
+          <td>节点 5「强弱分级处置与加白闭环」</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2. 端到端未来任务流转流程图 (In-situ 原地闭环模型)</h3>
+    <pre class="mermaid">
+graph LR
+    Start["SecOps 登录控制台"] --> P1["1. 合规大盘与巡检监控 (Page-01)"]
+    P1 -->|"点击【新建检测任务】"| P2["2. 配置下发抽屉 (Page-02 · EP-01/02)"]
+    P2 -->|"完成即时测算并下发"| P1
+    P1 -->|"任务运行: 三态进度条 + 超时跳过 (EP-04)"| P1
+    P1 -->|"点击某台违规终端【诊断详情】"| P3["3. 终端合规诊断抽屉 (Page-03 · EP-07/08)"]
+    P3 -->|"选择弱提醒: 下发弹窗引导"| P1
+    P3 -->|"选择强管控: 点击【联动零信任隔离】"| P4["4. 隔离确认弹窗 (Page-04 · EP-10)"]
+    P4 -->|"二次防呆确认成功"| P3
+    P3 -->|"关闭抽屉 (视线不中断)"| P1
+    </pre>
+
+    <!-- ==================== 第四章 ==================== -->
+    <h2>四、最终解决方案全景与页面架构拓扑</h2>
+
+    <h3>1. 解决方案页面清单 (Page Inventory)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>页面编号</th>
+          <th>页面 / 视图名称</th>
+          <th>交互形态</th>
+          <th>选定页面模板 (01-page-types)</th>
+          <th>核心职责与用户 Job</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Page-01</b></td>
+          <td>终端合规基线检测大盘与管理列表</td>
+          <td>主页面 (Main Page)</td>
+          <td><code>page-table-overview</code> 概览表格页</td>
+          <td>宏观展示全网终端综合合规率、监控正在运行的巡检任务进度、按终端/规则维度聚合检索全量数据。</td>
+        </tr>
+        <tr>
+          <td><b>Page-02</b></td>
+          <td>新建/编辑合规检测任务抽屉</td>
+          <td>右侧抽屉 (Drawer 640px)</td>
+          <td><code>page-form-drawer</code> 抽屉表单页</td>
+          <td>就地装配必装软件与黑名单进程规则，选择部门树与标签，即时计算目标覆盖终端大数并下发。</td>
+        </tr>
+        <tr>
+          <td><b>Page-03</b></td>
+          <td>终端合规体检诊断抽屉</td>
+          <td>右侧抽屉 (Drawer 800px)</td>
+          <td><code>page-detail-drawer</code> 抽屉详情页</td>
+          <td>单台终端合规体检单全貌、必装软件核对对比、违规进程与路径证据链、发起弱提醒与动态隔离。</td>
+        </tr>
+        <tr>
+          <td><b>Page-04</b></td>
+          <td>零信任动态隔离与合规加白弹窗</td>
+          <td>居中模态弹窗 (Modal 480px)</td>
+          <td><code>page-form-modal</code> 弹窗表单页</td>
+          <td>对高危违规终端联动切断内网访问权限，提供明确的业务影响提示与二次防呆确认；支持填写加白期限。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2. 页面流转关系拓扑图</h3>
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Page_01_合规大盘主页: 访问导航 [终端管理/终端管控/合规基线检测]
+    
+    state Page_01_合规大盘主页 {
+        [*] --> 巡检大盘概览
+        巡检大盘概览 --> 运行任务轮询
+        巡检大盘概览 --> 终端列表多维筛选
+    }
+
+    Page_01_合规大盘主页 --> Page_02_配置抽屉: 点击顶部主按钮【新建检测任务】
+    Page_02_配置抽屉 --> Page_01_合规大盘主页: 取消 / 下发成功 (原地更新任务卡)
+
+    Page_01_合规大盘主页 --> Page_03_诊断抽屉: 点击表格某违规终端【诊断详情】
+    Page_03_诊断抽屉 --> Page_01_合规大盘主页: 点击关闭 / 遮罩 (原列表焦点锁定)
+
+    Page_03_诊断抽屉 --> Page_04_隔离弹窗: 点击【联动零信任动态隔离】
+    Page_04_隔离弹窗 --> Page_03_诊断抽屉: 确认隔离 / 取消 (就地刷新准入标签)
+    </pre>
+
+    <!-- ==================== 第五章 ==================== -->
+    <h2>五、核心页面线框示意与深度推导 (分页面全要素拆解)</h2>
+    <p style="color:var(--text-sub);font-size:12px;">
+      本章彻底打破碎片化堆叠，对解决方案中的每一个页面/视图，依次深度展示：
+      <b>页面定位与核心任务 ➔ 界面结构线框图 (Wireframe) ➔ 承载的设计经验 (EP-xx) ➔ 真实 idux 组件与 Token 映射 ➔ 关键交互机制</b>。
+    </p>
+
+    <!-- 5.1 Page-01 -->
+    <h3>5.1 Page-01：终端合规基线检测大盘与管理列表 (主页面)</h3>
+    <ul>
+      <li><b>页面定位与核心 Job</b>：作为日常 SecOps 工作台首屏，承担宏观安全态势感知、运行中任务长耗时可见性监控，以及全量终端多维检索（彻底翻转 <span class="flag">🚩 S2-P2</span> 与 <span class="flag">🚩 S3-P3</span>）。</li>
+      <li><b>页面模板选用</b>：<code>page-table-overview</code>（概览表格页），左侧导航适配（`left-shaped`）。</li>
+    </ul>
+
+    <!-- 线框图 1 -->
+    <div class="wf-container">
+      <div class="wf-label">📐 界面结构线框示意图 (Wireframe Layout · Page-01)</div>
+      <div class="wf-shell">
+        <div class="wf-header">
+          <span>终端管理 / 终端管控 / 合规基线检测</span>
+          <div><span class="tag">SASE 标准页面套头</span></div>
+        </div>
+        <div class="wf-body">
+          <!-- 4 联卡片 -->
+          <div class="wf-row">
+            <div class="wf-card wf-col">
+              <div class="wf-card-title">全网终端综合合规率 (KPI)</div>
+              <div class="wf-card-val" style="color:var(--blue);">94.2% <span style="font-size:11px;color:var(--green-t);font-weight:400;">↑ 1.8% 较上周</span></div>
+              <div style="font-size:10.5px;color:var(--text-sub);margin-top:2px;">合规 2,308 / 总计 2,450 台终端</div>
+            </div>
+            <div class="wf-card wf-col">
+              <div class="wf-card-title">当前巡检任务执行进度 (EP-04)</div>
+              <div style="font-size:12px;font-weight:600;margin:3px 0;">2026 Q3例行巡检 [78%]</div>
+              <div style="height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden;margin:4px 0;">
+                <div style="width:78%;height:100%;background:var(--blue);"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-sub);display:flex;justify-content:space-between;">
+                <span>达标: 1,750</span><span>违规: 160</span><span>跳过: 540</span>
+              </div>
+            </div>
+            <div class="wf-card wf-col">
+              <div class="wf-card-title">待整改违规终端 (高危)</div>
+              <div class="wf-card-val" style="color:var(--danger-t);">160 台</div>
+              <div style="font-size:10.5px;color:var(--text-sub);margin-top:2px;">严重 24 / 高危 78 / 中低危 58</div>
+            </div>
+            <div class="wf-card wf-col">
+              <div class="wf-card-title">高频违规项 TOP1</div>
+              <div style="font-size:12px;font-weight:600;margin:2px 0;">DLP数据防泄密未装 (98台)</div>
+              <div style="font-size:10.5px;color:var(--text-sub);">ToDesk非法远控检出 (42台)</div>
+            </div>
+          </div>
+
+          <!-- 工具栏 -->
+          <div class="wf-toolbar">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="tag" style="background:var(--blue);color:#FFF;border:none;padding:3px 10px;font-weight:500;">+ 新建检测任务</span>
+              <span class="tag" style="background:#FFF;color:var(--text);border-color:#CBD5E1;">批量下发整改通知</span>
+              <span class="tag" style="background:#FFF;color:var(--text);border-color:#CBD5E1;">导出等保台账</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;color:#94A3B8;">🔍 搜索终端名 / IP / MAC / 使用人...</span>
+              <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;">合规状态: 全部 ▼</span>
+              <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;">所属部门: 全部 ▼</span>
+            </div>
+          </div>
+
+          <!-- 表格 -->
+          <table class="wf-table">
+            <thead>
+              <tr>
+                <th style="width:36px;"><input type="checkbox" /></th>
+                <th>终端名称</th>
+                <th>IP / MAC</th>
+                <th>所属部门</th>
+                <th>当前使用人</th>
+                <th>合规状态</th>
+                <th>违规项数</th>
+                <th>处置状态</th>
+                <th>最后检测时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:#FFF5F5;">
+                <td><input type="checkbox" /></td>
+                <td><b>DEV-PC-WANGJUE</b></td>
+                <td>10.28.14.88</td>
+                <td>安全体验研发部</td>
+                <td>王工 (wangjue)</td>
+                <td><span class="flag">违规 (严重)</span></td>
+                <td><span style="color:var(--danger-t);font-weight:700;">2 项</span></td>
+                <td><span class="tag" style="background:#FFFBE6;color:#D46B08;border-color:#FFE58F;">待整改</span></td>
+                <td>14:32:05</td>
+                <td><a href="javascript:void(0)" style="color:var(--blue);font-weight:500;">[诊断详情]</a> <a href="javascript:void(0)" style="color:var(--blue);">[下发提醒]</a></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>FIN-PC-LI02</td>
+                <td>10.28.16.20</td>
+                <td>财务资产部</td>
+                <td>李会计 (lili)</td>
+                <td><span class="tag-exp">已合规</span></td>
+                <td>0 项</td>
+                <td><span class="tag-exp">正常</span></td>
+                <td>14:30:12</td>
+                <td><a href="javascript:void(0)" style="color:var(--blue);">[查看]</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="wf-annotation">
+            💡 线框说明：顶部通过 KPI 4 联卡片让管理员秒级掌握全网达标率与当前任务进度；表格首列提供批量勾选，操作列提供原地展开抽屉的诊断入口。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 映射表 1 -->
+    <h4>Page-01 承载设计经验与真实 idux 组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>界面功能区域</th>
+          <th>承载组件 (idux 真实组件名)</th>
+          <th>规范引用</th>
+          <th>尺寸与 Token 硬指标</th>
+          <th>承载设计经验 (Step 2)</th>
+          <th>装配来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>页面标题与面包屑</td>
+          <td><code>IxBreadcrumb</code> + <code>IxPageHeader</code></td>
+          <td>01-page-types.md</td>
+          <td>石墨底色 <code>#F7F9FC</code>，下边框 <code>#E1E5EB</code></td>
+          <td>SASE 产线规范对齐</td>
+          <td>模板还原</td>
+        </tr>
+        <tr>
+          <td>合规概览 4 联卡片</td>
+          <td><code>IxCard</code> + <code>IxProgress</code></td>
+          <td>tokens-cheatsheet.md</td>
+          <td>卡片高度 <code>88px</code>、内边距 <code>12px</code>、数字 Outfit 等宽科技字体</td>
+          <td><span class="tag-exp">EP-04</span> 任务三态机进度控制</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>操作工具栏与按钮组</td>
+          <td><code>IxButton</code> + <code>IxDropdown</code></td>
+          <td>comp-button.md</td>
+          <td>主按钮高 <code>h32</code>、圆角 <code>rounded-[2px]</code>、主色 <code>#1C6EFF</code></td>
+          <td><span class="tag-exp">EP-09</span> 统一检索与操作栏</td>
+          <td>规范映射</td>
+        </tr>
+        <tr>
+          <td>高级复合搜索栏</td>
+          <td><code>IxProSearch</code></td>
+          <td>comp-pro-search.md</td>
+          <td>高度固定 <code>h32</code>、前置搜索镜、支持折叠收起、标签回显</td>
+          <td><span class="tag-exp">EP-09</span> 统一检索与联动过滤</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>终端合规明细表格</td>
+          <td><code>IxTable</code> + <code>IxTagGroup</code></td>
+          <td>02-table-patterns.md</td>
+          <td>表头高 <code>32px</code> (`#EDF1F7`)、行高 <code>40px</code>、斑马线、操作列冻结</td>
+          <td><span class="tag-exp">EP-06</span> 聚合结果多维呈现</td>
+          <td>标杆复用</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 5.2 Page-02 -->
+    <h3>5.2 Page-02：新建/编辑合规检测任务抽屉 (配置下发阶段)</h3>
+    <ul>
+      <li><b>页面定位与核心 Job</b>：就地装配必装基线与违规黑名单，多维勾选目标终端并即时测算覆盖大数，下发周期或即时检测（彻底翻转 <span class="flag">🚩 S1-P1</span>）。</li>
+      <li><b>页面模板选用</b>：<code>page-form-drawer</code>（抽屉表单页），右侧滑出宽度 <code>640px</code>。</li>
+    </ul>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 抽屉结构线框示意图 (Wireframe Layout · Page-02)</div>
+      <div class="wf-drawer-overlay">
+        <div class="wf-drawer-bg">(底层 Page-01 主表格半透明微可见，保持当前运维视线不离开列表)</div>
+        <div class="wf-drawer-body" style="width:380px;">
+          <div class="wf-header" style="background:#FFF;padding:0 0 10px 0;border-bottom:1px solid #E2E8F0;">
+            <b>新建终端合规基线检测任务</b>
+            <span style="cursor:pointer;color:#94A3B8;">✕</span>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding-top:10px;font-size:11px;">
+            <div style="margin-bottom:12px;">
+              <span class="wf-label">1. 基础信息</span>
+              <div style="border:1px solid #CBD5E1;padding:5px 8px;border-radius:2px;">任务名称: 2026 Q3办公终端基线例行巡检</div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <span class="wf-label">2. 必装软件基线 (勾选预置库)</span>
+              <div style="background:#F8FAFC;padding:8px;border:1px solid #E2E8F0;border-radius:2px;line-height:1.8;">
+                ☑️ 深信服 EDR 客户端 (最低版本 ≥3.5.20)<br/>
+                ☑️ 企业防病毒软件 (火绒/Symantec企业版)<br/>
+                ☑️ DLP 数据防泄密客户端 (必须保持进程存活)<br/>
+                ☑️ 屏幕防拍照水印客户端
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <span class="wf-label">3. 违规软件与黑名单进程 (勾选预置库)</span>
+              <div style="background:#F8FAFC;padding:8px;border:1px solid #E2E8F0;border-radius:2px;line-height:1.8;">
+                ☑️ 非法翻墙代理工具 (Shadowsocks/Clash/V2Ray)<br/>
+                ☑️ 未授权远程控制 (ToDesk免密版/向日葵个人版)<br/>
+                ☑️ 高风险挖矿木马进程 (XMRig)
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <span class="wf-label">4. 目标终端范围与即时测算</span>
+              <div style="border:1px solid #CBD5E1;padding:5px 8px;border-radius:2px;margin-bottom:6px;">
+                部门: 研发中心、财务部 (已选 2 个部门) ▼
+              </div>
+              <!-- 即时测算组件 EP-02 -->
+              <div style="background:#EFF6FF;border:1px solid #BFDBFE;padding:8px;border-radius:3px;color:#1E40AF;line-height:1.6;">
+                📊 <b>即时模拟测算 (EP-02)</b>：<br/>
+                预计覆盖终端：<b>2,450 台</b><br/>
+                <span style="font-size:10.5px;color:#3B82F6;">当前在线: 2,180 台 | 离线待唤醒: 270 台</span>
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <span class="wf-label">5. 执行计划</span>
+              <div style="background:#F8FAFC;padding:6px;border:1px solid #E2E8F0;border-radius:2px;">
+                🔘 立即执行一次 &nbsp;&nbsp; ⚪ 周期巡检 (每周工作日 12:30)
+              </div>
+            </div>
+          </div>
+          <div style="padding-top:10px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:8px;">
+            <span class="tag" style="background:#FFF;color:var(--text);border-color:#CBD5E1;">取消</span>
+            <span class="tag" style="background:var(--blue);color:#FFF;border:none;padding:3px 12px;">立即下发巡检</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 映射表 2 -->
+    <h4>Page-02 承载设计经验与真实 idux 组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>界面功能区域</th>
+          <th>承载组件 (idux 真实组件名)</th>
+          <th>规范引用</th>
+          <th>尺寸与 Token 硬指标</th>
+          <th>承载设计经验 (Step 2)</th>
+          <th>装配来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>配置抽屉容器</td>
+          <td><code>IxDrawer</code></td>
+          <td>comp-drawer.md</td>
+          <td>宽度固定 <code>640px</code>、右侧滑出、遮罩 <code>z-50</code>、标题外置通透</td>
+          <td><span class="tag-exp">EP-01</span> 轻量抽屉快速配置</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>规则多选与分组折叠</td>
+          <td><code>IxCheckboxGroup</code> + <code>IxCollapse</code></td>
+          <td>03-form-patterns.md</td>
+          <td>分组底色 <code>#F8FAFC</code>、行内间距 <code>8px</code> 网格、支持动态新增规则</td>
+          <td><span class="tag-exp">EP-03</span> 双规则矩阵配置</td>
+          <td>体验目标推导</td>
+        </tr>
+        <tr>
+          <td>部门树与资产标签选择</td>
+          <td><code>IxTreeSelect</code> + <code>IxTag</code></td>
+          <td>feature/tag-management.md</td>
+          <td>控件高 <code>h32</code>、支持树节点多选折叠、选中项带气泡回显</td>
+          <td><span class="tag-exp">EP-02</span> 目标即时测算</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>即时模拟测算卡片</td>
+          <td><code>IxAlert</code> + <code>IxStatistic</code></td>
+          <td>tokens-cheatsheet.md</td>
+          <td>浅蓝底 <code>#EFF6FF</code>、边框 <code>#BFDBFE</code>、文字 <code>#1E40AF</code></td>
+          <td><span class="tag-exp">EP-02</span> 任务即时模拟测算</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>执行调度周期配置</td>
+          <td><code>IxRadioGroup</code> + <code>IxDatePicker</code></td>
+          <td>feature/execution-cycle.md</td>
+          <td>控件高 <code>h28</code>、支持单次立即执行或 Cron 周期任务</td>
+          <td>标准能力模块</td>
+          <td>模板还原</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 5.3 Page-03 -->
+    <h3>5.3 Page-03：终端合规体检诊断抽屉 (就地排障与处置阶段)</h3>
+    <ul>
+      <li><b>页面定位与核心 Job</b>：点击任意终端即可滑出完整体检单，呈现必装核对对照与违规黑名单证据链，就地发起弱提醒或联动零信任动态隔离（彻底翻转 <span class="flag">🚩 S3-P3</span> 与 <span class="flag">🚩 S4-P4</span>）。</li>
+      <li><b>页面模板选用</b>：<code>page-detail-drawer</code>（抽屉详情页），右侧滑出宽度 <code>800px</code>，采用分栏双轴排障骨开。</li>
+    </ul>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 排障抽屉结构线框示意图 (Wireframe Layout · Page-03)</div>
+      <div class="wf-drawer-overlay">
+        <div class="wf-drawer-bg">(底层主列表高亮保持当前行 DEV-PC-WANGJUE，视线不中断)</div>
+        <div class="wf-drawer-body" style="width:480px;">
+          <!-- 抽屉头 -->
+          <div class="wf-header" style="background:#FFF;padding:0 0 10px 0;border-bottom:1px solid #E2E8F0;">
+            <div>
+              <b style="font-size:13px;">DEV-PC-WANGJUE 终端合规体检诊断</b>
+              <div style="font-size:10.5px;color:var(--text-sub);font-weight:400;margin-top:2px;">
+                IP: 10.28.14.88 | macOS 14.5 | 使用人: 王工 (wangjue) | 研发部
+              </div>
+            </div>
+            <span style="cursor:pointer;color:#94A3B8;">✕</span>
+          </div>
+
+          <!-- 诊断内容区 -->
+          <div style="flex:1;overflow-y:auto;padding-top:12px;font-size:11px;">
+            <!-- 诊断结论大卡片 -->
+            <div style="background:#FEF2F2;border:1px solid #FFA39E;padding:10px 12px;border-radius:4px;margin-bottom:14px;">
+              <div style="color:var(--danger-t);font-weight:700;font-size:12px;">❌ 判定违规：发现 2 项基线风险 (最高严重级别)</div>
+              <div style="color:#7F1D1D;font-size:10.5px;margin-top:3px;">
+                该终端未安装公司强制必备的【DLP数据防泄密客户端】，且运行了黑名单远程协助进程【ToDesk.exe】。
+              </div>
+            </div>
+
+            <!-- 模块一：必装基线核对 -->
+            <span class="wf-label">【模块一】必须安装软件基线核对清单</span>
+            <div style="border:1px solid #E2E8F0;border-radius:3px;margin-bottom:14px;overflow:hidden;">
+              <div style="padding:7px 10px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+                <span>深信服 EDR 客户端 (v3.5.20)</span>
+                <span class="tag-exp">✅ 已安装 · 进程运行正常</span>
+              </div>
+              <div style="padding:7px 10px;background:#FFF1F0;display:flex;justify-content:space-between;align-items:center;">
+                <span>DLP 数据防泄密客户端</span>
+                <span class="flag">❌ 未检出安装或进程挂死 (严重)</span>
+              </div>
+            </div>
+
+            <!-- 模块二：违规软件证据链 -->
+            <span class="wf-label">【模块二】检出违规软件与黑名单进程证据链 (EP-08)</span>
+            <div style="background:#FFF1F0;border:1px solid #FFA39E;padding:10px 12px;border-radius:3px;margin-bottom:14px;">
+              <div style="font-weight:700;color:var(--danger-t);font-size:11.5px;">⚠️ 命中黑名单: ToDesk.exe (未授权远程控制)</div>
+              <div style="color:var(--text-sub);font-size:10px;margin:3px 0;line-height:1.5;">
+                绝对路径: <code class="code-inline">/Applications/ToDesk.app/Contents/MacOS/ToDesk</code><br/>
+                运行时 PID: <code class="code-inline">4921</code> | 进程 Hash: <code class="code-inline">e3b0c44298fc1c...</code><br/>
+                上报检出时间: 2026-09-21 14:32:05 | 风险等级: 高危
+              </div>
+            </div>
+
+            <!-- 模块三：网络准入状态 -->
+            <span class="wf-label">【模块三】当前 SASE 零信任网络准入状态</span>
+            <div style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 10px;border-radius:3px;font-size:10.5px;color:var(--text-sub);">
+              当前零信任安全等级: <b>准入放行 (待处置)</b> | 访问内网业务系统正常
+            </div>
+          </div>
+
+          <!-- 抽屉底栏操作 -->
+          <div style="padding-top:12px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+            <span class="tag" style="background:#FFF;color:var(--text);border-color:#CBD5E1;">申请合规例外(加白)</span>
+            <div style="display:flex;gap:8px;">
+              <span class="tag" style="background:var(--blue);color:#FFF;border:none;padding:3px 10px;">下发整改弹窗提醒</span>
+              <span class="tag" style="background:var(--danger-t);color:#FFF;border:none;padding:3px 10px;font-weight:600;">联动零信任动态阻断</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 映射表 3 -->
+    <h4>Page-03 承载设计经验与真实 idux 组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>界面功能区域</th>
+          <th>承载组件 (idux 真实组件名)</th>
+          <th>规范引用</th>
+          <th>尺寸与 Token 硬指标</th>
+          <th>承载设计经验 (Step 2)</th>
+          <th>装配来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>原地诊断排障抽屉外壳</td>
+          <td><code>IxDrawer</code></td>
+          <td>comp-drawer.md</td>
+          <td>宽度固定 <code>800px</code>、右侧滑出、双栏排障、标题外置通透</td>
+          <td><span class="tag-exp">EP-07</span> In-situ 原地抽屉排障</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>必装软件核对对照表</td>
+          <td><code>IxList</code> + <code>IxTag</code></td>
+          <td>patterns/05-state-patterns.md</td>
+          <td>行高 <code>36px</code>、通过浅绿底 (`#F0FDF4`)、违规浅红底 (`#FEF2F2`)</td>
+          <td><span class="tag-exp">EP-08</span> 诊断证据链可视化</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>违规证据链与属性呈现</td>
+          <td><code>IxDescriptions</code></td>
+          <td>comp-descriptions.md</td>
+          <td>标签宽 100px、等宽代码字体展示绝对路径与 PID</td>
+          <td><span class="tag-exp">EP-08</span> 诊断证据链可视化</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>弱提醒与强管控按钮组</td>
+          <td><code>IxButton</code> + <code>IxPopconfirm</code></td>
+          <td>comp-button.md</td>
+          <td>按钮高 <code>h32</code>、阻断为红色危险按钮 (`#D9363E`)、二次气泡确认</td>
+          <td><span class="tag-exp">EP-10</span> 强弱分级处置闭环</td>
+          <td>标杆复用</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 5.4 Page-04 -->
+    <h3>5.4 Page-04：零信任动态隔离与合规加白弹窗 (二次防呆阶段)</h3>
+    <ul>
+      <li><b>页面定位与核心 Job</b>：提供高危动态隔离的二次确认与业务影响预警，以及特殊机器的合规加白审批登记（彻底翻转 <span class="flag">🚩 S4-P4</span>）。</li>
+      <li><b>页面模板选用</b>：<code>page-form-modal</code>（弹窗表单页），居中宽度 <code>480px</code>。</li>
+    </ul>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 弹窗结构线框示意图 (Wireframe Layout · Page-04)</div>
+      <div style="background:rgba(15,23,42,0.25);padding:24px;display:flex;justify-content:center;border-radius:4px;">
+        <div style="background:#FFF;width:440px;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,0.15);overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:1px solid #E2E8F0;font-size:13px;font-weight:700;color:var(--danger-t);display:flex;align-items:center;gap:6px;">
+            ⚠️ 确认联动零信任动态隔离该终端？
+          </div>
+          <div style="padding:16px 18px;font-size:11.5px;line-height:1.7;color:#334155;">
+            目标终端: <b>DEV-PC-WANGJUE</b> (使用人: 王工)<br/>
+            检出严重违规: <b>ToDesk.exe 未授权远程控制</b><br/>
+            <div style="background:#FFF1F0;border:1px solid #FFA39E;padding:8px 10px;border-radius:3px;margin:10px 0;color:#7F1D1D;font-size:11px;">
+              🛑 <b>高危操作提示 (防误触防线)</b>：<br/>
+              隔离生效后，系统将自动调用 SASE 零信任安全策略网关，<b>即刻切断该终端所有内网业务系统的访问权限</b>（仅保留内网杀毒软件更新与合规自愈通道）。
+            </div>
+            请确认是否立刻下发动态隔离？
+          </div>
+          <div style="padding:10px 18px;background:#F8FAFC;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:8px;">
+            <span class="tag" style="background:#FFF;color:var(--text);border-color:#CBD5E1;">取消</span>
+            <span class="tag" style="background:var(--danger-t);color:#FFF;border:none;padding:3px 12px;font-weight:600;">确认动态阻断</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 映射表 4 -->
+    <h4>Page-04 承载设计经验与真实 idux 组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>界面功能区域</th>
+          <th>承载组件 (idux 真实组件名)</th>
+          <th>规范引用</th>
+          <th>尺寸与 Token 硬指标</th>
+          <th>承载设计经验 (Step 2)</th>
+          <th>装配来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>高危隔离二次确认模态</td>
+          <td><code>IxModal</code></td>
+          <td>comp-modal.md</td>
+          <td>宽度 <code>480px</code>、居中弹出、背景遮罩防穿透滚动</td>
+          <td><span class="tag-exp">EP-10</span> 强弱分级处置闭环</td>
+          <td>标杆复用</td>
+        </tr>
+        <tr>
+          <td>高危影响警示卡片</td>
+          <td><code>IxAlert</code></td>
+          <td>patterns/05-state-patterns.md</td>
+          <td>红色告警三元组 (`#FFF1F0` / `#D9363E` / `#FFA39E`)</td>
+          <td>防御安全带</td>
+          <td>规范映射</td>
+        </tr>
+        <tr>
+          <td>阻断确认主按钮</td>
+          <td><code>IxButton</code> (danger)</td>
+          <td>comp-button.md</td>
+          <td>高度 <code>32px</code>、危险红按钮、强制等待 1 秒倒计时防止连击</td>
+          <td>高危防呆控制</td>
+          <td>规范映射</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== 第六章 ==================== -->
+    <h2>六、页面体验与异常保护规则</h2>
+    <ul>
+      <li>🛑 <b>长耗时心跳防死信 (EP-04 机制延伸)</b>：
+        针对离线或弱网终端超过 10 分钟未回传心跳，任务状态机自动将其归类为 <code>离线跳过 (OFFLINE_SKIPPED)</code>，并记录在案，<b>严禁因单机离线阻塞全局巡检进度</b>。
+      </li>
+      <li>🛑 <b>In-situ 上下文视线锚定</b>：
+        抽屉关闭或隔离完成后，底层主表格自动高亮保留在原先选中的终端行，绝不重置滚动条位置、不重置分页码、不重置已选筛选条件。
+      </li>
+      <li>🛑 <b>高危操作二次防呆防线</b>：
+        对【联动零信任动态隔离】与【终止巡检任务】强制挂载 <code>IxModal</code> / <code>IxPopconfirm</code> 二次确认，并用通俗自然语言告知业务影响面，严禁技术黑话。
+      </li>
+      <li>🛑 <b>客户端文案人性化大白话</b>：
+        下发给员工的弹窗文案强制采用自然语言：“您的电脑缺少必备安全软件【DLP数据防泄密】，请点击链接快速安装”，严禁向员工弹出底层十六进制报错代码（如 `Error 0x800401`）。
+      </li>
+      <li>🛑 <b>四重防破坏安全带</b>：
+        严格遵循 SASE 外层响应式框架约束，严禁破坏导航栏、严禁修改 API 绑定的实体字段名、严禁将组件行高脱离 8px 网格规范。
+      </li>
+    </ul>
+
+    <!-- ==================== 第七章 ==================== -->
+    <h2>七、方案共识与评审确认关卡</h2>
+    <div class="checkpoint">
+      <b>🚦 人机协作共识确认关卡 (Human-in-the-loop Checkpoint)</b>
+      规划老师好，以上为您输出的【SASE 终端安全合规基线检测任务】全流程端到端设计说明书。<br/>
+      请您重点对方案的完整性进行审查：<br/>
+      1. <b>方案架构与页面清单</b>：本方案拆解的 4 大页面视图（Page-01 大盘主页 + Page-02 配置抽屉 + Page-03 诊断抽屉 + Page-04 隔离弹窗）是否完整支撑业务流转？<br/>
+      2. <b>设计发力点与标杆融合</b>：第 2 章提炼的 3 大发力点与 Type-07 标杆经验（EP-01/02/04/07/08/10）在各页面的落地线框是否满足预期？<br/>
+      3. <b>真实 idux 组件与规范</b>：所列组件清单、尺寸 Token（h32/h28/rounded-2px）是否严谨？<br/>
+      <br/>
+      <b>本说明书已生成为独立自包含 HTML 文件：<code>design-spec-sase-compliance.html</code>，您可直接在浏览器中打开审阅。</b><br/>
+      <b>若您认可此方案，请回复【确认】；若有细节需优化，请随时提出指导意见。共识达成前，织雨将严格坚守铁律，绝不偷跑代码！</b>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>
