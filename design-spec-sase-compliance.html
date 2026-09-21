@@ -258,27 +258,79 @@
     </ul>
 
     <!-- ==================== 第二章 ==================== -->
-    <h2>二、设计思考、发力点与标杆经验选型</h2>
+    <h2>二、设计思考、标杆 Job 匹配与经验采纳</h2>
 
-    <h3>1. 业务属性与严肃程度定性 (定“度”，不定“向”)</h3>
+    <h3>1. 需求类型判定与严肃度定性 (定“度”，不定“向”)</h3>
     <ul>
+      <li><b>需求类型判定</b>：对照标杆案例库 7 大类型，本需求以“巡检任务”为主键，具备周期调度、多轮历史可追溯、终端批量检测与处置闭环特征，明确归属于 <b>Type-07 检测任务与批量巡检类</b>。</li>
       <li><b>业务属性与严肃度</b>：<b>企业安全管控与合规巡检 / 极高严肃度 (Mission-Critical)</b>。高危阻断直接影响员工能否正常接入公司网络，交互必须极度克制、理性且具备严密防呆。</li>
       <li><b>色彩基调与视觉风格</b>：<b>深沉克制 / 石墨冷灰底色 (`#F7F9FC`)</b>，全面去框线化，仅高危违规状态启用柔和红色（`#FEF2F2` 浅底 + `#D9363E` 深字三元组），确保操作专注且无色彩噪音。</li>
-    </ul>
-
-    <h3>2. 核心设计发力点提炼 (源自第一章体验目标)</h3>
-    <div style="background:#F8FAFC;border-left:3px solid var(--blue);padding:8px 14px;margin-bottom:14px;font-size:12px;color:#475569;">
-      💡 <b>设计推导说明</b>：设计发力点直接源自第一章的体验目标与用户核心诉求。先明确面对管理者的体验卡点如何从交互与心智层面破局，再带着这 3 大发力方向，去标杆案例库挑选经过实战检验的成熟机制（EP-01~10）进行工程承接。
-    </div>
-    <ul>
       <li><b>核心架构原则（页面职责分工）</b>：<b>首页只管「检测任务」</b>（宏观合规大势、巡检周期维护、执行进度监控）；<b>详情页才看「受检终端」</b>（单机体检诊断、违规原因定界、处置闭环）。两者父子分明，杜绝混合排布造成信息过载。</li>
     </ul>
+
+    <h3>2. 业务场景 ➔ 标杆 Job 匹配映射表</h3>
+    <div style="background:#F8FAFC;border-left:3px solid var(--blue);padding:8px 14px;margin-bottom:14px;font-size:12px;color:#475569;">
+      💡 <b>方法论逻辑</b>：从第一章拆分的业务场景（S1~S4）出发，深入标杆案例库 Type-07 分册匹配其标准 Job（Job 1、Job 2、Job 3）。场景对应哪个 Job，后续就针对性提炼发力点，并顺理成章将该 Job 下成熟的标杆实战经验（EP-xx）采纳过来。
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:10%;">业务场景</th>
+          <th style="width:20%;">场景名称与核心痛点</th>
+          <th style="width:22%;">匹配标杆标准 Job 节点</th>
+          <th style="width:24%;">Job 核心命题与关注维度</th>
+          <th style="width:24%;">经验采纳重点 (EP 靶向承接)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>S1</b></td>
+          <td><b>合规检测任务制定与下发</b><br/><span style="color:var(--text-sub);font-size:12px;">痛点：规则繁琐易错、影响面未知</span></td>
+          <td><b>【Job 1：创建并运行任务】</b><br/><span style="color:var(--text-sub);font-size:12px;">流程：录入配置并圈选对象</span></td>
+          <td><b>降低配置心智负荷与前置防呆</b>：入口深度、表单承载形态、对象圈选与大数约束暴露时机。</td>
+          <td>采纳 <b>EP-03</b>（720px 右侧抽屉轻量配置）、<b>EP-04</b>（圈选范围即时测算防呆）、<b>EP-05</b>（单一确定按钮+立即执行）。</td>
+        </tr>
+        <tr>
+          <td><b>S2</b></td>
+          <td><b>巡检任务执行与状态监控</b><br/><span style="color:var(--text-sub);font-size:12px;">痛点：长耗时盲等、离线卡死黑盒</span></td>
+          <td><b>【Job 1：创建并运行任务】</b><br/><span style="color:var(--text-sub);font-size:12px;">流程：等待并观察执行态</span></td>
+          <td><b>非终态持续反馈与状态机防冲突</b>：无需手动刷新的就地进度暴露、运行期互斥操作锁定与超时容错。</td>
+          <td>采纳 <b>EP-01</b>（单列任务卡片流承载大数）、<b>EP-02</b>（状态点染与未执行占位）、<b>EP-06</b>（卡底细进度条与操作加锁置灰）。</td>
+        </tr>
+        <tr>
+          <td><b>S3</b></td>
+          <td><b>查看任务结果与排查终端</b><br/><span style="color:var(--text-sub);font-size:12px;">痛点：结果与底层日志混杂、跳页断流</span></td>
+          <td><b>【Job 2：查看结果与排查问题】</b><br/><span style="color:var(--text-sub);font-size:12px;">流程：看整体结果 ➔ 翻明细 ➔ 钻单机</span></td>
+          <td><b>宏观定性、多轮历史回溯与就地下钻</b>：大结论定性、多轮历史归集模型、明细证据下钻不丢上下文。</td>
+          <td>采纳 <b>EP-07</b>（头部一句话大结论定性）、<b>EP-08</b>（父任务聚合+历史时光机下拉）、<b>EP-09</b>（右侧抽屉就地排查不跳页）。</td>
+        </tr>
+        <tr>
+          <td><b>S4</b></td>
+          <td><b>违规终端批量处置与闭环</b><br/><span style="color:var(--text-sub);font-size:12px;">痛点：处置脱节断流、缺乏分级闭环</span></td>
+          <td><b>【Job 2：查看结果与排查问题】</b><br/><span style="color:var(--text-sub);font-size:12px;">流程：问题定位 ➔ 就地处置闭环</span></td>
+          <td><b>处置动作防呆与高效闭环通道</b>：批量动作置灰防呆、强弱分级处置链路（提醒 vs 动态隔离）。</td>
+          <td>采纳 <b>EP-09</b>（未选终端时批量按钮置灰防呆）、<b>EP-10</b>（零信任网络动态隔离防呆确认）。</td>
+        </tr>
+        <tr>
+          <td><b>日常管护</b></td>
+          <td><b>任务启停、手动重测与删除</b><br/><span style="color:var(--text-sub);font-size:12px;">诉求：高频操作顺手、高危破坏防呆</span></td>
+          <td><b>【Job 3：日常管理与模板维护】</b><br/><span style="color:var(--text-sub);font-size:12px;">流程：日常轻维护与异常防御</span></td>
+          <td><b>高频轻操作原地化与破坏性操作防呆</b>：行内轻操作、删除气泡二次确认与对象名回显防误删。</td>
+          <td>采纳 <b>EP-01</b>（卡片行内轻操作）、<b>EP-10</b>（气泡确认原样回显任务名防呆）。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 核心设计发力点提炼 (结合场景痛点与标杆 Job 诉求)</h3>
+    <div style="background:#F8FAFC;border-left:3px solid var(--blue);padding:8px 14px;margin-bottom:14px;font-size:12px;color:#475569;">
+      💡 <b>设计推导说明</b>：发力点紧密连接业务场景与所匹配的标准 Job，明确面对管理者的体验卡点如何从交互机制与心智层面破局，再具体落地到标杆实战经验（EP-01~10）。
+    </div>
 
     <table>
       <thead>
         <tr>
           <th style="width:23%;">体验设计发力点</th>
-          <th style="width:16%;">承接体验目标</th>
+          <th style="width:16%;">承接场景与 Job</th>
           <th style="width:20%;">用户痛点与心理摩擦</th>
           <th style="width:23%;">系统设计解法 (Design Rationale)</th>
           <th style="width:18%;">标杆经验与组件选型</th>
@@ -287,7 +339,7 @@
       <tbody>
         <tr>
           <td><b>发力点 1：<br/>预置规则轻量配置与受检范围即时测算</b></td>
-          <td><b>目标 1</b>：任务配置省时防呆 (新建场景)</td>
+          <td><b>场景 S1</b><br/>(匹配 Job 1 配置圈选)</td>
           <td><b>怕拼错与怕误伤</b>：全网终端量大，管理员手工填写进程/注册表容易拼错导致误报；同时不清楚勾选部门后具体会覆盖多少台设备，担心误伤核心业务终端。</td>
           <td><b>预置常用库 + 即时测算</b>：将必装软件与违规进程沉淀为可多选的预置库；选择部门或标签时，即时计算出受检终端总量（2,450 台），让任务影响范围在保存前清晰可见。</td>
           <td>
@@ -299,7 +351,7 @@
         </tr>
         <tr>
           <td><b>发力点 2：<br/>长耗时任务进度连续反馈与离线自动容错</b></td>
-          <td><b>目标 2</b>：检测进度直观透明 (执行场景)</td>
+          <td><b>场景 S2</b><br/>(匹配 Job 1 执行监控)</td>
           <td><b>不可预期的盲等焦虑</b>：全网检测执行时间长，界面缺乏持续的执行反馈；遇到大量离线设备时，用户无法判断任务是否已假死挂起。</td>
           <td><b>细化进度呈现 + 超时熔断机制</b>：卡片底部内嵌微型进度条呈现检测百分比；针对离线无响应设备，设置 10 分钟自动超时跳过并标记，同时在执行期置灰互斥操作，确保操作稳定。</td>
           <td>
@@ -310,7 +362,7 @@
         </tr>
         <tr>
           <td><b>发力点 3：<br/>违规终端就地深度排查与轻重分级闭环处置</b></td>
-          <td><b>目标 3</b>：排查处置高效闭环 (排障处置场景)</td>
+          <td><b>场景 S3、S4</b><br/>(匹配 Job 2 结果排查处置)</td>
           <td><b>信息割裂与跳页断流</b>：检出违规后，管理员需要频繁跳页去底层全量日志排查具体原因，查完又要切换到网络控制台手动断网，动线割裂且难以形成闭环。</td>
           <td><b>抽屉就地排查 + 分级联动处置</b>：点击终端右侧滑出抽屉，左侧核对缺失项、右侧呈现违规进程与路径；原地提供“轻提醒（推送客户端自愈）”与“强管控（联动 SASE 零信任动态隔离）”双通道。</td>
           <td>
@@ -323,7 +375,7 @@
       </tbody>
     </table>
 
-    <h3>3. 采用的核心交互机制</h3>
+    <h3>4. 采用的核心交互机制</h3>
     <ul>
       <li><b>核心交互组合</b>：巡检任务周期调度 + 详情下钻排障联动</li>
       <li><b>核心交互机制说明</b>：
@@ -336,90 +388,101 @@
       </li>
     </ul>
 
-    <h3>4. 标杆案例经验有侧重的传承与装配矩阵 (从 Type-07 靶向提取)</h3>
+    <h3>5. 标杆案例经验按 Job 靶向采纳矩阵 (从 Type-07 精准提取)</h3>
     <div style="color:var(--text-sub);font-size:12px;margin-bottom:8px;">
-      紧扣上述确立的 3 个关键设计点，从标杆库中针对性提取成熟经验与组件样式：
+      顺着各场景匹配的标杆 Job 节点，将 Type-07 分册中成熟的工程实战经验（EP-01~10）靶向采纳并落地：
     </div>
     <table>
       <thead>
         <tr>
-          <th>经验编号</th>
-          <th>经验名称与解法机制</th>
-          <th>对齐产线</th>
-          <th>推荐程度</th>
-          <th>承载的设计点及在本方案中的实际落地</th>
+          <th style="width:9%;">经验编号</th>
+          <th style="width:14%;">归属标杆 Job</th>
+          <th style="width:23%;">经验名称与机制</th>
+          <th style="width:12%;">对齐产线</th>
+          <th style="width:12%;">推荐程度</th>
+          <th style="width:30%;">在本方案中的实际落地</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><span class="tag-exp">EP-01</span></td>
+          <td><b>Job 1 / Job 3</b><br/><span style="font-size:11px;color:var(--text-sub);">台账与管护</span></td>
           <td><b>单列任务卡片流 (Card)</b></td>
           <td>XDR / SASE</td>
           <td><b>【首选基线】</b></td>
-          <td><b>承载设计点 1</b>：任务列表首选单列卡片，避免宽表被长名字和多个指标撑爆。首页只放任务，不放单台终端。</td>
+          <td>任务列表首选单列卡片，避免宽表被长名字和多个指标撑爆。首页只放任务，不放单台终端；卡片行内提供轻量操作。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-02</span></td>
+          <td><b>Job 1</b><br/><span style="font-size:11px;color:var(--text-sub);">台账指标</span></td>
           <td><b>未执行占位与异常指标点染</b></td>
           <td>SASE / aES</td>
           <td><b>【体验推荐】</b></td>
-          <td><b>承载设计点 1</b>：从未执行过的任务指标显示「-」而不是「0」；违规数字标红点缀，界面不杂乱。</td>
+          <td>从未执行过的任务指标显示「-」而不是「0」；违规数字标红点缀，界面不杂乱。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-03</span></td>
+          <td><b>Job 1</b><br/><span style="font-size:11px;color:var(--text-sub);">创建配置</span></td>
           <td><b>右侧抽屉轻量新建 (Drawer)</b></td>
           <td>SASE</td>
           <td><b>【首选基线】</b></td>
-          <td><b>承载设计点 1</b>：新建任务用 720px 右侧抽屉，表单填完即走，不跳出当前主列表。</td>
+          <td>新建任务用 720px 右侧抽屉，表单填完即走，不跳出当前主列表。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-04</span></td>
+          <td><b>Job 1</b><br/><span style="font-size:11px;color:var(--text-sub);">对象圈选</span></td>
           <td><b>圈选对象与前置防呆测算</b></td>
           <td>XDR / SASE</td>
           <td><b>【防呆首选】</b></td>
-          <td><b>承载设计点 1</b>：勾选部门后，右侧直接算出当前会覆盖多少台电脑（如 2,450 台），心里有底。</td>
+          <td>勾选部门后，右侧直接算出当前会覆盖多少台电脑（如 2,450 台），心里有底。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-05</span></td>
+          <td><b>Job 1</b><br/><span style="font-size:11px;color:var(--text-sub);">创建出口</span></td>
           <td><b>单一主按钮 + 立即执行勾选框</b></td>
           <td>XDR</td>
           <td><b>【首选基线】</b></td>
-          <td><b>承载设计点 1</b>：抽屉底部只放一个「确定」主按钮，旁边放「立即执行一次」勾选框，避免两个蓝色按钮让人困惑。</td>
+          <td>抽屉底部只放一个「确定」主按钮，旁边放「立即执行一次」勾选框，避免两个蓝色按钮让人困惑。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-06</span></td>
+          <td><b>Job 1</b><br/><span style="font-size:11px;color:var(--text-sub);">运行监控</span></td>
           <td><b>卡底细进度条与操作置灰加锁</b></td>
           <td>SASE / XDR</td>
           <td><b>【体验推荐】</b></td>
-          <td><b>承载设计点 2</b>：正在检测的任务卡片底部显示细进度条；执行时禁用重跑/删除按钮并提示原因，防止误操作。</td>
+          <td>正在检测的任务卡片底部显示细进度条；执行时禁用重跑/删除按钮并提示原因，防止误操作。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-07</span></td>
+          <td><b>Job 2</b><br/><span style="font-size:11px;color:var(--text-sub);">结果定性</span></td>
           <td><b>头部一句话大结论定性</b></td>
           <td>SASE</td>
           <td><b>【体验推荐】</b></td>
-          <td><b>承载设计点 3</b>：点进任务结果页，顶部第一眼直接给结论（如：检测完成，发现 160 台终端违规），不用自己算。</td>
+          <td>点进任务结果页，顶部第一眼直接给结论（如：检测完成，发现 160 台终端违规），不用自己算。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-08</span></td>
+          <td><b>Job 2</b><br/><span style="font-size:11px;color:var(--text-sub);">执行模型</span></td>
           <td><b>留档式父任务历史时光机</b></td>
           <td>XDR</td>
           <td><b>【强烈推荐】</b></td>
-          <td><b>承载设计点 3</b>：多次检测只保留一条任务，在检测时间旁放小下拉箭头，随时切换翻看历史轮次。</td>
+          <td>多次检测只保留一条任务，在检测时间旁放小下拉箭头，随时切换翻看历史轮次。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-09</span></td>
+          <td><b>Job 2</b><br/><span style="font-size:11px;color:var(--text-sub);">排查与处置</span></td>
           <td><b>抽屉就地排查与批量置灰</b></td>
           <td>SASE / aES</td>
           <td><b>【首选基线】</b></td>
-          <td><b>承载设计点 3</b>：点击某台终端在右侧抽屉看详情，列表不跳转；没勾选电脑时，批量按钮置灰并提示勾选。</td>
+          <td>点击某台终端在右侧抽屉看详情，列表不跳转；没勾选电脑时，批量按钮置灰并提示勾选。</td>
         </tr>
         <tr>
           <td><span class="tag-exp">EP-10</span></td>
+          <td><b>Job 2 / Job 3</b><br/><span style="font-size:11px;color:var(--text-sub);">处置与防呆</span></td>
           <td><b>任务名原样回显防呆与分级处置</b></td>
           <td>SASE / XDR</td>
           <td><b>【首选基线】</b></td>
-          <td><b>承载设计点 3</b>：删除任务弹窗里明确写出任务名称二次防呆；对违规终端提供提醒整改或联动隔离。</td>
+          <td>删除任务弹窗里明确写出任务名称二次防呆；对违规终端提供提醒整改或联动隔离。</td>
         </tr>
       </tbody>
     </table>
