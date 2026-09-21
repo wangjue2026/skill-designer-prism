@@ -53,10 +53,11 @@ graph TD
     end
     
     subgraph Assets ["03-design-assets/ (统一设计资产库)"]
-        Comps["components/ (20+ 基础原子组件)"]
-        Pages["page-templates/ (业务框架套头库)"]
-        Patterns["patterns/ (专家范式机制库 P-01~P-08)"]
-        PKB["product-lines-knowledge/ (产线知识库与速查表三)"]
+        Comps["components/ (20+ 基础原子组件 + idux 组件映射)"]
+        Feature["feature/ (高频功能模块: 批量编辑/导入/导出/执行周期/标签/优先级)"]
+        Pages["page-templates/ (页面类型与布局: 01-page-types)"]
+        Patterns["patterns/ (通用设计范式 01~06: 导航/表格/表单/交互/状态/文案)"]
+        PKB["product-lines-knowledge/ (产线导航知识库: SASE / XDR / aES)"]
         Tokens["tokens-cheatsheet.md & global-styles/"]
     end
 
@@ -83,11 +84,12 @@ graph TD
 | ├─ [`细节调优中枢调度指南.md`](02-detail-tuning-design/细节调优中枢调度指南.md) | **调优中枢调度指南** | 定义 4 阶精密闭环作业法（主诉查表 ➔ 连带体检 ➔ 装配防线 ➔ 双重交付）。 |
 | ├─ [`b-tuning-strategy/`](02-detail-tuning-design/b-tuning-strategy/) | **b. 调优策略思考三要素** | 包含 3 篇核心资产：<br>1. [`b.1-设计细节吐槽转译词典.md`](02-detail-tuning-design/b-tuning-strategy/b.1-设计细节吐槽转译词典.md)<br>2. [`b.2-界面体验与可用性.md`](02-detail-tuning-design/b-tuning-strategy/b.2-界面体验与可用性.md)<br>3. [`b.3-避坑指南.md`](02-detail-tuning-design/b-tuning-strategy/b.3-避坑指南.md) |
 | └─ [`c-execute-tuning/`](02-detail-tuning-design/c-execute-tuning/) | **c. 局部调优补丁执行** | [`c-局部调优补丁执行模板.md`](02-detail-tuning-design/c-execute-tuning/c-局部调优补丁执行模板.md) (生成针对局部模块的精准补丁 Prompt 与通俗设计说明)。 |
-| **`03-design-assets/`** | **【统一设计资产库基座】** | **提供客观数值、组件、页面模板、专家范式与产线知识支撑（找设计资产统一入口）** |
-| ├─ [`components/`](03-design-assets/components/) | **基础原子组件规范 (20+)** | Table (表头32px/行高40px/右对齐)、Pro-Search (32px)、Button (56px) 等。 |
-| ├─ [`page-templates/`](03-design-assets/page-templates/) | **页面模板与业务框架套头**| 监控大盘标准套头、配置向导骨架、对象管理两栏套头。 |
-| ├─ [`patterns/`](03-design-assets/patterns/) | **专家范式（机制）库** | P-01~P-08 业务范式详情 + 速查表；步骤 2 找承载机制的统一入口。 |
-| ├─ [`product-lines-knowledge/`](03-design-assets/product-lines-knowledge/) | **产线设计知识库** | 云网络/安全/计算/计费产品线严肃度定性、产品知识速查表三。 |
+| **`03-design-assets/`** | **【统一设计资产库基座】** | **提供客观数值、组件映射、页面模板、设计范式与产线导航知识支撑** |
+| ├─ [`components/`](03-design-assets/components/) | **基础原子组件规范 (20+) & idux 组件映射** | 包含 20+ 原子组件规范及 `idux-component-map.md`（语义到 `IxButton` / `IxTable` 等标准调用契约）。 |
+| ├─ [`feature/`](03-design-assets/feature/) | **高频业务功能模块规范** | 包含批量编辑、导入、导出、执行周期、优先级配置、标签管理等通用业务功能交互设计标准。 |
+| ├─ [`page-templates/`](03-design-assets/page-templates/) | **页面类型与模板库** | `01-page-types.md` 标准页面类型、布局结构与骨架选型。 |
+| ├─ [`patterns/`](03-design-assets/patterns/) | **通用设计范式库 (01~06)** | 导航与层级、表格、表单、交互、状态、文案术语规范。 |
+| ├─ [`product-lines-knowledge/`](03-design-assets/product-lines-knowledge/) | **产线设计与导航知识库** | 按 SASE (aTrust/SASE)、XDR、aES (DR) 分目录纳管产线菜单层级、导航路径与业务归属。 |
 | ├─ [`global-styles/`](03-design-assets/global-styles/) | **全局原子规范库** | 色彩全量矩阵、8px 网格、字阶公式、24 栅格。 |
 | └─ [`tokens-cheatsheet.md`](03-design-assets/tokens-cheatsheet.md) | **高频 Tokens 速查手册** | 品牌色、状态三元组、石墨灰阶、原子间距速查。 |
 | **`04-workflows-and-cases/`** | **【执行 SOP 与协作协议】** | **指导 Agent 状态机流转与提供标杆样本** |
