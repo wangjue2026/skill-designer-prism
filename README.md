@@ -100,9 +100,10 @@ skill-designer-prism/
 ├── 04-workflows-and-cases/                          # 【执行 SOP 与协作协议】
 │   ├── agent-interaction-protocol.md                # 人机协作状态机 (含说明书确认闸门铁律)
 │   ├── execution-sop.md                             # 8 步端到端执行作业程序
-│   └── few-shots.md                                 # 标杆实战 Few-Shot 样本库
+│   ├── few-shots.md                                 # 标杆实战 Few-Shot 样本库
+│   └── cases/                                       # 真实业务需求用例库 (PRD 实战演练)
 │
-├── learning-materials/                              # 【资料投喂与蒸馏暂存收件箱】
+├── 05-learning-materials/                           # 【资料投喂与蒸馏暂存收件箱】
 │   ├── learning-materials-guide.md                  # 经验蒸馏手册
 │   └── (随时投喂原始 PRD 或复盘资料，蒸馏后随时清理)
 │

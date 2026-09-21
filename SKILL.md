@@ -37,8 +37,8 @@ graph TD
         M1["1. 需求理解与分析 (①需求理解与分析/)"]
         M2["2. 设计点思考与范式 (②设计点思考/)"]
         M3["3. 未来旅程与流程建模 (③未来旅程/)"]
-        M4["4. 布局结构与组件映射 (④布局与结构/)"]
-        M5["5. 完整设计说明书交付 (⑤设计说明书/)"]
+        M4["4. 解决方案架构与组件深度装配 (④布局与结构/)"]
+        M5["5. 系统化整合设计说明书交付 (⑤设计说明书/)"]
         M6["6. AI Coding 与回测 (⑥AI coding 要求/)"]
         M1 --> M2 --> M3 --> M4 --> M5
         M5 -->|"🚦 人机共识确认闸门"| Gate{"规划人员确认"}
@@ -77,9 +77,9 @@ graph TD
 | ├─ [`①需求理解与分析/`](01-system-solution-design/①需求理解与分析/) | **1. 需求理解与分析** | 包含 2 篇核心指南：<br>1. [`1.1-需求理解与现状旅程.md`](01-system-solution-design/①需求理解与分析/1.1-需求理解与现状旅程.md) (痛点穿透与主要任务旅程)<br>2. [`1.2-体验目标.md`](01-system-solution-design/①需求理解与分析/1.2-体验目标.md) (体验收益与务实目标) |
 | ├─ [`②设计点思考/`](01-system-solution-design/②设计点思考/) | **2. 需求定性、标杆学习与发力点** | 包含 3 类核心资产：<br>1. [`2.2-标杆案例库.md`](01-system-solution-design/②设计点思考/2.2-标杆案例库.md) (【门户】7大需求类型全景图 + 定性自检 + 分册索引)<br>2. [`标杆案例库/`](01-system-solution-design/②设计点思考/标杆案例库/) (【分册】一类型一文件：Type-01~07 各自的通用场景清单 + 标杆案例深度蒸馏与Why因果推演；⚠️ **当前仅 Type-07 的 XDR 检测任务已完成蒸馏，其余均待补**)<br>3. [`2.1-设计思考与发力点.md`](01-system-solution-design/②设计点思考/2.1-设计思考与发力点.md) (设计发力点提炼与专家范式匹配) |
 | ├─ [`③未来旅程/`](01-system-solution-design/③未来旅程/) | **3. 未来旅程与流程建模** | 包含 1 篇核心指南：[`3.1-未来旅程.md`](01-system-solution-design/③未来旅程/3.1-未来旅程.md) (优化后的用户任务流转，绘制标准 Mermaid 规划流程图)。 |
-| ├─ [`④布局与结构/`](01-system-solution-design/④布局与结构/) | **4. 布局结构与组件映射** | 包含 2 篇核心指南：<br>1. [`4.1-业务页面框架选型指引.md`](01-system-solution-design/④布局与结构/4.1-业务页面框架选型指引.md) (选定页面框架套头与总览交付)<br>2. [`4.2-业务能力与组件选型指引.md`](01-system-solution-design/④布局与结构/4.2-业务能力与组件选型指引.md) (梳理业务能力并精确映射到底层组件硬指标) |
-| ├─ [`⑤设计说明书/`](01-system-solution-design/⑤设计说明书/) | **5. 标准设计说明书模板** | **【共识关卡】** [`5.0-设计说明书标准模板.md`](01-system-solution-design/⑤设计说明书/5.0-设计说明书标准模板.md) (汇总设计思考与细节，等待规划人员确认后再执行代码)。 |
-| └─ [`⑥AI coding 要求/`](01-system-solution-design/⑥AI coding 要求/) | **6. AI Coding 与回测** | [`6.0-前端 demo 输出要求.md`](01-system-solution-design/⑥AI coding 要求/6.0-前端 demo 输出要求.md) (确认后输出高保真 Demo，严格反向回测第 4 步套头与组件达标度)。 |
+| ├─ [`④布局与结构/`](01-system-solution-design/④布局与结构/) | **4. 解决方案架构、页面清单与组件深度装配** | 包含 2 篇核心指南：<br>1. [`4.1-业务页面框架选型指引.md`](01-system-solution-design/④布局与结构/4.1-业务页面框架选型指引.md) (确定解决方案页面清单、拓扑及模板选型)<br>2. [`4.2-业务能力与组件选型指引.md`](01-system-solution-design/④布局与结构/4.2-业务能力与组件选型指引.md) (分页面映射真实 idux 组件、标杆 EP 经验与尺寸 Token) |
+| ├─ [`⑤设计说明书/`](01-system-solution-design/⑤设计说明书/) | **5. 系统化整合型设计说明书标准模板** | **【共识关卡】** [`5.0-设计说明书标准模板.md`](01-system-solution-design/⑤设计说明书/5.0-设计说明书标准模板.md) (汇流全流程要素，逐页面输出线框图、承载 EP 经验与真实组件，共识确认关卡)。 |
+| └─ [`⑥AI coding 要求/`](01-system-solution-design/⑥AI coding 要求/) | **6. AI Coding 与回测** | [`6.0-前端 demo 输出要求.md`](01-system-solution-design/⑥AI coding 要求/6.0-前端 demo 输出要求.md) (确认后输出高保真 Demo，严格反向回测第 4/5 步页面套头与组件达标度)。 |
 | **`02-detail-tuning-design/`** | **【设计细节调优主线 (4阶闭环)】**| **解决局部样式、间距排版、组件硬指标修复与槽点根除（意图穿透与转轨红线由 `00-triage-and-routing/` 统一承载）** |
 | ├─ [`细节调优中枢调度指南.md`](02-detail-tuning-design/细节调优中枢调度指南.md) | **调优中枢调度指南** | 定义 4 阶精密闭环作业法（主诉查表 ➔ 连带体检 ➔ 装配防线 ➔ 双重交付）。 |
 | ├─ [`b-tuning-strategy/`](02-detail-tuning-design/b-tuning-strategy/) | **b. 调优策略思考三要素** | 包含 3 篇核心资产：<br>1. [`b.1-设计细节吐槽转译词典.md`](02-detail-tuning-design/b-tuning-strategy/b.1-设计细节吐槽转译词典.md)<br>2. [`b.2-界面体验与可用性.md`](02-detail-tuning-design/b-tuning-strategy/b.2-界面体验与可用性.md)<br>3. [`b.3-避坑指南.md`](02-detail-tuning-design/b-tuning-strategy/b.3-避坑指南.md) |
@@ -95,8 +95,9 @@ graph TD
 | **`04-workflows-and-cases/`** | **【执行 SOP 与协作协议】** | **指导 Agent 状态机流转与提供标杆样本** |
 | ├─ [`agent-interaction-protocol.md`](04-workflows-and-cases/agent-interaction-protocol.md) | **人机协作协议与共识闸门** | **铁律**：方案说明书输出后必须等待确认，杜绝未经允许偷跑代码。 |
 | ├─ [`execution-sop.md`](04-workflows-and-cases/execution-sop.md) | **8 步执行工作流 SOP 说明书**| 端到端流水线作业程序。 |
-| └─ [`few-shots.md`](04-workflows-and-cases/few-shots.md) | **经典实战 Few-Shot 样本库** | 真实案例前后对比与代码级标杆 Prompt。 |
-| **`learning-materials/`** | **【知识蒸馏收件箱】** | **接收用户临时投喂资料，深度蒸馏后合入系统核心库** |
+| ├─ [`few-shots.md`](04-workflows-and-cases/few-shots.md) | **经典实战 Few-Shot 样本库** | 真实案例前后对比与代码级标杆 Prompt。 |
+| └─ [`cases/`](04-workflows-and-cases/cases/) | **全流程演练真实需求用例库** | 存放标准 PRD（如 SASE 终端合规检测任务），用于端到端模拟与回测。 |
+| **`05-learning-materials/`** | **【知识蒸馏收件箱】** | **接收用户临时投喂资料，深度蒸馏后合入系统核心库** |
 | **`tools/`** | **【工程工具】** | **执行环节所需的脚本工具（非设计知识）** |
 | ├─ [`internal-reverse-proxy.js`](tools/internal-reverse-proxy.js) | **内网系统访问通道** | 当内网系统因自建 CA 证书不被信任（`ERR_CERT_AUTHORITY_INVALID`）而无法在浏览器直连时，用它在本地开一条访问通道，供蒸馏取证。用法见 [`tools/README.md`](tools/README.md)。 |
 
