@@ -608,10 +608,13 @@ graph LR
 
     <!-- 5.1 Page-01 -->
     <h3>5.1 Page-01：终端合规基线检测任务台账 (主页面 · 任务维度)</h3>
-    <ul>
-      <li><b>页面定位与核心 Job</b>：作为【合规检测】模块的入口首页，核心承载<b>所有检测任务（Task）的生命周期管理</b>，暴露执行进度与合规大数，提供新建、重测与日常管护入口。</li>
-      <li><b>容器与布局选型</b>：严格遵循 <b>EP-01 首选「单列任务卡片流 (Card)」</b>（整卡宽 <code>100%</code> / 内边距 <code>12px 16px</code> / 圆角 <code>2px</code> / 边框 <code>1px #E1E5EB</code>），彻底避免高密表格把任务名、指标与行内按钮扯散撑爆。</li>
-    </ul>
+    <div style="background:#F8FAFC;border-left:3px solid var(--blue);padding:10px 14px;margin-bottom:14px;font-size:12px;color:#475569;line-height:1.6;">
+      💡 <b>设计取材边界透视说明（标杆参考 vs 独立需求推导）</b>：
+      <ul style="margin:4px 0 0 16px;padding:0;">
+        <li><b>标杆经验参考（相同能覆盖的共性场景）</b>：本页全面继承 Type-07 标杆库中成熟的交互与容器选型 —— 采用 <b>EP-01 单列任务卡片流</b>（规整承载任务元数据与指标）、<b>EP-02 异常指标单点染红</b>（仅违规终端染红，其余中性深灰，严控色彩信噪比）、<b>EP-06 卡底内嵌细进度条与悬浮百分比药丸</b>（不下钻即可知进度，运行期写操作加锁置灰）、以及 <b>EP-10 任务名回显防呆</b>。</li>
+        <li><b>业务独立推导（标杆库未覆盖的合规特性）</b>：标杆库中存量的 Type-07 案例（如病毒查杀、弱密码）以离散、偶发、小量级排障为主（实测仅 6 条），无需常态化大盘；而<b>「合规基线检测」具备强烈的企业常态合规管控与等保审计属性</b>（直接对应第一章 CISO / 审计员 JTBD）。因此，本方案在列表上方独立推导了<b>「全网综合合规态势与高频根因摘要」</b>，为合规管理者提供全局定性抓手，不机械死套病毒查杀页面。</li>
+      </ul>
+    </div>
 
     <!-- 线框图 1 -->
     <div class="wf-container">
@@ -622,11 +625,15 @@ graph LR
           <div><span class="tag">SASE 页面套头 · 任务台账</span></div>
         </div>
         <div class="wf-body">
-          <!-- 概览 4 联卡片 -->
+          <!-- 概览 4 联卡片（独立需求推导：承接 CISO/合规审计 JTBD） -->
+          <div style="font-size:11px;color:var(--text-sub);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+            <span>全网合规基线态势概览</span>
+            <span class="tag" style="background:#EFF6FF;color:var(--blue);border-color:#BFDBFE;font-size:10px;">业务独立推导 · CISO 审计视角</span>
+          </div>
           <div class="wf-row">
             <div class="wf-card wf-col">
-              <div class="wf-card-title">全网终端综合合规率 (KPI)</div>
-              <div class="wf-card-val" style="color:var(--blue);">94.2% <span style="font-size:11px;color:var(--green-t);font-weight:400;">↑ 1.8% 较上周</span></div>
+              <div class="wf-card-title">全网终端综合合规率</div>
+              <div class="wf-card-val" style="color:#1E293B;">94.2% <span style="font-size:11px;color:var(--green-t);font-weight:400;">↑ 1.8% 较上周</span></div>
               <div style="font-size:10.5px;color:var(--text-sub);margin-top:2px;">合规 2,308 / 总计 2,450 台终端</div>
             </div>
             <div class="wf-card wf-col">
@@ -649,138 +656,176 @@ graph LR
           <!-- 任务操作栏 -->
           <div class="wf-toolbar">
             <div style="display:flex;gap:6px;align-items:center;">
-              <span class="tag" style="background:var(--blue);color:#FFF;border:none;padding:4px 12px;font-weight:500;">+ 新建检测任务</span>
+              <span class="tag" style="background:var(--blue);color:#FFF;border:none;padding:5px 14px;font-weight:500;border-radius:2px;">+ 新建检测任务</span>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:11px;color:#475569;display:flex;align-items:center;gap:4px;"><input type="checkbox" checked style="margin:0;"/> 仅看有违规终端的任务</span>
               <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;color:#94A3B8;">🔍 搜索检测任务名称...</span>
-              <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;">任务状态: 全部 ▼</span>
+              <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;">状态: 全部 ▼</span>
+              <span style="border:1px solid #CBD5E1;background:#FFF;padding:3px 8px;border-radius:2px;font-size:11px;color:#475569;">↻</span>
             </div>
           </div>
 
-          <!-- 单列任务卡片流 (EP-01 真实展现) -->
-          <!-- 任务卡片 1：正在执行态 -->
-          <div class="wf-task-card" style="border-left:3px solid var(--blue);">
-            <div class="wf-task-main">
+          <!-- 单列任务卡片流 (EP-01 标杆继承：左 34% 基础信息 + 右 66% 成对指标) -->
+          <!-- 任务卡片 1：正在执行态 (参考 SASE 弱密码设计稿规格：微蓝底 + 卡底 2px 细进度条 + 悬浮数值药丸) -->
+          <div class="wf-task-card" style="background:#F8FAFC;border:1px solid #BFDBFE;position:relative;padding-bottom:18px;">
+            <div class="wf-task-main" style="width:36%;">
               <div class="wf-task-title">
-                <span>2026 Q3办公网终端安全合规例行巡检</span>
-                <span class="tag" style="background:#E0F2FE;color:#0369A1;border-color:#BAE6FD;">检测中 (78%)</span>
-                <span style="font-size:11px;font-weight:400;color:var(--text-sub);">周期: 每周工作日 12:30</span>
+                <span style="font-size:13px;font-weight:600;color:#1E293B;">2026 Q3办公网终端安全合规例行巡检</span>
+                <span class="tag" style="background:#E0F2FE;color:#0369A1;border-color:#BAE6FD;font-size:11px;">◌ 检测中</span>
+                <span class="tag" style="background:#F1F5F9;color:#475569;border:none;font-size:10px;">每周工作日 12:30</span>
               </div>
-              <div class="wf-task-sub">
-                检测规则: 必须安装软件(4款) + 违规黑名单进程(3类) ｜ 覆盖范围: 研发中心、财务部 (共2,450台终端) ｜ 检测时间: 2026-09-21 12:30:00
-              </div>
-              <!-- 卡底细进度条 EP-06 -->
-              <div style="height:3px;background:#E2E8F0;border-radius:2px;overflow:hidden;margin-top:8px;">
-                <div style="width:78%;height:100%;background:var(--blue);"></div>
+              <div class="wf-task-sub" style="margin-top:6px;line-height:1.6;">
+                <div><span style="color:#64748B;">检测规则：</span>必须安装软件(4款) ＋ 违规黑名单进程(3类)</div>
+                <div><span style="color:#64748B;">覆盖范围：</span>研发中心、财务部 (共 2,450 台终端)</div>
+                <div><span style="color:#64748B;">检测时间：</span>2026-09-21 12:30:00 (耗时 8分30秒)</div>
               </div>
             </div>
-            <div class="wf-task-stats">
+            
+            <!-- 右侧成对指标区 (EP-02 标杆细节：正常中性灰，异常违规单点染红) -->
+            <div class="wf-task-stats" style="width:46%;">
               <div class="wf-task-stat-item">
-                <div style="font-size:18px;font-weight:700;color:var(--blue);font-family:monospace;">94.2%</div>
-                <div style="font-size:10px;color:var(--text-sub);">当前合规率</div>
+                <div style="font-size:20px;font-weight:700;color:#1E293B;font-family:monospace;">94.2%</div>
+                <div style="font-size:11px;color:#64748B;margin-top:2px;">当前合规率</div>
               </div>
               <div class="wf-task-stat-item">
-                <div style="font-size:18px;font-weight:700;color:var(--danger-t);font-family:monospace;">160 台</div>
-                <div style="font-size:10px;color:var(--text-sub);">检出违规终端</div>
+                <div style="font-size:20px;font-weight:700;color:#CF171D;font-family:monospace;">160 <span style="font-size:12px;font-weight:normal;">台</span></div>
+                <div style="font-size:11px;color:#CF171D;margin-top:2px;">检出违规终端</div>
               </div>
               <div class="wf-task-stat-item">
-                <div style="font-size:18px;font-weight:700;color:#64748B;font-family:monospace;">540 台</div>
-                <div style="font-size:10px;color:var(--text-sub);">离线自动跳过</div>
+                <div style="font-size:20px;font-weight:700;color:#1E293B;font-family:monospace;">540 <span style="font-size:12px;font-weight:normal;">台</span></div>
+                <div style="font-size:11px;color:#64748B;margin-top:2px;">离线自动跳过</div>
               </div>
             </div>
-            <div class="wf-task-actions">
-              <a href="javascript:void(0)" style="color:var(--blue);font-weight:600;">[查看结果]</a>
-              <span style="color:#CBD5E1;font-size:11px;" title="任务运行中加锁">[重新检测]</span>
-              <a href="javascript:void(0)" style="color:var(--blue);">[编辑]</a>
+
+            <!-- 右上角行内轻操作区 (EP-06 运行中写操作加锁置灰) -->
+            <div class="wf-task-actions" style="width:18%;align-items:flex-end;">
+              <div style="display:flex;gap:8px;font-size:12px;">
+                <a href="javascript:void(0)" style="color:var(--blue);text-decoration:none;font-weight:500;">查看结果</a>
+                <span style="color:#CBD5E1;">·</span>
+                <span style="color:#94A3B8;cursor:not-allowed;" title="检测执行中，禁止重新检测与编辑">重新检测</span>
+                <span style="color:#CBD5E1;">·</span>
+                <span style="color:#94A3B8;cursor:not-allowed;" title="检测执行中，禁止重新检测与编辑">编辑</span>
+              </div>
+            </div>
+
+            <!-- 卡底细进度条与悬浮百分比药丸 (EP-06 标杆细节完整呈现) -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:#E2E8F0;border-bottom-left-radius:2px;border-bottom-right-radius:2px;">
+              <div style="width:78%;height:100%;background:var(--blue);position:relative;">
+                <!-- 悬浮百分比标签 (白底带投影微组件) -->
+                <div style="position:absolute;right:-18px;bottom:4px;background:rgba(255,255,255,0.96);border:1px solid #CBD5E1;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,0.12);padding:1px 5px;font-size:10px;font-weight:600;color:var(--blue);font-family:monospace;">
+                  78%
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- 任务卡片 2：已完成态 -->
-          <div class="wf-task-card">
-            <div class="wf-task-main">
+          <!-- 任务卡片 2：已完成终态 (标准常态卡片：白底 + 异常单点染红 + 右上角完整轻管护动作) -->
+          <div class="wf-task-card" style="background:#FFF;border:1px solid #E1E5EB;margin-top:10px;">
+            <div class="wf-task-main" style="width:36%;">
               <div class="wf-task-title">
-                <span>核心研发代码机特种违规进程排查</span>
-                <span class="tag-exp">已完成</span>
-                <span style="font-size:11px;font-weight:400;color:var(--text-sub);">单次即时任务</span>
+                <span style="font-size:13px;font-weight:600;color:#1E293B;">核心研发代码机特种违规进程排查</span>
+                <span class="tag" style="background:#E7F6F1;color:#12A679;border-color:#A7F3D0;font-size:11px;">✓ 已完成</span>
+                <span class="tag" style="background:#F1F5F9;color:#475569;border:none;font-size:10px;">单次即时任务</span>
               </div>
-              <div class="wf-task-sub">
-                检测规则: 非法网络代理与未授权远程桌面 ｜ 覆盖范围: 高密研发机标签组 (320台终端) ｜ 检测时间: 2026-09-20 18:00:15
-              </div>
-            </div>
-            <div class="wf-task-stats">
-              <div class="wf-task-stat-item">
-                <div style="font-size:18px;font-weight:700;color:var(--green-t);font-family:monospace;">98.8%</div>
-                <div style="font-size:10px;color:var(--text-sub);">合规率</div>
-              </div>
-              <div class="wf-task-stat-item">
-                <div style="font-size:18px;font-weight:700;color:var(--danger-t);font-family:monospace;">4 台</div>
-                <div style="font-size:10px;color:var(--text-sub);">检出违规终端</div>
-              </div>
-              <div class="wf-task-stat-item">
-                <div style="font-size:18px;font-weight:700;color:#64748B;font-family:monospace;">0 台</div>
-                <div style="font-size:10px;color:var(--text-sub);">离线跳过</div>
+              <div class="wf-task-sub" style="margin-top:6px;line-height:1.6;">
+                <div><span style="color:#64748B;">检测规则：</span>非法网络代理与未授权远程桌面</div>
+                <div><span style="color:#64748B;">覆盖范围：</span>高密研发机标签组 (320 台终端)</div>
+                <div><span style="color:#64748B;">检测时间：</span>2026-09-20 18:00:15 (耗时 1分12秒)</div>
               </div>
             </div>
-            <div class="wf-task-actions">
-              <a href="javascript:void(0)" style="color:var(--blue);font-weight:600;">[查看结果]</a>
-              <a href="javascript:void(0)" style="color:var(--blue);">[重新检测]</a>
-              <a href="javascript:void(0)" style="color:var(--blue);">[编辑]</a>
-              <a href="javascript:void(0)" style="color:var(--danger-t);">[删除]</a>
+
+            <!-- 右侧指标区 (EP-02 标杆细节：合规率与跳过深灰，违规4台染红) -->
+            <div class="wf-task-stats" style="width:46%;">
+              <div class="wf-task-stat-item">
+                <div style="font-size:20px;font-weight:700;color:#1E293B;font-family:monospace;">98.8%</div>
+                <div style="font-size:11px;color:#64748B;margin-top:2px;">合规率</div>
+              </div>
+              <div class="wf-task-stat-item">
+                <div style="font-size:20px;font-weight:700;color:#CF171D;font-family:monospace;">4 <span style="font-size:12px;font-weight:normal;">台</span></div>
+                <div style="font-size:11px;color:#CF171D;margin-top:2px;">检出违规终端</div>
+              </div>
+              <div class="wf-task-stat-item">
+                <div style="font-size:20px;font-weight:700;color:#1E293B;font-family:monospace;">0 <span style="font-size:12px;font-weight:normal;">台</span></div>
+                <div style="font-size:11px;color:#64748B;margin-top:2px;">离线跳过</div>
+              </div>
+            </div>
+
+            <!-- 右上角行内轻操作区 (EP-01 / EP-10 标杆标准 link 动作流) -->
+            <div class="wf-task-actions" style="width:18%;align-items:flex-end;">
+              <div style="display:flex;gap:8px;font-size:12px;">
+                <a href="javascript:void(0)" style="color:var(--blue);text-decoration:none;font-weight:500;">查看结果</a>
+                <span style="color:#CBD5E1;">·</span>
+                <a href="javascript:void(0)" style="color:var(--blue);text-decoration:none;">重新检测</a>
+                <span style="color:#CBD5E1;">·</span>
+                <a href="javascript:void(0)" style="color:var(--blue);text-decoration:none;">编辑</a>
+                <span style="color:#CBD5E1;">·</span>
+                <a href="javascript:void(0)" style="color:var(--danger-t);text-decoration:none;">删除</a>
+              </div>
             </div>
           </div>
 
           <div class="wf-annotation">
-            💡 <b>架构纠偏说明 (EP-01 落地)</b>：主台账主键为【检测任务（Task）】，绝不是单个终端！每个任务展示覆盖资产大数、成对合规率指标、调度周期与状态机，点击「查看结果」才下钻到该任务的终端明细页。
+            💡 <b>架构定位与职责说明 (EP-01 落地)</b>：主台账主键严格为【检测任务（Task）】，首页绝对不展开单台终端明细！每个任务卡片完整承载规则摘要、资产大数、成对合规率指标、调度周期与状态机，点击「查看结果」才下钻到该任务的终端明细页（Page-03）。
           </div>
         </div>
       </div>
     </div>
 
     <!-- 映射表 1 -->
-    <h4>Page-01 承载设计经验与真实 idux 组件选型映射清单</h4>
+    <h4>Page-01 承载设计经验与真实 idux 组件选型映射清单 (标杆复用 vs 独立推导)</h4>
     <table>
       <thead>
         <tr>
-          <th>界面功能区域</th>
-          <th>承载组件 (idux 真实组件名)</th>
-          <th>规范引用</th>
-          <th>尺寸与 Token 硬指标</th>
-          <th>承载设计经验 (Step 2)</th>
-          <th>装配来源</th>
+          <th style="width:18%;">界面功能区域</th>
+          <th style="width:20%;">承载组件 (idux 真实组件名)</th>
+          <th style="width:14%;">设计定位</th>
+          <th style="width:24%;">尺寸与 Token 硬指标</th>
+          <th style="width:24%;">设计来源与因果依据</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>页面标题与面包屑</td>
-          <td><code>IxBreadcrumb</code> + <code>IxPageHeader</code></td>
-          <td>01-page-types.md</td>
-          <td>石墨底色 <code>#F7F9FC</code>，下边框 <code>#E1E5EB</code></td>
-          <td>SASE 产线规范对齐</td>
-          <td>模板还原</td>
+          <td><b>顶部合规态势概览区</b><br/>(4联指标卡片)</td>
+          <td><code>IxRow</code> + <code>IxCol</code> + <code>IxCard</code></td>
+          <td><b>业务独立推导</b></td>
+          <td>卡片白底、圆角 <code>2px</code>、边框 <code>#E1E5EB</code>、大数字 <code>20px</code></td>
+          <td><b>【业务独立推导 · 承接 CISO 审计 JTBD】</b><br/>合规基线具备强等保考核属性，区别于病毒查杀小量级排障，需提供宏观合规率与高频根因抓手。</td>
         </tr>
         <tr>
-          <td>任务卡片流容器</td>
+          <td><b>任务工具栏与搜索</b></td>
+          <td><code>IxButton</code> + <code>IxInput</code> + <code>IxCheckbox</code></td>
+          <td><b>标杆复用</b></td>
+          <td>主按钮 <code>h28 #1C6EFF r2</code>，搜索框 <code>160×24</code>，复选框 <code>16×16</code></td>
+          <td><b>【标杆复用 · 参考 SASE 案例 B 弱密码稿】</b><br/>快速新建居左，右侧配备「仅看有违规终端的任务」快速过滤复选框与搜索框。</td>
+        </tr>
+        <tr>
+          <td><b>任务卡片流容器</b></td>
           <td><code>IxCard</code> (自定义单列任务卡)</td>
-          <td>01-page-types.md</td>
-          <td>边框 <code>#E1E5EB</code>、圆角 <code>rounded-[2px]</code>、内边距 <code>12px 16px</code></td>
-          <td><span class="tag-exp">EP-01</span> 单列任务卡片流 (Card)</td>
-          <td>标杆复用</td>
+          <td><b>标杆复用</b></td>
+          <td>整卡 <code>100%×126px</code>、内边距 <code>12px 16px</code>、圆角 <code>2px</code>、边框 <code>#E1E5EB</code></td>
+          <td><b>【标杆复用 · EP-01 单列任务卡片流】</b><br/>字段不对称（长任务名 + 成对指标 + 动作流），卡片能成组承载配对语义，避免宽表横向扯散。</td>
         </tr>
         <tr>
-          <td>卡底运行细进度条</td>
-          <td><code>IxProgress</code></td>
-          <td>tokens-cheatsheet.md</td>
-          <td>进度条高 <code>2px</code>、品牌蓝 <code>#1C6EFF</code>、无刺眼背景</td>
-          <td><span class="tag-exp">EP-06</span> 卡底细进度条与状态机加锁</td>
-          <td>标杆复用</td>
+          <td><b>成对合规率与违规指标</b></td>
+          <td><code>IxStatistic</code> (大数统计单元)</td>
+          <td><b>标杆复用</b></td>
+          <td>大数字 <code>20px/600 DINPro</code>，正常深灰 <code>#1E293B</code>，违规染红 <code>#CF171D</code></td>
+          <td><b>【标杆复用 · EP-02 异常单点染红】</b><br/>同排数字仅高亮需处置的违规终端，其余中性深灰，严格控制色彩信噪比。</td>
         </tr>
         <tr>
-          <td>操作按钮与二次删除防呆</td>
-          <td><code>IxButton</code> + <code>IxPopconfirm</code></td>
-          <td>comp-button.md</td>
-          <td>新建按钮 <code>h32</code>；删除时 Popconfirm 回显任务全名</td>
-          <td><span class="tag-exp">EP-10</span> 任务名原样回显防呆</td>
-          <td>标杆复用</td>
+          <td><b>卡底细进度条与数值标签</b></td>
+          <td><code>IxProgress</code> + 悬浮数值标签</td>
+          <td><b>标杆复用</b></td>
+          <td>进度条高 <code>2px #1C6EFF</code>，数值标签白底 <code>.95</code> + 阴影 <code>0 2px 6px rgba(0,0,0,.12)</code></td>
+          <td><b>【标杆复用 · EP-06 细进度条与加锁】</b><br/>不下钻即获知检测进度；检测执行中禁用重跑与编辑并悬浮说明，杜绝并发脏写。</td>
+        </tr>
+        <tr>
+          <td><b>行内动作与删除防呆</b></td>
+          <td><code>IxButton</code> (link 型) + <code>IxPopconfirm</code></td>
+          <td><b>标杆复用</b></td>
+          <td>文字链 <code>12px #1C6EFF</code>，二次确认气泡回显任务全名</td>
+          <td><b>【标杆复用 · EP-10 任务名回显防呆】</b><br/>卡片右上角轻出口；破坏性删除弹窗回显完整任务名，防止批量/长列表中手误误删。</td>
         </tr>
       </tbody>
     </table>
