@@ -1,0 +1,37 @@
+{
+  "type": "Type-07",
+  "name": "检测任务与批量巡检类",
+  "description": "检测任务主台账、巡检配置、结果下钻与轻管护特征物指纹契约",
+  "signatures": {
+    "EP-06": {
+      "name": "卡底细进度条与状态锁定",
+      "required_patterns": [
+        "rgba\\(255,\\s*255,\\s*255",
+        "box-shadow",
+        "[0-9]+%"
+      ],
+      "error_msg": "卡底嵌入式细进度条未完整还原骑在末端的半透明白底浮动数值标签（必须包含 position: absolute、rgba(255,255,255) 半透明白底、box-shadow 阴影与百分比数值）"
+    },
+    "EP-09": {
+      "name": "排查下钻与检索工具栏",
+      "required_patterns": [
+        "(IxProSearch|Pro-Search|复合检索)"
+      ],
+      "error_msg": "台账/下钻列表工具栏未还原标准复合检索输入框，严禁降级为简陋的纯文本或单一操作按钮"
+    },
+    "EP-10": {
+      "name": "原地轻管护与分级确认",
+      "required_patterns": [
+        "(✎|Popconfirm)"
+      ],
+      "error_msg": "行内轻管护与分级确认未检出原地改名铅笔图标（✎）或二次确认气泡（Popconfirm）"
+    },
+    "EP-11": {
+      "name": "规则模板主从分栏",
+      "required_patterns": [
+        "(295px|主从分栏)"
+      ],
+      "error_msg": "规则模板资产库未还原左侧 295px 卡片列表标准分栏骨架"
+    }
+  }
+}

@@ -12,7 +12,7 @@
 graph TD
     Input["👤 规划人员输入<br>(自然语言需求 / 口语化吐槽 / 页面截图 / 代码片段)"] --> Eval{"🤔 意图评估与影响范围判定"}
     
-    Eval -->|"特征 A: 全新业务 / 页面级架构 / 流程断裂 / 多模块重组"| Track1["🌐 路由至：01-方案系统设计 (1~6步)<br>(01-system-solution-design/)"]
+    Eval -->|"特征 A: 全新业务 / 页面级架构 / 流程断裂 / 多模块重组"| Track1["🌐 路由至：01-方案系统设计 (1~5步)<br>(01-system-solution-design/)"]
     Eval -->|"特征 B: 局部样式 / 间距松紧 / 颜色美化 / 组件硬指标 / 局部吐槽"| Track2["🔬 路由至：02-设计细节调优 (b~c步)<br>(02-detail-tuning-design/)"]
     
     Track2 --> StepA["意图穿透与转轨红线检查"]
@@ -32,7 +32,7 @@ graph TD
 | **影响空间范围** | **全页面级 (Page-level)** 或 **复合子系统级 (Sub-system)** | **局部组件级 (Component-level)** 或 **局部样式级 (Style-level)** |
 | **涉及业务流程** | 涵盖多状态流转、从 0 到 1 任务闭环、多维联动下钻 | 仅在当前既定容器内的呈现优化，不改变底层业务状态机 |
 | **代码动刀深度** | 重写/新建整个页面骨架、重构 DOM 树层级与响应式布局 | 仅修改局部 CSS 类名、微调间距 padding/gap、替换色值、微调局部 DOM 属性 |
-| **对应落地路径** | `01-system-solution-design/` (完整 1~6 步流水线) | `02-detail-tuning-design/` (完整 b~c 步流水线) |
+| **对应落地路径** | `01-system-solution-design/` (完整 1~5 步流水线) | `02-detail-tuning-design/` (完整 b~c 步流水线) |
 
 ---
 
