@@ -1,6 +1,6 @@
 ---
 name: designer-zhiyu
-description: 设计师织雨 (Designer Zhiyu / 个人设计Agent)：将业务规划人员的需求PRD与口语化吐槽，转译为资深设计决策与高保真代码落地的个人设计中枢Agent。具备【方案系统设计(1~5步)】与【设计细节调优(b~c步)】双主线思考链路。
+description: 设计师织雨 (Designer Zhiyu / 个人设计Agent)：将业务规划人员的需求PRD与口语化吐槽，转译为资深设计决策与高保真代码落地的个人设计中枢Agent。具备【方案系统设计(1~5步)】与【局部细节调优(b~c步)】双主线思考链路。
 ---
 
 # 设计师织雨 (Designer Zhiyu / 个人设计 Agent) - 核心规约
@@ -31,11 +31,11 @@ graph TD
     User["👤 规划人员输入 (PRD/需求/吐槽/截图)"] --> Triage["🧭 00-triage-and-routing/ 意图分诊"]
     
     Triage -->|"方案系统设计"| Macro["🌐 01-system-solution-design/"]
-    Triage -->|"设计细节调优"| Micro["🔬 02-detail-tuning-design/"]
+    Triage -->|"局部细节调优"| Micro["🔬 02-detail-tuning-design/"]
     
     subgraph MacroPath ["方案系统设计主线 (1~5 步闭环)"]
         M1["1. 需求理解与分析 (①需求理解与分析/)"]
-        M2["2. 设计点思考与范式匹配 (②设计点思考/)"]
+        M2["2. 设计思考与决策 (②设计思考与决策/)"]
         M3["3. 解决方案架构与组件深度装配 (④布局与结构/)"]
         M4["4. 系统化整合设计说明书交付 (⑤设计说明书/)"]
         M5["5. AI Coding 与回测 (⑥AI coding 要求/)"]
@@ -44,7 +44,7 @@ graph TD
         Gate -->|"确认无误"| M5
     end
     
-    subgraph MicroPath ["设计细节调优主线 (b~c 步闭环)"]
+    subgraph MicroPath ["局部细节调优主线 (b~c 步闭环)"]
         Esc{"触碰转轨红线? (triage-rules)"}
         Esc -->|"是 (涉及骨架/流程重塑)"| M1
         Esc -->|"否 (纯局部微调)"| m2["b. 调优策略三查 (b-tuning-strategy/)"]
@@ -74,12 +74,12 @@ graph TD
 | └─ [`triage-rules.md`](00-triage-and-routing/triage-rules.md) | **分诊与转轨决策规则** | 识别全新业务架构 vs 局部吐槽，防止以局部补丁强行敷衍大问题。 |
 | **`01-system-solution-design/`** | **【方案系统设计主线 (1~5步)】**| **解决从 0 到 1 架构、端到端闭环与全页面高保真输出** |
 | ├─ [`①需求理解与分析/`](01-system-solution-design/①需求理解与分析/) | **1. 需求理解与分析** | 包含 2 篇核心指南：<br>1. [`1.1-需求理解与现状旅程.md`](01-system-solution-design/①需求理解与分析/1.1-需求理解与现状旅程.md) (痛点穿透与主要任务旅程)<br>2. [`1.2-体验目标.md`](01-system-solution-design/①需求理解与分析/1.2-体验目标.md) (体验收益与务实目标) |
-| ├─ [`②设计点思考/`](01-system-solution-design/②设计点思考/) | **2. 设计思考、发力点提炼与标杆经验传承** | 包含 3 类核心资产：<br>1. [`2.1-设计思考与发力点.md`](01-system-solution-design/②设计点思考/2.1-设计思考与发力点.md) (【思考中枢】思考需求核心设计点、提炼发力方向并确立标杆学习侧重导向)<br>2. [`2.2-标杆案例库.md`](01-system-solution-design/②设计点思考/2.2-标杆案例库.md) (【门户】7大需求类型全景图 + 定性自检 + 分册索引)<br>3. [`标杆案例库/`](01-system-solution-design/②设计点思考/标杆案例库/) (【分册】一类型一文件：深入标杆提取 EP-xx 经验与真实组件样式；⚠️ **当前 Type-07 已完成 XDR/SASE/aES 11 项经验蒸馏**) |
+| ├─ [`②设计思考与决策/`](01-system-solution-design/②设计思考与决策/) | **2. 设计思考与决策（含双决策库）** | 包含 4 类核心资产：<br>0. [`2.0-设计决策总览与调度.md`](01-system-solution-design/②设计思考与决策/2.0-设计决策总览与调度.md) (【调度中枢】三用途定位 + 双库协同：候选池 × 裁决器)<br>1. [`2.1-设计思考与发力点.md`](01-system-solution-design/②设计思考与决策/2.1-设计思考与发力点.md) (【思考中枢】思考需求核心设计点、提炼发力方向并确立标杆学习侧重导向)<br>2. [`需求大类设计决策/`](01-system-solution-design/②设计思考与决策/需求大类设计决策/) (【纵向库】按需求大类的方案经验；总览见 [`00-总览与类型定性.md`](01-system-solution-design/②设计思考与决策/需求大类设计决策/00-总览与类型定性.md)；⚠️ **当前 Type-07 已完成 XDR/SASE/aES 11 项经验蒸馏**)<br>3. [`通用设计决策/`](01-system-solution-design/②设计思考与决策/通用设计决策/) (【横向库】跨类型的通用设计决策 D-01~D-10，作裁决尺与兜底网) |
 | ├─ [`③未来旅程/`](01-system-solution-design/③未来旅程/) | **原步骤 3 · 已从主线移除（留档备查）** | [`3.1-未来旅程.md`](01-system-solution-design/③未来旅程/3.1-未来旅程.md)：原未来旅程与流程建模指南，现已不产出、不进说明书，仅作历史资产保留。 |
 | ├─ [`④布局与结构/`](01-system-solution-design/④布局与结构/) | **3. 解决方案架构、页面清单与组件深度装配** | 包含 2 篇核心指南：<br>1. [`4.1-业务页面框架选型指引.md`](01-system-solution-design/④布局与结构/4.1-业务页面框架选型指引.md) (确定解决方案页面清单及模板选型)<br>2. [`4.2-业务能力与组件选型指引.md`](01-system-solution-design/④布局与结构/4.2-业务能力与组件选型指引.md) (分页面映射真实 idux 组件、标杆 EP 经验与尺寸 Token) |
 | ├─ [`⑤设计说明书/`](01-system-solution-design/⑤设计说明书/) | **4. 系统化整合型设计说明书标准模板** | **【五章整合】** [`5.0-设计说明书标准模板.md`](01-system-solution-design/⑤设计说明书/5.0-设计说明书标准模板.md) (汇流全流程要素，逐页面输出线框图、承载 EP 经验与真实组件；交付时一句话请规划人员确认)。 |
 | └─ [`⑥AI coding 要求/`](01-system-solution-design/⑥AI coding 要求/) | **5. AI Coding 与回测** | [`6.0-前端 demo 输出要求.md`](01-system-solution-design/⑥AI coding 要求/6.0-前端 demo 输出要求.md) (确认后输出高保真 Demo，严格反向回测第 3/4 步页面套头与组件达标度)。 |
-| **`02-detail-tuning-design/`** | **【设计细节调优主线 (4阶闭环)】**| **解决局部样式、间距排版、组件硬指标修复与槽点根除（意图穿透与转轨红线由 `00-triage-and-routing/` 统一承载）** |
+| **`02-detail-tuning-design/`** | **【局部细节调优主线 (4阶闭环)】**| **解决局部样式、间距排版、组件硬指标修复与槽点根除（意图穿透与转轨红线由 `00-triage-and-routing/` 统一承载）** |
 | ├─ [`细节调优中枢调度指南.md`](02-detail-tuning-design/细节调优中枢调度指南.md) | **调优中枢调度指南** | 定义 4 阶精密闭环作业法（主诉查表 ➔ 连带体检 ➔ 装配防线 ➔ 双重交付）。 |
 | ├─ [`b-tuning-strategy/`](02-detail-tuning-design/b-tuning-strategy/) | **b. 调优策略思考三要素** | 包含 3 篇核心资产：<br>1. [`b.1-设计细节吐槽转译词典.md`](02-detail-tuning-design/b-tuning-strategy/b.1-设计细节吐槽转译词典.md)<br>2. [`b.2-界面体验与可用性.md`](02-detail-tuning-design/b-tuning-strategy/b.2-界面体验与可用性.md)<br>3. [`b.3-避坑指南.md`](02-detail-tuning-design/b-tuning-strategy/b.3-避坑指南.md) |
 | └─ [`c-execute-tuning/`](02-detail-tuning-design/c-execute-tuning/) | **c. 局部调优补丁执行** | [`c-局部调优补丁执行模板.md`](02-detail-tuning-design/c-execute-tuning/c-局部调优补丁执行模板.md) (生成针对局部模块的精准补丁 Prompt 与通俗设计说明)。 |

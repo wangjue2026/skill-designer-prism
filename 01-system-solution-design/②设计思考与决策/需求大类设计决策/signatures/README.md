@@ -1,4 +1,4 @@
-# 标杆案例库特征物签名契约说明 (Feature Signature Manifests)
+# 需求大类设计决策特征物签名契约说明 (Feature Signature Manifests)
 
 ## 📌 架构定位与解耦原则
 本目录存放 7 大需求类型（`Type-01` ~ `Type-07`）中，沉淀的高保真标杆设计经验（`EP-xx`）所对应的**可机器校验物理特征指纹（Physical Feature Signatures）**。

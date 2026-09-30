@@ -154,7 +154,7 @@ fi
 # ---------- 9. 标杆经验特征物保真度（数据驱动动态契约比对）----------
 head_ "9/9 标杆经验特征物保真度（动态特征指纹契约比对）"
 DOC_TYPE=$(grep -oE 'Type-0[1-7]' "$SPEC" | head -1 || true)
-SIG_DIR="$ROOT/01-system-solution-design/②设计点思考/标杆案例库/signatures"
+SIG_DIR="$ROOT/01-system-solution-design/②设计思考与决策/需求大类设计决策/signatures"
 SIG_FILE="$SIG_DIR/${DOC_TYPE}.json"
 
 if [ -z "$DOC_TYPE" ]; then

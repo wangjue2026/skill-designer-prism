@@ -34,7 +34,7 @@ stateDiagram-v2
 
 ---
 
-## 2. 设计细节调优主线的人机协作状态机 (Detail Tuning State Machine)
+## 2. 局部细节调优主线的人机协作状态机 (Detail Tuning State Machine)
 
 ```mermaid
 stateDiagram-v2
