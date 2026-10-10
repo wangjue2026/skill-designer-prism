@@ -314,6 +314,50 @@ async function cmdOpen(keyword) {
   console.log(`✅ 已置前：${target.title} | ${target.url}`);
 }
 
+async function cmdForceHover(keyword, selector, expr) {
+  if (!keyword || !selector) throw new Error("用法：fhover <关键字> <CSS选择器> [读取表达式]");
+  const target = await resolveOne(keyword);
+  const out = await withTarget(target, async (send) => {
+    const { result } = await send("Runtime.evaluate", {
+      expression: `(function(){var e=document.querySelector(${JSON.stringify(selector)});if(!e)return false;var td=e.closest('td'),tr=e.closest('tr'),li=e.closest('li');var ns=[e,li,td,tr].filter(function(x,i,a){return x&&a.indexOf(x)===i});ns.forEach(function(n){['mouseover','mouseenter','mousemove'].forEach(function(t){n.dispatchEvent(new MouseEvent(t,{bubbles:true,cancelable:true,view:window}));});});return true;})()`,
+      returnByValue: true,
+    });
+    if (!result.value) throw new Error(`未找到选择器：${selector}`);
+    await sleep(600);
+    if (!expr) return null;
+    const r2 = await send("Runtime.evaluate", { expression: expr, returnByValue: true });
+    return r2.result.value;
+  });
+  console.log(`✅ 已悬停触发（派发到 控件 + li/td/tr 祖先）→ ${selector}`);
+  if (out !== null && out !== undefined) console.log(typeof out === "string" ? out : JSON.stringify(out, null, 1));
+}
+
+async function cmdClickSel(keyword, selector) {
+  if (!keyword || !selector) throw new Error("用法：clickel <关键字> <CSS选择器>");
+  const target = await resolveOne(keyword);
+  await withTarget(target, async (send) => {
+    const { result } = await send("Runtime.evaluate", {
+      expression: `(function(){var e=document.querySelector(${JSON.stringify(selector)});if(!e)return false;e.click();return true;})()`,
+      returnByValue: true,
+    });
+    if (!result.value) throw new Error(`未找到选择器：${selector}`);
+  });
+  console.log(`✅ 已点击 → ${selector}`);
+}
+
+async function cmdSetValue(keyword, selector, value) {
+  if (!keyword || !selector) throw new Error("用法：setvalue <关键字> <CSS选择器> <值>");
+  const target = await resolveOne(keyword);
+  await withTarget(target, async (send) => {
+    const { result } = await send("Runtime.evaluate", {
+      expression: `(function(){var e=document.querySelector(${JSON.stringify(selector)});if(!e)return false;try{e.focus();}catch(_){}var d=Object.getOwnPropertyDescriptor(e.__proto__,'value')||Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');if(d&&d.set){d.set.call(e,${JSON.stringify(value)});}else{e.value=${JSON.stringify(value)};}e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));e.blur();return true;})()`,
+      returnByValue: true,
+    });
+    if (!result.value) throw new Error(`未找到选择器：${selector}`);
+  });
+  console.log(`✅ 已设值并失焦 → ${selector}`);
+}
+
 async function main() {
   const [cmd, ...args] = process.argv.slice(2);
   switch (cmd) {
@@ -346,6 +390,15 @@ async function main() {
       break;
     case "mouse":
       await cmdMouse(args[0], args[1], args[2], args[3]);
+      break;
+    case "fhover":
+      await cmdForceHover(args[0], args[1]);
+      break;
+    case "clickel":
+      await cmdClickSel(args[0], args[1]);
+      break;
+    case "setvalue":
+      await cmdSetValue(args[0], args[1], args[2]);
       break;
     default:
       console.log(
