@@ -4,13 +4,16 @@
 #
 # 用法: bash tools/design-spec-selfcheck.sh <design-spec-xxx.html>
 #
-# 目的: 用机器兜住三类"老毛病"，不让它们再靠人工逐轮发现——
+# 目的: 用机器兜住四类"老毛病"，不让它们再靠人工逐轮发现——
 #   ① 内容完整性    : 五章齐备 / 页面小节存在 / 每条 EP 都有页面落点（防空头引用）
 #   ② 资产引用正确性: 组件名必须在 idux-component-map.md 登记（否则须显式声明）
 #                     模板 ID 必须在 01-page-types.md 存在（否则须显式声明）
 #                     引用的 .md 文件必须可解析
 #   ③ 样式合规性    : 所有色值必须命中 03-design-assets/ 全量色板；
 #                     严禁出现红色/危险型按钮（设计资产无此按钮类型）
+#   ④ 线框规范符合度: 弹窗/抽屉页脚主按钮在左；操作按钮不带前置图标；
+#                     表单 Label 非必填项须留星号占位；弹窗/抽屉宽度须命中允许档位；
+#                     页面模板与线框容器原语一致（drawer ↔ modal 不得跨用）；UI 文案不泄漏 EP 编号
 #
 # 退出码: 0 = 全部通过（可进入共识确认闸门）；1 = 存在未通过项（必须先修）
 # ============================================================
@@ -40,14 +43,14 @@ echo " 目标文件: $SPEC"
 echo "============================================================"
 
 # ---------- 1. 结构完整性 ----------
-head_ "1/9 结构完整性（五章 + 分页面小节）"
+head_ "1/10 结构完整性（五章 + 分页面小节）"
 H2=$(grep -c '<h2' "$SPEC" || true)
 H3P=$(grep -oE '<h3[^>]*>\s*4\.[0-9]' "$SPEC" | wc -l | tr -d ' ')
-if [ "$H2" -eq 5 ]; then echo "  ✅ 五章齐备 (h2 = $H2)"; else echo "  ❌ 章节数异常: h2 = $H2（应为 5）"; is_bad; fi
+if [ "$H2" -eq 5 ]; then echo "  ✅ 五章齐备 (h2 = $H2)"; else echo "  ❌ 章节数异常: h2 = ${H2}（应为 5）"; is_bad; fi
 if [ "$H3P" -ge 1 ]; then echo "  ✅ 分页面小节 $H3P 个"; else echo "  ❌ 未找到分页面小节 (h3 4.x)"; is_bad; fi
 
 # ---------- 2. 组件真实性（两轨制）----------
-head_ "2/9 组件真实性（已登记 或 已显式声明来源）"
+head_ "2/10 组件真实性（已登记 或 已显式声明来源）"
 MAPTOK=$(grep -oE 'Ix[A-Za-z]+' "$MAP" | sort -u)
 DECL_RE='未在|未登记|保留蒸馏|查无|无对应|产线|已声明'
 UNDEF=""
@@ -62,7 +65,7 @@ else
 fi
 
 # ---------- 3. 模板真实性 ----------
-head_ "3/9 页面模板真实性（资产库存在 或 已显式声明）"
+head_ "3/10 页面模板真实性（资产库存在 或 已显式声明）"
 REALTPL=$(grep -oE 'page-[a-z]+-[a-z]+' "$PAGES" | sort -u)
 TPL_DECL_RE='无对应模板|套头借|模板库|自定义|产线|已声明'
 BADTPL=""
@@ -77,7 +80,7 @@ else
 fi
 
 # ---------- 4. 色值白名单 ----------
-head_ "4/9 色值合规（必须命中 03-design-assets/ 全量色板）"
+head_ "4/10 色值合规（必须命中 03-design-assets/ 全量色板）"
 WHITE=$(find "$ASSETS" -type f -name '*.md' | while read -r f; do grep -oE '#[0-9A-Fa-f]{6}' "$f"; done | tr 'a-f' 'A-F' | sort -u)
 BADC=""
 # 排除说明性文字行（含违规/禁止/示例/举例/均属/反例等关键词的行是规则描述，非实际使用色值）
@@ -94,7 +97,7 @@ else
 fi
 
 # ---------- 5. 按钮用色铁律 ----------
-head_ "5/9 按钮用色铁律（无红色 / 危险型按钮）"
+head_ "5/10 按钮用色铁律（无红色 / 危险型按钮）"
 # 排除自检规则说明行（含「扫描」「不存在」「严格」「严禁」「铁律」等词的行是规则描述，非实际代码）
 DANGER_BTN=$(grep -nE '危险型' "$SPEC" | grep -vE '(扫描|不存在|严格|严禁|检查|铁律|规则|自检|说明)' || true)
 if [ -z "$DANGER_BTN" ]; then
@@ -110,7 +113,7 @@ else
 fi
 
 # ---------- 6. 引用文件可解析 ----------
-head_ "6/9 引用文件可解析（.md 必须存在）"
+head_ "6/10 引用文件可解析（.md 必须存在）"
 MISSING=""
 for r in $(grep -oE '[a-zA-Z0-9_./-]+\.md' "$SPEC" | sort -u); do
   if [ -f "$ROOT/$r" ] || [ -f "$ASSETS/$r" ] || [ -n "$(find "$ROOT" -name "$(basename "$r")" -not -path '*/node_modules/*' -print -quit 2>/dev/null)" ]; then :; else MISSING="$MISSING $r"; fi
@@ -122,28 +125,35 @@ else
 fi
 
 # ---------- 7. 经验落点（无空头引用）----------
-head_ "7/9 经验落点（每条 EP 必须在"四、核心页面"中有承载）"
+head_ "7/10 经验落点（纵向 EP 与横向 D0x-EPxx 均须在四、核心页面中有承载）"
 FOURTH=$(grep -n '<h2' "$SPEC" | sed -n '4p' | cut -d: -f1)
 if [ -z "$FOURTH" ]; then
   echo "  ⚠️ 未定位到第四章，跳过本项"
 else
   ORPHAN=""
-  # 只统计真实引用的 EP（排除在说明性文字/举例/规则描述行中出现的 EP 编号）
+  # 只统计真实引用的纵向 EP（排除在说明性文字/举例/规则描述行中出现的 EP 编号）
   for ep in $(grep -oE 'EP-[0-9]+' "$SPEC" | sort -u); do
     REAL_REF=$(grep -nE "${ep}([^0-9]|$)" "$SPEC" | grep -vE '(如禁止写|禁止写入|举例|如：EP|EP-xx|说明|规则|禁止在 UI)' || true)
     [ -z "$REAL_REF" ] && continue
     n=$(printf '%s\n' "$REAL_REF" | cut -d: -f1 | awk -v t="$FOURTH" '$1 > t' | wc -l | tr -d ' ')
     [ "$n" -eq 0 ] && ORPHAN="$ORPHAN $ep"
   done
-  if [ -z "$ORPHAN" ]; then
-    echo "  ✅ 全部 EP 均在第四章页面中有落点，无空头引用"
+  # 横向通用决策经验（D0x-EPxx）同样要求有页面落点
+  ORPHANH=""
+  for ep in $(grep -oE 'D[0-9][0-9]-EP[0-9]+' "$SPEC" | sort -u); do
+    n=$(grep -nE "${ep}([^0-9]|$)" "$SPEC" | cut -d: -f1 | awk -v t="$FOURTH" '$1 > t' | wc -l | tr -d ' ')
+    [ "$n" -eq 0 ] && ORPHANH="$ORPHANH $ep"
+  done
+  if [ -z "$ORPHAN" ] && [ -z "$ORPHANH" ]; then
+    echo "  ✅ 全部纵向 EP 与横向 D0x-EPxx 均在第四章页面中有落点，无空头引用"
   else
-    echo "  ❌ 空头引用（经验被引用但无页面承载）:$ORPHAN"; is_bad
+    [ -n "$ORPHAN" ] && { echo "  ❌ 纵向空头引用（经验被引用但无页面承载）:$ORPHAN"; is_bad; }
+    [ -n "$ORPHANH" ] && { echo "  ❌ 横向空头引用（D0x-EPxx 被引用但无页面承载）:$ORPHANH"; is_bad; }
   fi
 fi
 
 # ---------- 8. 表单左右结构铁律 ----------
-head_ "8/9 表单结构合规（遵循 design-form.md 第 14 条左右结构铁律）"
+head_ "8/10 表单结构合规（遵循 design-form.md 第 14 条左右结构铁律）"
 VERTICAL_FORM=$(grep -nE '(<br\s*/?>\s*<input|[:：]\s*(</span>)?\s*<br\s*/?>\s*<input|<label>[^<]*<br\s*/?>\s*<input)' "$SPEC" || true)
 if [ -z "$VERTICAL_FORM" ]; then
   echo "  ✅ 未检出表单上下堆叠反模式（严格遵循左 Label 右 Control 水平左右结构）"
@@ -152,7 +162,7 @@ else
 fi
 
 # ---------- 9. 标杆经验特征物保真度（数据驱动动态契约比对）----------
-head_ "9/9 标杆经验特征物保真度（动态特征指纹契约比对）"
+head_ "9/10 标杆经验特征物保真度（动态特征指纹契约比对）"
 DOC_TYPE=$(grep -oE 'Type-0[1-7]' "$SPEC" | head -1 || true)
 SIG_DIR="$ROOT/01-system-solution-design/②设计思考与决策/需求大类设计决策/signatures"
 SIG_FILE="$SIG_DIR/${DOC_TYPE}.json"
@@ -203,11 +213,112 @@ else
   fi
 fi
 
+# ---------- 10. 线框规范符合度（对接 03-design-assets 组件规范）----------
+head_ "10/10 线框规范符合度（页脚按钮顺序 / 按钮图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号）"
+WF_RESULT=$(node -e '
+  const fs = require("fs");
+  const spec = fs.readFileSync(process.argv[1], "utf-8");
+  const errors = [];
+  const lines = spec.split(/\r?\n/);
+
+  // 收集全部线框按钮（按文档顺序）
+  const btnRe = /<span class="(wf-btn-primary|wf-btn|wf-btn-disabled)"[^>]*>([^<]*)<\/span>/g;
+  const btns = [];
+  let m;
+  while ((m = btnRe.exec(spec)) !== null) {
+    btns.push({ kind: m[1], text: m[2].trim(), idx: m.index });
+  }
+
+  // 10a 弹窗/抽屉页脚按钮顺序：取消/关闭 不得紧邻排在主按钮之前（comp-modal.md / comp-drawer.md：主按钮在左）
+  for (let i = 0; i < btns.length - 1; i++) {
+    const a = btns[i], b = btns[i + 1];
+    if (a.kind === "wf-btn" && /^(取消|关闭)$/.test(a.text) && b.kind === "wf-btn-primary" && (b.idx - a.idx) < 400) {
+      errors.push("【按钮顺序】「" + a.text + "」紧邻排在主按钮之前；页脚须主按钮在左、取消/关闭在右");
+    }
+  }
+
+  // 10b 操作按钮默认不带图标（comp-button.md）：按钮文本不得以图标字符开头（规范允许的刷新 icon 按钮 ⟳ 除外）
+  const iconLead = /^[+＋✚✎✕✖🔍⚙🗑➕]/;
+  for (const b of btns) {
+    if (iconLead.test(b.text)) {
+      errors.push("【按钮图标】按钮「" + b.text + "」带前置图标；按 comp-button.md 默认不带图标（刷新 icon 按钮除外）");
+    }
+  }
+
+  // 10c 表单 Label 星号占位对齐（design-form.md 5.1.3 / 5.3.9）：存在必填项时，非必填 Label 也须预留隐形星号占位
+  const labelRe = /<div class="wf-form-label">([\s\S]*?)<\/div>/g;
+  const labels = [];
+  while ((m = labelRe.exec(spec)) !== null) labels.push(m[1]);
+  const hasRequired = labels.some(l => /class="req"/.test(l));
+  if (hasRequired) {
+    const seen = new Set();
+    for (const l of labels) {
+      if (!/class="req"/.test(l) && !/visibility\s*:\s*hidden/.test(l)) {
+        const name = l.replace(/<[^>]+>/g, "").trim();
+        if (!seen.has(name)) { seen.add(name); errors.push("【表单对齐】Label「" + name + "」未预留星号占位；非必填项须补隐形占位以保证左对齐"); }
+      }
+    }
+  }
+
+  // 10d 弹窗/抽屉宽度档位（comp-modal.md / comp-drawer.md）：宽度须命中允许档位
+  const allowed = new Set([400, 480, 640, 720, 800, 960, 1200]);
+  for (const line of lines) {
+    if (!/(IxModal|IxDrawer|IxProFormModal|IxProFormDrawer)/.test(line)) continue;
+    const wm = line.match(/宽\s*(\d{3,4})\s*px/);
+    if (wm && !allowed.has(parseInt(wm[1], 10))) {
+      errors.push("【容器宽度】弹窗/抽屉宽度 " + wm[1] + "px 不在允许档位（400/480/640/720/800/960/1200）");
+    }
+  }
+
+  // 10e 容器选型一致性：页面声明的模板类型与其线框容器原语必须一致（drawer 类 ↔ wf-drawer；modal 类 ↔ wf-modal）
+  const secRe = /<h3[^>]*>([\s\S]*?)(?=<h3|<h2|<\/body>)/g;
+  const DRAWER = new Set(["page-form-drawer", "page-detail-drawer", "page-list-drawer"]);
+  const MODAL = new Set(["page-form-modal", "page-list-modal"]);
+  while ((m = secRe.exec(spec)) !== null) {
+    const sec = m[1];
+    if (sec.indexOf("wf-container") === -1) continue;
+    const t = sec.match(/page-[a-z]+-[a-z]+/);
+    if (!t) continue;
+    const tpl = t[0];
+    const hasDrawer = sec.indexOf("wf-drawer-body") !== -1;
+    const hasModal = sec.indexOf("wf-modal-body") !== -1;
+    if (DRAWER.has(tpl) && hasModal && !hasDrawer) errors.push("【容器选型】模板 " + tpl + " 是抽屉页，线框却用了弹窗容器（wf-modal-body）");
+    if (MODAL.has(tpl) && hasDrawer && !hasModal) errors.push("【容器选型】模板 " + tpl + " 是弹窗页，线框却用了抽屉容器（wf-drawer-body）");
+  }
+
+  // 10f UI 文案不泄漏经验编号：线框可视区（wf-container 内、wf-annotation 批注之前）不得出现 EP-xx / D0x-EPxx
+  const contRe = /<div class="wf-container">/g;
+  const seenUI = new Set();
+  while ((m = contRe.exec(spec)) !== null) {
+    const tail = spec.slice(m.index);
+    const annRel = tail.search(/<div class="wf-annotation">/);
+    const region = annRel === -1 ? tail : tail.slice(0, annRel);
+    const hits = region.match(/EP-\d+|D\d\d-EP\d+/g) || [];
+    hits.forEach(h => seenUI.add(h));
+  }
+  if (seenUI.size) errors.push("【UI文案】线框可视区出现经验编号 " + [...seenUI].join("、") + "；EP/D0x-EPxx 不得写进线框 UI 文案，只能出现在映射表与批注中");
+
+  if (errors.length > 0) {
+    console.log("FAIL|" + [...new Set(errors)].join("；"));
+  } else {
+    console.log("PASS|线框规范符合度通过（页脚按钮顺序 / 按钮无图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号）");
+  }
+' "$SPEC")
+
+WF_STATUS=$(echo "$WF_RESULT" | cut -d'|' -f1)
+WF_MSG=$(echo "$WF_RESULT" | cut -d'|' -f2-)
+if [ "$WF_STATUS" = "PASS" ]; then
+  echo "  ✅ $WF_MSG"
+else
+  echo "  ❌ $WF_MSG"
+  is_bad
+fi
+
 # ---------- 结论 ----------
 echo
 echo "============================================================"
 if [ "$FAIL" -eq 0 ]; then
-  echo "🎉 自检通过（9/9）：可进入「🚦 人机共识确认闸门」向规划人员汇报。"
+  echo "🎉 自检通过（10/10）：可进入「🚦 人机共识确认闸门」向规划人员汇报。"
   exit 0
 else
   echo "🚫 自检未通过（$FAIL 项）：严禁进入共识确认，必须先修至全绿。"

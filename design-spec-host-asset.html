@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>织雨体验设计方案说明书：主机资产发现与识别 · 资产台账</title>
+  <style>
+    :root {
+      --bg: #F7F9FC; --card: #FFFFFF; --border: #E1E5EB;
+      --text: #2F3540; --text-sub: #6F7785; --text-mute: #A1A7B3;
+      --blue: #1C6EFF; --blue-l: #E8F4FF; --blue-border: #BAE6FD;
+      --warn-t: #FA8C16; --warn-b: #FFFBE6; --warn-bd: #FFE58F;
+      --green-t: #12A679; --green-b: #F6FFED; --green-bd: #B7EB8F;
+      --danger-t: #D9363E; --danger-b: #FFF1F0; --danger-bd: #FFA39E;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: "Inter", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      font-size: 13px; line-height: 1.7;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+    .doc { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 36px; box-shadow: 0 1px 3px rgba(15,23,42,0.04); }
+    h1 { font-size: 22px; line-height: 30px; font-weight: 700; margin: 0 0 16px; color: #1E293B; }
+    h2 { font-size: 16px; line-height: 24px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: #1E293B; }
+    h3 { font-size: 14px; font-weight: 600; margin: 24px 0 10px; color: #2F3540; }
+    h4 { font-size: 13px; font-weight: 600; margin: 16px 0 6px; color: var(--text-sub); }
+
+    .meta { color: var(--text-sub); font-size: 12px; margin-bottom: 24px; line-height: 2; background: #F8FAFC; padding: 12px 16px; border-radius: 4px; border: 1px solid var(--border); }
+    .meta b { color: var(--text); }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 2px; background: var(--warn-b); color: var(--warn-t); border: 1px solid var(--warn-bd); font-size: 11px; font-weight: 500; }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+    th { background: #EDF1F7; color: #454C59; font-weight: 500; text-align: left; height: 32px; padding: 0 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { height: 38px; padding: 6px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .tag { display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px; background: var(--blue-l); color: var(--blue); border: 1px solid var(--blue-border); }
+    .tag-exp { display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px; background: var(--green-b); color: var(--green-t); border: 1px solid var(--green-bd); font-weight: 600; }
+    .deriv { display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px; background: #F1F5F9; color: #454C59; border: 1px dashed #94A3B8; }
+    .flag { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 11px; background: var(--danger-b); color: var(--danger-t); border: 1px solid var(--danger-bd); }
+
+    ul { margin: 8px 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    .note { background: #F8FAFC; border-left: 3px solid var(--blue); padding: 8px 14px; margin: 10px 0; font-size: 12px; color: #454C59; }
+    code { background: #F1F5F9; border: 1px solid var(--border); border-radius: 2px; padding: 0 4px; font-family: "JetBrains Mono", Menlo, monospace; font-size: 11px; color: #454C59; }
+
+    /* ========== 通用线框图视觉基础原语 ========== */
+    .wf-container { background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 16px; margin: 16px 0; }
+    .wf-label { display: inline-block; font-size: 11px; font-weight: 700; color: #454C59; margin-bottom: 6px; }
+    .wf-shell { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; box-shadow: 0 1px 3px rgba(15,23,42,0.05); overflow: hidden; }
+    .wf-header { background: #F1F5F9; border-bottom: 1px solid #E2E8F0; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: #454C59; }
+    .wf-body { padding: 12px; }
+    .wf-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+    .wf-col { flex: 1; }
+    .wf-card { background: #F8FAFC; border: 1px solid #E1E5EB; border-radius: 2px; padding: 8px 10px; font-size: 11px; }
+    .wf-tabs { display: flex; gap: 16px; font-size: 11px; color: #64748B; border-bottom: 1px solid #E2E8F0; padding-bottom: 6px; margin-bottom: 10px; }
+    .wf-tabs .on { color: var(--blue); font-weight: 600; border-bottom: 2px solid var(--blue); padding-bottom: 5px; margin-bottom: -7px; }
+    .wf-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+    .wf-table th { background: #EDF1F7; padding: 6px 8px; border-bottom: 1px solid #E2E8F0; text-align: left; height: auto; color: #454C59; }
+    .wf-table td { padding: 6px 8px; border-bottom: 1px dashed #E2E8F0; color: #64748B; height: auto; }
+    .wf-btn { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 11px; background: #FFFFFF; color: #2F3540; border: 1px solid #D3D7DE; }
+    .wf-btn-primary { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 11px; background: var(--blue); color: #FFFFFF; border: 1px solid var(--blue); }
+    .wf-btn-disabled { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 11px; background: #EDF1F7; color: #BEC3CC; border: 1px solid #E2E8F0; }
+    .wf-input { display: inline-block; height: 32px; line-height: 32px; padding: 0 10px; border: 1px solid #D3D7DE; border-radius: 2px; color: #A1A7B3; background: #FFFFFF; font-size: 11px; }
+    .wf-kpi { flex: 1; background: #F8FAFC; border: 1px solid #E1E5EB; border-radius: 2px; padding: 8px 10px; }
+    .wf-kpi .n { font-size: 18px; font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums; }
+    .wf-status { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 10px; }
+    .wf-st-ok { background: var(--green-b); color: var(--green-t); border: 1px solid var(--green-bd); }
+    .wf-st-off { background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
+    .wf-drawer-overlay { display: flex; background: rgba(15, 23, 42, 0.15); border: 1px dashed #94A3B8; border-radius: 4px; min-height: 300px; position: relative; }
+    .wf-drawer-body { width: 480px; background: #FFFFFF; border-left: 2px solid var(--blue); padding: 16px 32px; margin-left: auto; box-shadow: -4px 0 16px rgba(15,23,42,0.12); display: flex; flex-direction: column; }
+    .wf-modal-overlay { display: flex; justify-content: center; align-items: center; background: rgba(15, 23, 42, 0.25); border: 1px dashed #94A3B8; border-radius: 4px; min-height: 240px; padding: 20px; }
+    .wf-modal-body { width: 480px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 4px; padding: 16px 32px; box-shadow: 0 4px 16px rgba(15,23,42,0.14); }
+    .wf-alert { background: var(--danger-b); border: 1px solid var(--danger-bd); color: var(--danger-t); padding: 8px 10px; border-radius: 2px; font-size: 11px; line-height: 1.6; }
+
+    /* 表单专用线框原语：严格左右结构 */
+    .wf-form-item { display: flex; align-items: flex-start; margin-bottom: 12px; }
+    .wf-form-label { width: 120px; flex-shrink: 0; color: #6F7785; font-size: 11px; line-height: 32px; text-align: left; }
+    .wf-form-control { flex: 1; min-width: 0; color: #64748B; font-size: 11px; }
+    .req { color: #F52727; margin-right: 4px; }
+    .wf-annotation { font-size: 11px; color: #1C6EFF; background: var(--blue-l); padding: 6px 10px; border-radius: 2px; border-left: 3px solid var(--blue); margin-top: 10px; line-height: 1.7; }
+
+    .checkpoint { background: var(--blue-l); border: 1px solid #BAE6FD; border-radius: 4px; padding: 16px 20px; margin-top: 36px; font-size: 12px; color: #1C6EFF; line-height: 1.9; }
+    .checkpoint b { display: block; margin-bottom: 6px; font-size: 13px; color: #1C6EFF; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="doc">
+    <h1>🎨 织雨体验设计方案说明书：主机资产发现与识别 · 资产台账</h1>
+    <div class="meta">
+      <b>方案制定者</b>：设计师织雨 (Virtual Designer Zhiyu)<br/>
+      <b>产品线归属</b>：RGP 风险治理平台 ➔ 统一资产基础 ➔ 主机资产发现与识别 ➔ 资产台账<br/>
+      <b>需求类型定性</b>：Type-01 对象与资产管理类<br/>
+      <b>输入需求依据</b>：DSP 主机资产发现与识别_小需求用户需求说明_评审版（REQ-HOST-001~006、REQ-HOST-008~013）<br/>
+      <b>面向对象</b>：业务规划人员 / 前端工程团队<br/>
+      <b>当前协同状态</b>：<span class="status">⏳ 步骤 4 交付完成 · 待规划人员评审确认 (Pending Human Review)</span>
+    </div>
+
+    <!-- ==================== 一、需求洞察与体验目标 ==================== -->
+    <h2>一、需求洞察与体验目标</h2>
+
+    <h3>1. 目标用户与核心任务 (JTBD)</h3>
+    <ul>
+      <li><b>资产运营人员（主维护角色）</b>
+        <ul>
+          <li><b>使用情境</b>：ESM 扫描结果、被动流量、端侧上报和 Excel/CSV 文件四类来源不断产生资产记录，字段和标识口径各不相同；需要把这些记录收敛成一套可维护、可追溯的服务器与终端资产。</li>
+          <li><b>核心任务</b>：“我要把各来源送上来的资产记录，一次整理成不会重复、不会分错类型的正式资产，并且能像维护现有 WEB 应用资产那样查、改、导出和对账。”</li>
+        </ul>
+      </li>
+      <li><b>安全运营人员（消费角色）</b>
+        <ul>
+          <li><b>使用情境</b>：不直接维护资产字段，但要把统一资产对象引用到后续安全运营中。</li>
+          <li><b>核心任务</b>：“我需要一套口径稳定、标识唯一的资产清单，让我直接引用而不用再核对。”</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>2. 主场景清单与现状痛点</h3>
+    <table>
+      <thead>
+        <tr><th style="width:7%;">场景</th><th style="width:17%;">主场景名称</th><th style="width:16%;">触发情境</th><th style="width:12%;">主要角色</th><th style="width:48%;">现状卡点 (Pain Points)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>S1</b></td>
+          <td>收集资产输入</td>
+          <td>任务中心既有扫描任务产出 ESM 结果，或被动流量、端侧系统、文件产生资产记录</td>
+          <td>资产运营人员</td>
+          <td><b>P1 来源分散、口径不一</b> <span class="flag">🚩S1-P1</span>：多来源记录缺少统一入口与结果口径，需重复整理仍难得到完整的服务器与终端范围（REQ-HOST-001~003）。</td>
+        </tr>
+        <tr>
+          <td><b>S2</b></td>
+          <td>形成连续资产身份</td>
+          <td>同一设备出现 IP 变化、多网卡或后补 Agent 标识</td>
+          <td>资产运营人员</td>
+          <td><b>P2 身份易重复 / 错归</b> <span class="flag">🚩S2-P2</span>：人工比对 Agent、IP、历史 IP 与来源字段，容易产生重复资产或错误合并（REQ-HOST-004/005）。</td>
+        </tr>
+        <tr>
+          <td><b>S3</b></td>
+          <td>确定资产大类</td>
+          <td>不同来源对设备类型描述不一致</td>
+          <td>资产运营人员</td>
+          <td><b>P3 分型边界不清</b> <span class="flag">🚩S3-P3</span>：服务器、终端与网络设备口径不同，未知记录可能被错误入池（REQ-HOST-006）。</td>
+        </tr>
+        <tr>
+          <td><b>S4</b></td>
+          <td>查看、维护并盘点</td>
+          <td>资产入池后查询字段、执行增删改与批量处理、导入导出、看数量统计</td>
+          <td>资产运营人员 / 安全运营人员</td>
+          <td><b>P4 字段不完整、口径不一致</b> <span class="flag">🚩S4-P4</span>：可查看字段不完整，或与 WEB 应用资产使用不同运维与统计定义，增加核对成本（REQ-HOST-008~013）。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 核心体验改进目标</h3>
+    <ul>
+      <li>1. <b>多源整理：四类来源分散整理（不同入口、不同口径） ➔ 统一入池、一次识别</b>；可观察判据：任一首期来源结果到达或文件导入完成后即形成服务器或终端资产，通用字段完整率 ≥ 95%。</li>
+      <li>2. <b>身份连续性：人工比对（易重复、易错归） ➔ 规则化归并、连续可追溯</b>；可观察判据：同一 Agent 标识的资产 IP 变化后，平台仍引用同一内部资产标识，并更新当前 IP、保留历史 IP。</li>
+      <li>3. <b>台账查看与维护：字段缺失、口径不一 ➔ 完整字段 + 与 WEB 应用资产同口径的就地查看与维护</b>；可观察判据：服务器/终端可获取全部通用字段与专属字段，通用字段可查询、可筛选；10 万级资产可查询、可查看。</li>
+    </ul>
+    <div class="note">
+      🚫 <b>本期不承诺（Non-Goals）</b>：识别与入库失败的状态机、重试与幂等（OPEN-TR1-008，系统需求阶段关闭）；风险数量 / 风险摘要 / 风险跳转；第三方资产平台与 CMDB 自动同步；影子资产、主机漏洞、主动渗透与风险处置；国际化与 NFV（OPEN-NFR-006/007）。以上不派生为前台能力。
+    </div>
+
+    <!-- ==================== 二、设计思考、设计决策经验匹配与采纳 ==================== -->
+    <h2>二、设计思考、设计决策经验匹配与采纳</h2>
+
+    <h3>1. 需求类型分析 (四子弹定局)</h3>
+    <ul>
+      <li><b>需求类型定性</b>：<b>Type-01 对象与资产管理类</b>。判据：主键是实体（服务器 / 终端资产），对象长期存在并带台账属性（权属、归属、状态），需按类型批量维护，且有生命周期（发现 ➔ 变更 ➔ 退库）。</li>
+      <li><b>业务属性与严肃度</b>：企业统一资产治理，<b>中等严肃度 (Standard Enterprise)</b>。资产是下游安全运营的引用基础，字段与口径要求稳定准确，但单条操作多为可逆的常规维护，不需要极重确认。</li>
+      <li><b>色彩基调</b>：现代扁平 / 高效规整。超浅底 <code>#F7F9FC</code> 划分区域、卡片白底、去框线化、线条 1px；状态一律“浅底 + 深字 + 浅边框”三元组；全系统只有品牌蓝主按钮，<b>不使用红色实心按钮</b>（破坏性靠二次确认防呆）。</li>
+      <li><b>页面职责分工</b>：<b>台账页只管“查 / 筛 / 看 / 维护 / 盘点”</b>；资产识别与入库是后台统一链路，本期不新增前台识别页。</li>
+      <li><b>经验来源判定（关键）</b>：<b>纵向 Type-01 分册当前未蒸馏</b>（无经核实的标杆案例），按调度规则“<b>命中类型但分册未覆盖 → 该设计问题走横向</b>”，因此本次<b>全量走横向通用设计决策库</b>，执行《横向库承接与场景拆解桥协议》：把业务场景拆成设计问题 + 分析维度取值，去 D-01~D-10 母尺读数。</li>
+    </ul>
+
+    <h3>2. 业务场景 → 设计决策经验匹配与设计发力点 (单表穿透)</h3>
+    <div class="note">
+      💡 <b>推导逻辑</b>：从第一章拆出的业务场景出发，把场景拆成设计问题、用分析维度取值去 D-01~D-10 读数；命中即采纳（<code>D0x-EPxx</code>），未命中则转业务独立推导。本表经验只带编号（外键），机制 / 锚点见第 3 节。<br/>
+      🎯 <b>三个方向级设计发力点</b>：<b>L1 让四类来源“一口入池、口径唯一”</b>；<b>L2 让资产身份“可识别、可追溯、不重不漏”</b>；<b>L3 让台账“一眼可查、字段齐全、与 WEB 同口径地就地维护与盘点”</b>。
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:9%;">业务场景</th>
+          <th style="width:20%;">命中的设计决策经验</th>
+          <th style="width:12%;">核心设计发力点</th>
+          <th style="width:13%;">用户痛点</th>
+          <th style="width:24%;">系统设计解法</th>
+          <th style="width:22%;">自行设计补充</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>S1<br/><span style="color:var(--text-sub);font-size:11px;">收集资产输入</span></td>
+          <td><span class="tag-exp">D10-EP03</span><br/><span class="tag-exp">D10-EP01</span><br/><span class="tag-exp">D07-EP01</span></td>
+          <td><b>L1 统一入池<br/>口径唯一</b></td>
+          <td>来源分散、字段与标识口径不一</td>
+          <td>文件导入走顶部「导入 / 导出 ▾」下拉 → 居中弹窗（下载模板 / 上传文件 / 冲突规则“跳过 · 替换”）；ESM、被动流量、端侧上报由后台同一识别链路接收，保留来源系统与来源资产 ID。</td>
+          <td><span class="deriv">业务独立推导</span> 识别与入库失败的状态机、重试与幂等由 OPEN-TR1-008 在系统需求阶段冻结，<b>本期不建前台异常页</b>，仅保留来源可追溯字段。</td>
+        </tr>
+        <tr>
+          <td>S2<br/><span style="color:var(--text-sub);font-size:11px;">连续身份</span></td>
+          <td><span class="tag-exp">D02-EP03</span><br/><span class="tag-exp">D02-EP05</span><br/><span class="tag-exp">D03-EP05</span></td>
+          <td><b>L2 身份连续<br/>可追溯</b></td>
+          <td>人工比对易重复 / 错归</td>
+          <td>详情抽屉内以「来源追溯」Tab + 键值子表并列展示各来源观察、当前有效值与命中依据；Agent ID、最近/当前 IP、历史/常用 IP 分字段展示，长值截断悬浮。</td>
+          <td><span class="deriv">业务独立推导</span> “人工值优先级最高、非人工来源优先级为 OPEN-TR1-002”只在字段值上体现，本方案不新增多主源裁决界面。</td>
+        </tr>
+        <tr>
+          <td>S3<br/><span style="color:var(--text-sub);font-size:11px;">资产分型</span></td>
+          <td><span class="tag-exp">D01-EP03</span><br/><span class="tag-exp">D04-EP04</span><br/><span class="tag-exp">D02-EP01</span></td>
+          <td><b>L2 身份连续<br/>可追溯</b></td>
+          <td>分型边界不清、易误归类</td>
+          <td>台账以顶部 Tab 切服务器 / 终端两类子集；类型用浅底深字标签表达；服务器与终端专属字段按类型受控展示，类型字段允许为空但不得跨类型误填。</td>
+          <td><span class="deriv">业务独立推导</span> 网络设备归入服务器、应用与数据库不成为独立大类的分型规则来自需求，不由界面推导。</td>
+        </tr>
+        <tr>
+          <td>S4<br/><span style="color:var(--text-sub);font-size:11px;">查看维护盘点</span></td>
+          <td><span class="tag-exp">D02-EP01</span><br/><span class="tag-exp">D02-EP02</span><br/><span class="tag-exp">D03-EP01</span><br/><span class="tag-exp">D03-EP02</span><br/><span class="tag-exp">D03-EP06</span><br/><span class="tag-exp">D03-EP07</span><br/><span class="tag-exp">D04-EP01</span><br/><span class="tag-exp">D04-EP02</span><br/><span class="tag-exp">D05-EP01</span><br/><span class="tag-exp">D05-EP04</span><br/><span class="tag-exp">D06-EP01</span><br/><span class="tag-exp">D06-EP02</span><br/><span class="tag-exp">D07-EP04</span><br/><span class="tag-exp">D08-EP01</span><br/><span class="tag-exp">D08-EP04</span><br/><span class="tag-exp">D09-EP01</span><br/><span class="tag-exp">D09-EP02</span><br/><span class="tag-exp">D09-EP03</span><br/><span class="tag-exp">D09-EP07</span><br/><span class="tag-exp">D10-EP02</span><br/><span class="tag-exp">D10-EP04</span><br/><span class="tag-exp">D10-EP05</span></td>
+          <td><b>L3 台账就地<br/>查看维护闭环</b></td>
+          <td>字段不完整、与 WEB 口径不一致</td>
+          <td>常规表格 + 顶部 Tab + 顶部四类统计卡；<code>IxProSearch</code> 复合检索；行内操作列 + 顶部批量栏；新增 / 编辑 / 查看用抽屉；删除走阻断确认弹窗。</td>
+          <td><span class="deriv">业务独立推导</span> 服务器 / 终端专属字段清单（组件清单、开放端口、MAC 等）与四类统计定义直接复用目标版本 WEB 应用资产口径，属本需求给定字段，不由界面发明。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 设计决策经验采纳明细 (横向统一登记)</h3>
+    <div class="note">
+      统一登记本方案采纳的全部<b>横向通用决策经验</b> <code>D0x-EPxx</code>（纵向 Type-01 未蒸馏，故无 <code>EP-xx</code>）。本表承载机制 / 命中点 / 采纳结论 / 锚点，与第 2 节按编号互查。<br/>
+      📌 <b>产线血统说明</b>：本次为自研 RGP 主机资产模块，证据层无同名产线样本，故各条按【统一基线 / 推荐体验】采纳；因业务同为服务器 / 终端主机资产台账，线框取料优先参考 D 域证据层中 <code>XDR · 资产管理</code>（主机资产台账）的结构骨架。
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:11%;">经验编号</th>
+          <th style="width:15%;">归属</th>
+          <th style="width:26%;">经验名称与机制示意</th>
+          <th style="width:16%;">命中点</th>
+          <th style="width:20%;">采纳结论</th>
+          <th style="width:12%;">证据锚点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="tag-exp">D02-EP01</span></td><td>D-02 信息承载与容器选型（横）</td><td><b>台账壳选型</b>：管理维护且有 ≥2 套可切换分类维度 → 左树 + 表格；分类维度唯一 / 无可再分 → 常规表格</td><td>设计问题：资产台账用哪个壳装？</td><td>常规表格 + 顶部 Tab（服务器 / 终端），不做左树（本需求未给出可切换分类维度）</td><td><code>XDR · 风险主机分析 ▸ D-02 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D02-EP02</span></td><td>D-02 信息承载与容器选型（横）</td><td><b>新增 / 编辑容器分档</b>：字段 ≤5 且 ≤560px → 弹窗；字段多或内容 >560px（≤1.5 屏）→ 抽屉</td><td>设计问题：资产新增 / 编辑用哪种壳？</td><td>800px 右侧抽屉（字段多、内容超一屏），提交后自动关闭并刷新列表</td><td><code>SASE · 互联网应用管控 ▸ D-02 ②</code></td></tr>
+        <tr><td><span class="tag-exp">D02-EP03</span></td><td>D-02 信息承载与容器选型（横）</td><td><b>查看同容器 + 详情默认右侧抽屉</b>：查看首选与新增 / 编辑同容器；详情抽屉 800px 起步</td><td>设计问题：资产详情用哪种壳？</td><td>800px 右侧详情抽屉，看完即关，保留列表筛选与游标</td><td><code>XDR · 安全告警分析 ▸ D-02 ③</code></td></tr>
+        <tr><td><span class="tag-exp">D02-EP05</span></td><td>D-02 信息承载与容器选型（横）</td><td><b>从属明细容器</b>：多组并列从属明细 → 页内 Tab + 内嵌子表</td><td>设计问题：来源追溯 / 多组明细怎么承载？</td><td>详情内页内 Tab + 键值子表，不跳页</td><td><code>XDR · 安全事件处理 ▸ D-02 ⑤</code></td></tr>
+        <tr><td><span class="tag-exp">D01-EP03</span></td><td>D-01 信息架构（横）</td><td><b>模块内次级结构</b>：并列子集优先顶部 Tab</td><td>设计问题：服务器 / 终端子集怎么切？</td><td>台账顶部 Tab 切「服务器资产 / 终端资产」</td><td><code>XDR · 资产管理 ▸ D-01 ③</code></td></tr>
+        <tr><td><span class="tag-exp">D03-EP01</span></td><td>D-03 信息密度与可读性（横）</td><td><b>列表切分</b>：台账 / 检索一律分页（共 N 项 + 页码 + 每页条数）</td><td>设计问题：10 万级列表怎么切分？</td><td><code>IxPagination</code>，默认每页 20；超出引擎上限时给“仅展示前 N 条”护栏文案</td><td><code>XDR · 日志检索 ▸ D-03 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D03-EP02</span></td><td>D-03 信息密度与可读性（横）</td><td><b>冻结列</b>：列超视口 → 横向滚动 + 冻结首末列</td><td>设计问题：字段多时冻结哪几列？</td><td>冻结左侧勾选 / 资产名称列 + 末尾操作列，中间业务列横向滚动</td><td><code>SASE · 用户管理 ▸ D-03 ②</code></td></tr>
+        <tr><td><span class="tag-exp">D03-EP05</span></td><td>D-03 信息密度与可读性（横）</td><td><b>长文本 / 多值</b>：超长截断 + 悬浮；多条复杂数据 → 计数下钻</td><td>设计问题：长文本 / 多值单元格怎么展示？</td><td>截断 + <code>IxTooltip</code> 展示全量；IP 集合等长值同规则，行高固定</td><td><code>SASE · 应用管理 ▸ D-03 ⑤</code></td></tr>
+        <tr><td><span class="tag-exp">D03-EP06</span></td><td>D-03 信息密度与可读性（横）</td><td><b>列设置</b>：列数 ≥6 提供“布局设置”（显隐 / 顺序 / 固定）</td><td>设计问题：字段太多怎么个性化？</td><td>表头右端「⋯」列设置入口</td><td><code>XDR · 智能对抗 ▸ D-03 ⑥</code></td></tr>
+        <tr><td><span class="tag-exp">D03-EP07</span></td><td>D-03 信息密度与可读性（横）</td><td><b>密度档位</b>：默认行高 40px，双行 56~64px，单元格不超过 3 行</td><td>设计问题：表格密度档位？</td><td>默认 40px 单行；单元格内不堆叠多行</td><td><code>SASE · 用户管理 ▸ D-03 ⑦</code></td></tr>
+        <tr><td><span class="tag-exp">D04-EP01</span></td><td>D-04 状态与反馈表达（横）</td><td><b>首屏加载</b>：一律加载态 spinner，不用骨架屏</td><td>设计问题：首屏加载用什么？</td><td><code>IxSpin</code>；数据较慢的重页带文案（“数据加载中，请等待…”）</td><td><code>XDR · 资产体检 ▸ D-04 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D04-EP02</span></td><td>D-04 状态与反馈表达（横）</td><td><b>空态</b>：普通台账 → 纯文案“暂无数据”；带筛选的分析列表 → 引导式</td><td>设计问题：台账空态怎么表达？</td><td><code>IxEmpty</code> 保留工具栏；筛选无结果时给“修改筛选条件”引导</td><td><code>aES · 客户端列表 ▸ D-04 ②</code></td></tr>
+        <tr><td><span class="tag-exp">D04-EP04</span></td><td>D-04 状态与反馈表达（横）</td><td><b>状态表达</b>：浅底深字状态标签，语义色固定；≤2 档双色、3~5 档逐档、纯计数走指标条</td><td>设计问题：资产状态 / 类型怎么表达？</td><td><code>IxTag</code> 浅底深字三元组（在库 / 失活），类型同规则</td><td><code>XDR · 检测任务 ▸ D-04 ⑪</code></td></tr>
+        <tr><td><span class="tag-exp">D05-EP01</span></td><td>D-05 操作确认与防错（横）</td><td><b>破坏性二次确认</b>：一律二次确认；高影响面 / 跨模块级联 → 阻断弹窗 + 影响面清单 + 回显对象名</td><td>设计问题：删除要不要拦、拦到什么程度？</td><td><code>IxModal</code> 阻断确认，回显资产名称，列出将受影响的来源映射与操作记录</td><td><code>XDR · 资产管理 ▸ D-05 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D05-EP04</span></td><td>D-05 操作确认与防错（横）</td><td><b>确认按钮用色</b>：破坏性确认主按钮用品牌蓝，不用红色</td><td>设计问题：确认按钮用什么色？</td><td>主按钮 <code>#1C6EFF</code>，全系统无红色实心按钮</td><td><code>XDR · 运营规则 ▸ D-05 ⑧</code></td></tr>
+        <tr><td><span class="tag-exp">D06-EP01</span></td><td>D-06 层级与动线（横）</td><td><b>URL 直达</b>：模块 / Tab / 选中对象入 URL，可直达可分享</td><td>设计问题：台账与详情能否直达 / 分享？</td><td>页面 / Tab / 资产 id 入 URL 路由</td><td><code>XDR · 日志检索 ▸ D-06 ⑥</code></td></tr>
+        <tr><td><span class="tag-exp">D06-EP02</span></td><td>D-06 层级与动线（横）</td><td><b>层级承载</b>：需保留列表上下文的就地查看用抽屉；层叠 ≤2 层</td><td>设计问题：详情层级怎么叠？</td><td>列表 → 详情抽屉（单层），抽屉内不再套抽屉</td><td><code>XDR · 脆弱性 ▸ D-06 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D07-EP01</span></td><td>D-07 对象录入与选择（横）</td><td><b>字段控件分派</b>：层级 → 树选择；多值平铺 → 多选下拉；枚举少 → 单选组；批量文本 → 多行文本域</td><td>设计问题：新增 / 编辑字段用什么控件？</td><td>按字段语义分派：来源系统 = 下拉、责任人 = 多选下拉、资产重要性 = 单选组、网络区域 = 下拉</td><td><code>XDR · 资产管理·新增 ▸ D-07 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D07-EP04</span></td><td>D-07 对象录入与选择（横）</td><td><b>多值字段</b>：逐行文本域（一行一条、可批量粘贴）</td><td>设计问题：多 IP / 网段怎么录？</td><td><code>IxProTextarea</code> 逐行录入 IP 与网段，支持引用对象组</td><td><code>XDR · 资产管理 ▸ D-07 ⑦</code></td></tr>
+        <tr><td><span class="tag-exp">D08-EP01</span></td><td>D-08 概览与驾驶舱可视化（横）</td><td><b>概览承载</b>：指标 ≤4 且语义 = 当前结果集 → 列表顶部统计卡（推荐配「隐藏概览」开关）</td><td>设计问题：四类数量统计放哪？</td><td>台账顶部 4 张统计卡（资产总数 / 失活 / 复活 / 近七天新增）+ 隐藏概览开关</td><td><code>XDR · 脆弱性 ▸ D-08 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D08-EP04</span></td><td>D-08 概览与驾驶舱可视化（横）</td><td><b>指标卡构成</b>：按“有无目标 / 构成”分档：单值 / 单值 + 进度 / 单值 + 环形 / 单值 + 分档小字</td><td>设计问题：统计卡带不带基准？</td><td>资产总数 = 单值；失活 / 复活 / 新增 = 单值 + 占比小字</td><td><code>aES · 首页概览 ▸ D-08 ⑫</code></td></tr>
+        <tr><td><span class="tag-exp">D09-EP01</span></td><td>D-09 检索与筛选（横）</td><td><b>检索入口</b>：一律常驻列表页内，不另开独立检索页</td><td>设计问题：资产检索入口放哪？</td><td>常驻台账顶部工具栏</td><td><code>XDR · 安全事件处理 ▸ D-09 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D09-EP02</span></td><td>D-09 检索与筛选（横）</td><td><b>多条件壳</b>：条件 &gt;4 或一行放不下 → <code>IxProSearch</code> 复合搜索框（条件以 Tag 内嵌）</td><td>设计问题：多条件筛选用什么壳？</td><td>通用字段可筛项 &gt;4 → <code>IxProSearch</code></td><td><code>aES · 客户端列表 ▸ D-09 ②</code></td></tr>
+        <tr><td><span class="tag-exp">D09-EP03</span></td><td>D-09 检索与筛选（横）</td><td><b>触发时机</b>：关键字 / 检索式一律显式提交（回车 / 点搜索），不做输入即时筛选</td><td>设计问题：筛选何时触发？</td><td>回车或点搜索触发；行内多选点“确定”后生效</td><td><code>SASE · 日志中心 ▸ D-09 ③</code></td></tr>
+        <tr><td><span class="tag-exp">D09-EP07</span></td><td>D-09 检索与筛选（横）</td><td><b>条件回显与清空</b>：已生效条件回显 + 一键清空</td><td>设计问题：筛选条件怎么回显与清空？</td><td><code>IxProSearch</code> 有值时 hover 显示一键清除 ×，并提供重置</td><td><code>aES · 安全事件 ▸ D-09 ⑦</code></td></tr>
+        <tr><td><span class="tag-exp">D10-EP01</span></td><td>D-10 操作入口与批量（横）</td><td><b>操作入口</b>：新增类主操作挂顶部工具栏；单行操作挂行内操作列（链接 ≤3）</td><td>设计问题：资产操作入口挂哪？</td><td>顶部「新增资产」主按钮；行内「详情 / 编辑 / 删除」链接</td><td><code>XDR · 资产管理 ▸ D-10 ①</code></td></tr>
+        <tr><td><span class="tag-exp">D10-EP02</span></td><td>D-10 操作入口与批量（横）</td><td><b>批量组织</b>：行内勾选 + 顶部批量栏；未勾选整组置灰（保留可见）</td><td>设计问题：批量操作怎么组织？</td><td>勾选列 + 顶部批量栏（批量编辑 / 删除 / 导出），未选整组置灰</td><td><code>XDR · 资产管理 ▸ D-10 ②</code></td></tr>
+        <tr><td><span class="tag-exp">D10-EP03</span></td><td>D-10 操作入口与批量（横）</td><td><b>导入 / 导出壳</b>：需分场景 / 需规则或字段选择 → 顶部「导入 / 导出 ▾」下拉 → 居中弹窗</td><td>设计问题：导入导出用什么壳？</td><td>下拉 → 居中弹窗（导入：下载模板 + 上传 + 冲突规则；导出：分组字段复选）</td><td><code>XDR · 资产管理 ▸ D-10 ③</code></td></tr>
+        <tr><td><span class="tag-exp">D10-EP04</span></td><td>D-10 操作入口与批量（横）</td><td><b>批量改同值</b>：收进批量栏动作按钮 / 下拉，不用表格内联批量编辑；多属性用属性级复选</td><td>设计问题：批量改字段怎么做？</td><td>「批量编辑」面板，属性级复选（勾选项才修改）；枚举字段用下拉选值</td><td><code>SASE · 用户管理 ▸ D-10 ⑤</code></td></tr>
+        <tr><td><span class="tag-exp">D10-EP05</span></td><td>D-10 操作入口与批量（横）</td><td><b>全选范围</b>：表头全选默认仅作用当前页</td><td>设计问题：全选作用于哪？</td><td>表头全选仅当前页；跨页批量先用筛选缩小范围</td><td><code>XDR · 资产管理 ▸ D-10 ⑥</code></td></tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== 三、最终解决方案全景与页面架构拓扑 ==================== -->
+    <h2>三、最终解决方案全景与页面架构拓扑</h2>
+
+    <h3>解决方案页面清单与职责划分</h3>
+    <table>
+      <thead>
+        <tr><th style="width:9%;">页面编号</th><th style="width:22%;">页面 / 视图名称</th><th style="width:12%;">交互形态</th><th style="width:16%;">页面模板</th><th style="width:41%;">核心职责</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Page-01</b></td><td>主机资产台账（服务器 / 终端）</td><td>主页面</td><td><code>page-table-overview</code></td><td>查询筛选、字段查看入口、基础运维（新增 / 编辑 / 批量 / 删除 / 导入导出）、四类数量盘点，是本办法的主承载页。</td></tr>
+        <tr><td><b>Page-02</b></td><td>资产详情抽屉（含来源追溯 / 操作记录）</td><td>右侧抽屉</td><td><code>page-detail-drawer</code></td><td>查看单条资产的通用字段与类型专属字段，追溯各来源观察与命中依据，查看操作审计记录，就地闭环不跳页。</td></tr>
+        <tr><td><b>Page-03</b></td><td>新增 / 编辑资产抽屉</td><td>右侧抽屉</td><td><code>page-form-drawer</code></td><td>临时新增资产与编辑现有资产字段，人工值优先级最高，保存后自动关闭并刷新台账。</td></tr>
+        <tr><td><b>Page-04</b></td><td>删除二次确认弹窗</td><td>居中弹窗</td><td><code>page-form-modal</code></td><td>单条 / 批量删除的阻断确认，回显资产名称与影响面清单，防止误删。</td></tr>
+        <tr><td><b>Page-05</b></td><td>导入 / 导出弹窗</td><td>居中弹窗</td><td><code>page-form-modal</code></td><td>Excel/CSV 导入（模板 + 上传 + 冲突规则）与导出字段选择，承载文件类操作。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      🧾 <b>页面集合推导依据（覆盖率自检）</b>：由「业务对象 × 动作」覆盖度反推得出——<br/>
+      · 对象＝服务器资产 / 终端资产 / 导入文件；<br/>
+      · 动作：<b>查 / 筛</b> ➔ Page-01；<b>看字段</b> ➔ Page-02；<b>增（临时）</b> ➔ Page-03；<b>改（编辑 / 批量编辑）</b> ➔ Page-03 + Page-01 批量栏；<b>删（单条 / 批量）</b> ➔ Page-04；<b>导入 / 导出</b> ➔ Page-05；<b>来源追溯</b> ➔ Page-02「来源追溯」Tab；<b>审计</b> ➔ Page-02「操作记录」Tab；<b>数量统计</b> ➔ Page-01 顶部统计卡；<b>多源输入与识别</b> ➔ 后台统一识别链路（本期无前台页）。<br/>
+      🚫 <b>本期不做边界声明</b>：① 识别与入库失败的状态机 / 重试 / 幂等（OPEN-TR1-008，系统需求阶段关闭）；② 风险数量、风险摘要、风险跳转；③ 第三方资产平台 / CMDB / 云资产自动同步；④ 影子资产、主机漏洞扫描、主动渗透与风险处置；⑤ 跨页全选批量；⑥ 国际化与 NFV（OPEN-NFR-006/007）。以上均不派生为前台能力。<br/>
+      💡 <b>模板选用声明</b>：新增 / 编辑采用抽屉（<code>page-form-drawer</code>）而非默认弹窗，依据是横向经验 <span class="tag-exp">D02-EP02</span>（业务设计采用抽屉档）；其余模板均取自 <code>01-page-types.md</code> 标准页面类型，无自造模板 ID。
+    </div>
+
+    <!-- ==================== 四、核心页面线框示意与深度推导 ==================== -->
+    <h2>四、核心页面线框示意与深度推导</h2>
+    <p style="color:var(--text-sub);font-size:12px;">
+      本章逐页汇流前置推导（痛点、决策经验、idux 组件与 Token 规范）。每个页面小节严格遵循“① 页面定位 ➔ ②【置顶】设计经验与组件映射清单 ➔ ③【居中】结构线框图 ➔ ④【底部】设计批注”的专业排版顺序。线框内的 UI 文案均为纯业务语言，不含经验编号。
+    </p>
+
+    <!-- 4.1 Page-01 -->
+    <h3>4.1 Page-01：主机资产台账（主页面 · 服务器 / 终端资产）</h3>
+    <ul>
+      <li><b>页面定位与核心任务</b>：统一承载服务器与终端资产的查询、筛选、字段查看入口、基础运维与数量盘点，翻转痛点 <span class="flag">🚩S4-P4</span>（字段不完整、口径不一致）与 <span class="flag">🚩S1-P1</span>（文件导入分散）。</li>
+      <li><b>选用页面模板</b>：<code>page-table-overview</code>（顶部统计卡 + 工具栏 + 表格）。</li>
+    </ul>
+
+    <h4>Page-01 设计经验与组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%;">界面区域 / 业务能力项</th>
+          <th style="width:18%;">组件 (idux / 蒸馏名)</th>
+          <th style="width:15%;">规范引用</th>
+          <th style="width:23%;">关键尺寸与 Token 硬指标</th>
+          <th style="width:14%;">设计经验</th>
+          <th style="width:10%;">来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>页面标题栏</td><td><code>IxHeader</code></td><td>01-page-types.md</td><td>高 48px；标题 16px/600 <code>#2F3540</code>；底色 <code>#F7F9FC</code></td><td>产线标准框架</td><td>模板还原</td></tr>
+        <tr><td>服务器 / 终端子集切换</td><td><code>IxTabs</code>（line）</td><td>01-page-types.md</td><td>高 32px；选中下划线 <code>#1C6EFF</code></td><td><span class="tag-exp">D01-EP03</span></td><td>标杆复用</td></tr>
+        <tr><td>四类数量统计卡</td><td><code>IxCard</code> + <code>IxText</code></td><td>tokens-cheatsheet.md</td><td>圆角 2px；边框 1px <code>#E1E5EB</code>；卡距 8px；主数字 24px/600 等宽；卡高 160px</td><td><span class="tag-exp">D08-EP01</span> <span class="tag-exp">D08-EP04</span></td><td>标杆复用</td></tr>
+        <tr><td>隐藏概览开关</td><td><code>IxButton</code></td><td>components/comp-button.md</td><td>高 32px；描边普通按钮</td><td><span class="tag-exp">D08-EP01</span>（推荐体验）</td><td>标杆复用</td></tr>
+        <tr><td>顶部工具栏 · 主操作</td><td><code>IxButton</code></td><td>components/comp-button.md</td><td>高 32px；圆角 2px；底 <code>#1C6EFF</code>；文字 14px <code>#FFFFFF</code>；默认不带图标</td><td><span class="tag-exp">D10-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>批量操作栏（批量编辑 / 删除 / 导出）</td><td><code>IxButton</code> + <code>IxDropdown</code></td><td>patterns/04-interaction-patterns.md</td><td>高 32px；未勾选整组置灰（底 <code>#EDF1F7</code> / 字 <code>#BEC3CC</code>）；「已选（N）」计数</td><td><span class="tag-exp">D10-EP02</span> <span class="tag-exp">D10-EP04</span> <span class="tag-exp">D10-EP05</span></td><td>标杆复用</td></tr>
+        <tr><td>导入 / 导出入口</td><td><code>IxDropdown</code></td><td>components/idux-component-map.md</td><td>「导入 / 导出 ▾」；默认按钮高 32px / 边框 <code>#D3D7DE</code></td><td><span class="tag-exp">D10-EP03</span></td><td>标杆复用</td></tr>
+        <tr><td>通用字段检索筛选</td><td><code>IxProSearch</code></td><td>components/comp-pro-search.md</td><td>高 32px；条件以 Tag 内嵌；有值 hover 显示清除 ×</td><td><span class="tag-exp">D09-EP01</span> <span class="tag-exp">D09-EP02</span> <span class="tag-exp">D09-EP03</span> <span class="tag-exp">D09-EP07</span></td><td>标杆复用</td></tr>
+        <tr><td>主数据表格</td><td><code>IxProTable</code></td><td>patterns/02-table-patterns.md</td><td>表头 32px <code>#EDF1F7</code>；行高 40px；无圆角；冻结勾选 / 名称列 + 操作列</td><td><span class="tag-exp">D02-EP01</span> <span class="tag-exp">D03-EP02</span> <span class="tag-exp">D03-EP07</span></td><td>标杆复用</td></tr>
+        <tr><td>长文本 / 多值单元格</td><td><code>IxText</code> + <code>IxTooltip</code></td><td>components/idux-component-map.md</td><td>截断省略号；悬浮展示全量；行高固定不撑高</td><td><span class="tag-exp">D03-EP05</span></td><td>标杆复用</td></tr>
+        <tr><td>列设置入口</td><td><code>IxDropdown</code></td><td>components/idux-component-map.md</td><td>表头右端「⋯」，16×16 图标</td><td><span class="tag-exp">D03-EP06</span></td><td>标杆复用</td></tr>
+        <tr><td>状态 / 类型标签</td><td><code>IxTag</code></td><td>tokens-cheatsheet.md</td><td>浅底 + 深字 + 浅边框三元组；圆角 2px；在库 <code>#F6FFED</code>/<code>#12A679</code>，失活 <code>#F1F5F9</code>/<code>#64748B</code></td><td><span class="tag-exp">D04-EP04</span></td><td>标杆复用</td></tr>
+        <tr><td>加载态 / 空态</td><td><code>IxSpin</code> / <code>IxEmpty</code></td><td>patterns/05-state-patterns.md</td><td>首屏 spinner；空态保留工具栏</td><td><span class="tag-exp">D04-EP01</span> <span class="tag-exp">D04-EP02</span></td><td>标杆复用</td></tr>
+        <tr><td>分页</td><td><code>IxPagination</code></td><td>01-page-types.md</td><td>右对齐；默认每页 20；当前页蓝底白字 24px 圆形</td><td><span class="tag-exp">D03-EP01</span></td><td>模板还原</td></tr>
+        <tr><td>行内操作</td><td>链接型操作列</td><td>patterns/04-interaction-patterns.md</td><td>12px / <code>#1C6EFF</code>；「详情 / 编辑 / 删除」≤3 个</td><td><span class="tag-exp">D10-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>页面 / Tab / 资产直达</td><td>路由 URL</td><td>patterns/01-navigation-and-hierarchy.md</td><td>页面 / Tab / 资产 id 入 URL</td><td><span class="tag-exp">D06-EP01</span></td><td>标杆复用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 主机资产台账 · 界面结构线框示意图 (Wireframe Layout)</div>
+      <div class="wf-shell">
+        <div class="wf-header">
+          <span>统一资产基础 / 主机资产发现与识别 / 资产台账</span>
+          <div><span class="tag">产线规范</span></div>
+        </div>
+        <div class="wf-body">
+          <div class="wf-tabs">
+            <span class="on">服务器资产</span>
+            <span>终端资产</span>
+          </div>
+          <div class="wf-row">
+            <div class="wf-kpi"><span class="wf-label">资产总数</span><div class="n">104,286</div><span style="color:#6F7785;font-size:10px;">当前口径</span></div>
+            <div class="wf-kpi"><span class="wf-label">失活资产</span><div class="n" style="color:#64748B;">1,204</div><span style="color:#6F7785;font-size:10px;">占比 1.2%</span></div>
+            <div class="wf-kpi"><span class="wf-label">复活资产</span><div class="n">318</div><span style="color:#6F7785;font-size:10px;">占比 0.3%</span></div>
+            <div class="wf-kpi"><span class="wf-label">近七天新增</span><div class="n" style="color:#FA8C16;">2,076</div><span style="color:#6F7785;font-size:10px;">占比 2.0%</span></div>
+          </div>
+          <div class="wf-row" style="background:#F1F5F9;padding:8px 10px;border-radius:2px;align-items:center;justify-content:space-between;">
+            <div>
+              <span class="wf-btn-primary">新增资产</span>
+              <span class="wf-btn-disabled" style="margin-left:8px;">批量编辑</span>
+              <span class="wf-btn-disabled" style="margin-left:8px;">删除</span>
+              <span class="wf-btn" style="margin-left:8px;">导入 / 导出 ▾</span>
+              <span style="color:#6F7785;font-size:11px;margin-left:8px;">已选（0）</span>
+            </div>
+            <div>
+              <span class="wf-btn">隐藏概览</span>
+              <span class="wf-input" style="width:220px;margin-left:8px;">筛选：资产名称 / IP / 来源系统 / 责任人…</span>
+              <span class="wf-btn" style="margin-left:8px;">⟳</span>
+            </div>
+          </div>
+          <table class="wf-table">
+            <thead>
+              <tr>
+                <th style="width:3%;">☐</th><th>资产名称</th><th>资产类型</th><th>最近/当前 IP</th><th>历史/常用 IP</th><th>来源系统</th><th>在库状态</th><th>责任人</th><th>最近同步时间</th><th>操作</th><th style="width:4%;">⋯</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>☐</td><td>srv-web-01</td><td>服务器</td><td>10.24.1.88</td><td>10.24.1.80、10.24.1.81</td><td>ESM 扫描</td><td><span class="wf-status wf-st-ok">在库</span></td><td>张三</td><td>2026-08-11 09:12</td><td>详情 编辑 删除</td><td>⋯</td></tr>
+              <tr><td>☐</td><td>PC-FIN-002</td><td>终端</td><td>10.24.1.90</td><td>—</td><td>端侧上报</td><td><span class="wf-status wf-st-ok">在库</span></td><td>李四</td><td>2026-08-11 08:40</td><td>详情 编辑 删除</td><td>⋯</td></tr>
+              <tr><td>☐</td><td>srv-db-07</td><td>服务器</td><td>10.24.2.15</td><td>10.24.2.11</td><td>被动流量</td><td><span class="wf-status wf-st-off">失活</span></td><td>未指派</td><td>2026-07-30 17:03</td><td>详情 编辑 删除</td><td>⋯</td></tr>
+            </tbody>
+          </table>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:#6F7785;">
+            <span>共 104,286 项</span>
+            <span>‹ 1 2 3 … › 每页 [20 ▾] 前往 __ 页</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-annotation">
+        💡 <b>架构定位与 Why 依据</b>：本需求未给出可切换的分类维度，故按 <span class="tag-exp">D02-EP01</span> 采用常规表格（不做左树），把“服务器 / 终端”这一唯一子集维度交给顶部 Tab（<span class="tag-exp">D01-EP03</span>）；四类统计语义即“当前结果集汇总”，故落列表顶部统计卡而非独立驾驶舱（<span class="tag-exp">D08-EP01</span>），并配「隐藏概览」把纵向空间还给列表。<br/>
+        🧭 <b>业务动作落点 (CRUD 闭环)</b>：<b>增</b>＝顶部「新增资产」（Page-03）；<b>查</b>＝<code>IxProSearch</code> + 列设置；<b>看</b>＝行内「详情」（Page-02）；<b>改</b>＝行内「编辑」/ 批量「批量编辑」；<b>删</b>＝行内「删除」/ 批量「删除」（Page-04）；<b>导入导出</b>＝顶部下拉（Page-05）。<br/>
+        🛡️ <b>状态机与异常规则</b>：未勾选时批量按钮整组置灰（<span class="tag-exp">D10-EP02</span>）；表头全选仅作用当前页（<span class="tag-exp">D10-EP05</span>）；加载 <code>IxSpin</code>、空态 <code>IxEmpty</code> 保留工具栏；长值截断悬浮（<span class="tag-exp">D03-EP05</span>）；勾选与筛选、分页、Tab 状态均入 URL（<span class="tag-exp">D06-EP01</span>）。
+      </div>
+    </div>
+
+    <!-- 4.2 Page-02 -->
+    <h3>4.2 Page-02：资产详情抽屉（右侧抽屉 · 单资产字段与来源追溯）</h3>
+    <ul>
+      <li><b>页面定位与核心任务</b>：就地查看一项服务器 / 终端资产的全部适用字段，追溯字段来源与命中依据，查看操作记录；翻转痛点 <span class="flag">🚩S2-P2</span>（身份易重复 / 错归）与 <span class="flag">🚩S3-P3</span>（分型边界不清）。</li>
+      <li><b>选用页面模板</b>：<code>page-detail-drawer</code>（概览卡 + Tab + 描述列表）。</li>
+    </ul>
+
+    <h4>Page-02 设计经验与组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%;">界面区域 / 业务能力项</th>
+          <th style="width:18%;">组件 (idux / 蒸馏名)</th>
+          <th style="width:15%;">规范引用</th>
+          <th style="width:23%;">关键尺寸与 Token 硬指标</th>
+          <th style="width:14%;">设计经验</th>
+          <th style="width:10%;">来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>抽屉容器与遮罩</td><td><code>IxDrawer</code></td><td>components/comp-drawer.md</td><td>宽 800px；右侧滑出；标题栏 48px、关闭钮最右；底部按钮栏 56px，主按钮在左、取消在右、左对齐；层叠 ≤1 层</td><td><span class="tag-exp">D02-EP03</span> <span class="tag-exp">D06-EP02</span></td><td>标杆复用</td></tr>
+        <tr><td>单对象详情概览卡</td><td><code>IxCard</code></td><td>01-page-types.md</td><td>圆角 2px；边框 1px <code>#E1E5EB</code>；对象名 14px/600；与下方内容卡间距 8px</td><td>模板还原</td><td>模板还原</td></tr>
+        <tr><td>字段分区 Tab</td><td><code>IxTabs</code>（line）</td><td>01-page-types.md</td><td>高 32px；选中下划线 <code>#1C6EFF</code>；Tab 与内容区上下分离</td><td><span class="tag-exp">D02-EP05</span></td><td>标杆复用</td></tr>
+        <tr><td>字段名-值展示</td><td><code>IxProDesc</code></td><td>components/idux-component-map.md</td><td>按容器 1~2 列；分组小标题 16px/600</td><td>模板还原</td><td>模板还原</td></tr>
+        <tr><td>来源追溯键值子表</td><td><code>IxProTable</code></td><td>patterns/02-table-patterns.md</td><td>表头 32px；行高 40px；列：来源系统 / 来源观察值 / 当前有效值 / 命中依据 / 时间</td><td><span class="tag-exp">D02-EP05</span></td><td>标杆复用</td></tr>
+        <tr><td>操作记录时间线</td><td><code>IxTimeline</code></td><td>components/idux-component-map.md</td><td>节点：操作对象 / 来源 / 关键依据 / 结果 / 操作者 / 时间</td><td><span class="deriv">业务独立推导</span></td><td>业务独立推导</td></tr>
+        <tr><td>状态 / 类型标签</td><td><code>IxTag</code></td><td>tokens-cheatsheet.md</td><td>浅底深字三元组；类型标签服务器 / 终端</td><td><span class="tag-exp">D04-EP04</span></td><td>标杆复用</td></tr>
+        <tr><td>多值 IP 字段</td><td><code>IxText</code></td><td>components/idux-component-map.md</td><td>历史 / 常用 IP 为多值，超长截断 + 悬浮</td><td><span class="tag-exp">D03-EP05</span></td><td>标杆复用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 资产详情抽屉 · 界面结构线框示意图 (Drawer Layout)</div>
+      <div class="wf-drawer-overlay">
+        <div class="wf-drawer-body">
+          <div class="wf-header" style="background:#FFFFFF;padding:0 0 10px 0;margin-bottom:12px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:13px;font-weight:600;color:#1E293B;">资产详情</span>
+            <span style="color:#94A3B8;">✕</span>
+          </div>
+          <div class="wf-card" style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:600;color:#1E293B;">srv-web-01</span>
+              <span>
+                <span class="wf-status wf-st-ok">在库</span>
+                <span class="wf-status wf-st-off" style="margin-left:4px;">服务器</span>
+              </span>
+            </div>
+            <div style="color:#6F7785;font-size:11px;margin-top:6px;">来源系统 ESM 扫描 ｜ 责任人 张三 ｜ 网络区域 内网</div>
+          </div>
+          <div class="wf-tabs">
+            <span class="on">基本信息</span>
+            <span>类型专属字段</span>
+            <span>来源追溯</span>
+            <span>操作记录</span>
+          </div>
+          <div style="flex:1;font-size:11px;color:#64748B;">
+            <div class="wf-card" style="margin-bottom:8px;">
+              平台内唯一 ID：AST-0000128 ｜ 资产名称：srv-web-01<br/>
+              资产类型：服务器 ｜ 责任人：张三 ｜ 来源系统：ESM 扫描<br/>
+              来源系统资产 ID：ESM-88213 ｜ Agent ID：ag-3f91c2<br/>
+              最近/当前 IP：10.24.1.88 ｜ 历史/常用 IP：10.24.1.80、10.24.1.81<br/>
+              在库状态：在库 ｜ 首次发现：2026-05-02 ｜ 最近发现：2026-08-11<br/>
+              网络区域：内网 ｜ 暴露属性：仅内网 ｜ 资产重要性：重要<br/>
+              <span style="color:#94A3B8;">（当前 Tab = 基本信息；类型专属字段、来源追溯、操作记录为同级 Tab，切换时保留抽屉外壳）</span>
+            </div>
+          </div>
+          <div style="padding-top:12px;border-top:1px solid #E2E8F0;display:flex;gap:8px;">
+            <span class="wf-btn-primary">编辑</span>
+            <span class="wf-btn">关闭</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-annotation">
+        💡 <b>架构定位与 Why 依据</b>：详情信息量中等、以“看完即走”为主，需保留列表游标与筛选，故按 <span class="tag-exp">D02-EP03</span> 采用 800px 右侧抽屉而非下钻独立页；多组从属信息（来源追溯 / 操作记录）按 <span class="tag-exp">D02-EP05</span> 用页内 Tab 收纳，避免纵向无限拉长。<br/>
+        🧭 <b>业务动作落点</b>：<b>看</b>＝四个字段 Tab；<b>追溯</b>＝「来源追溯」Tab 内键值子表（各来源观察 / 当前有效值 / 命中依据，对应 REQ-HOST-009）；<b>审计</b>＝「操作记录」时间线（对应 REQ-HOST-011）；<b>改</b>＝底部「编辑」→ Page-03。<br/>
+        🛡️ <b>状态机与异常规则</b>：类型专属字段按资产类型受控展示，缺失时留空不跨类型误填（REQ-HOST-013）；抽屉层叠 ≤1 层（<span class="tag-exp">D06-EP02</span>）；概览卡已展示字段在下方描述列表去重。
+      </div>
+    </div>
+
+    <!-- 4.3 Page-03 -->
+    <h3>4.3 Page-03：新增 / 编辑资产抽屉（右侧抽屉 · 临时新增与编辑）</h3>
+    <ul>
+      <li><b>页面定位与核心任务</b>：人工临时新增资产，或编辑现有资产字段；人工值优先级最高；翻转痛点 <span class="flag">🚩S1-P1</span> 与 <span class="flag">🚩S4-P4</span>。</li>
+      <li><b>选用页面模板</b>：<code>page-form-drawer</code>（分组表单 + 底部固定操作栏）。</li>
+    </ul>
+
+    <h4>Page-03 设计经验与组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%;">界面区域 / 业务能力项</th>
+          <th style="width:18%;">组件 (idux / 蒸馏名)</th>
+          <th style="width:15%;">规范引用</th>
+          <th style="width:23%;">关键尺寸与 Token 硬指标</th>
+          <th style="width:14%;">设计经验</th>
+          <th style="width:10%;">来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>表单抽屉容器</td><td><code>IxProFormDrawer</code></td><td>components/idux-component-map.md</td><td>宽 800px；标题栏 48px；底部按钮栏 56px；提交后自动关闭并刷新列表</td><td><span class="tag-exp">D02-EP02</span></td><td>标杆复用</td></tr>
+        <tr><td>表单分组（左 Label 右 Control）</td><td><code>IxProForm</code></td><td>components/design-form.md</td><td>Label 左对齐、等宽固定 120px + 间距 16px、行高 32px；控件高 32px 右边缘对齐并填充剩余宽度；非必填项左侧预留星号占位；严禁上下堆叠</td><td>模板还原</td><td>模板还原</td></tr>
+        <tr><td>单行文本字段</td><td><code>IxInput</code></td><td>components/comp-input.md</td><td>高 32px；圆角 2px；边框 <code>#D3D7DE</code>；聚焦 <code>#1C6EFF</code></td><td><span class="tag-exp">D07-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>枚举 / 分类字段</td><td><code>IxSelect</code></td><td>components/comp-select.md</td><td>单选下拉；高 32px</td><td><span class="tag-exp">D07-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>多值对象字段（责任人 / 标签）</td><td><code>IxSelect</code>（multiple）</td><td>components/idux-component-map.md</td><td>多选下拉；高 32px</td><td><span class="tag-exp">D07-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>二值字段（资产重要性）</td><td><code>IxRadioGroup</code></td><td>components/comp-radio.md</td><td>枚举 ≤3 档用单选组</td><td><span class="tag-exp">D07-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>多值 IP / 网段字段</td><td><code>IxProTextarea</code></td><td>components/idux-component-map.md</td><td>逐行录入，一行一条；支持引用对象组</td><td><span class="tag-exp">D07-EP04</span></td><td>标杆复用</td></tr>
+        <tr><td>底部操作条</td><td><code>IxButton</code></td><td>components/comp-drawer.md</td><td>高 32px；左对齐；主按钮在左（唯一主按钮「保存」）、取消在右；默认不带图标</td><td><span class="tag-exp">D02-EP02</span>（统一基线）</td><td>标杆复用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 新增 / 编辑资产抽屉 · 界面结构线框示意图 (Form Drawer Layout)</div>
+      <div class="wf-drawer-overlay">
+        <div class="wf-drawer-body">
+          <div class="wf-header" style="background:#FFFFFF;padding:0 0 10px 0;margin-bottom:12px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:13px;font-weight:600;color:#1E293B;">新增资产 / 编辑资产</span>
+            <span style="color:#94A3B8;">✕</span>
+          </div>
+          <div style="flex:1;font-size:11px;color:#454C59;">
+            <div class="wf-card" style="margin-bottom:10px;">
+              <span class="wf-label" style="display:block;margin-bottom:8px;">基础信息</span>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span class="req">*</span>资产名称：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">请输入资产名称</span></div>
+              </div>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span class="req">*</span>资产类型：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">服务器 ▾</span></div>
+              </div>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span style="visibility:hidden;margin-right:4px;">*</span>资产重要性：</div>
+                <div class="wf-form-control" style="line-height:32px;">（ ）一般　（●）重要　（ ）核心</div>
+              </div>
+            </div>
+            <div class="wf-card" style="margin-bottom:10px;">
+              <span class="wf-label" style="display:block;margin-bottom:8px;">网络信息</span>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span style="visibility:hidden;margin-right:4px;">*</span>最近/当前 IP：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">10.24.1.88</span></div>
+              </div>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span style="visibility:hidden;margin-right:4px;">*</span>历史/常用 IP：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">每一行一条，可输入 IP、IP 段或网段</span></div>
+              </div>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span style="visibility:hidden;margin-right:4px;">*</span>网络区域：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">内网 ▾</span></div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <span class="wf-label" style="display:block;margin-bottom:8px;">归属与来源</span>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span style="visibility:hidden;margin-right:4px;">*</span>责任人：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">选择人员（多选）▾</span></div>
+              </div>
+              <div class="wf-form-item">
+                <div class="wf-form-label"><span style="visibility:hidden;margin-right:4px;">*</span>来源系统：</div>
+                <div class="wf-form-control"><span class="wf-input" style="width:100%;">人工新增 ▾</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding-top:12px;border-top:1px solid #E2E8F0;display:flex;gap:8px;">
+            <span class="wf-btn-primary">保存</span>
+            <span class="wf-btn">取消</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-annotation">
+        💡 <b>架构定位与 Why 依据</b>：资产字段较多、内容超过一屏，按 <span class="tag-exp">D02-EP02</span> 用 800px 抽屉承载（业务设计采用抽屉档），并在保存后自动关闭、刷新列表，避免停留导致重复提交。<br/>
+        🧭 <b>业务动作落点</b>：<b>增</b>＝空表单；<b>改</b>＝带原值回填；<b>提交</b>＝底部「保存」（唯一主按钮）。<br/>
+        🛡️ <b>状态机与异常规则</b>：字段按语义分派控件（<span class="tag-exp">D07-EP01</span>）；多 IP 用逐行文本域（<span class="tag-exp">D07-EP04</span>）；表单严格左 Label 右 Control（见 <code>design-form.md</code>）；校验失败字段内联提示、抽屉不关闭；人工新增值优先级最高，不被自动来源覆盖（REQ-HOST-008/009）。
+      </div>
+    </div>
+
+    <!-- 4.4 Page-04 -->
+    <h3>4.4 Page-04：删除二次确认弹窗（居中弹窗 · 单条 / 批量删除防呆）</h3>
+    <ul>
+      <li><b>页面定位与核心任务</b>：删除资产前的阻断确认，回显资产名称与影响面，防止误删；翻转痛点 <span class="flag">🚩S4-P4</span>（维护动作口径不一）。</li>
+      <li><b>选用页面模板</b>：<code>page-form-modal</code>（阻断确认弹窗）。</li>
+    </ul>
+
+    <h4>Page-04 设计经验与组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%;">界面区域 / 业务能力项</th>
+          <th style="width:18%;">组件 (idux / 蒸馏名)</th>
+          <th style="width:15%;">规范引用</th>
+          <th style="width:23%;">关键尺寸与 Token 硬指标</th>
+          <th style="width:14%;">设计经验</th>
+          <th style="width:10%;">来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>阻断确认弹窗</td><td><code>IxModal</code></td><td>01-page-types.md</td><td>宽 480px；居中；标题栏 48px；底部按钮栏 56px</td><td><span class="tag-exp">D05-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>影响面 / 风险警示</td><td><code>IxAlert</code></td><td>tokens-cheatsheet.md</td><td>柔和红底 <code>#FFF1F0</code>、边框 <code>#FFA39E</code>、字 <code>#D9363E</code></td><td><span class="tag-exp">D05-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>确认 / 取消按钮</td><td><code>IxButton</code></td><td>components/comp-modal.md</td><td>高 32px；按钮组右对齐；主按钮在左（<code>#1C6EFF</code> 品牌蓝）、取消在右；默认不带图标</td><td><span class="tag-exp">D05-EP04</span></td><td>标杆复用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 删除二次确认弹窗 · 界面结构线框示意图 (Modal Layout)</div>
+      <div class="wf-modal-overlay">
+        <div class="wf-modal-body">
+          <div class="wf-header" style="background:#FFFFFF;padding:0 0 10px 0;margin-bottom:10px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:13px;font-weight:600;color:#1E293B;">确认删除资产</span>
+            <span style="color:#94A3B8;">✕</span>
+          </div>
+          <div class="wf-alert" style="margin-bottom:10px;">
+            <b>影响警示</b>：删除后将同时移除该资产的来源映射与来源观察记录；若该资产已进入安全运营引用，相关引用将失效且不可恢复。请确认无误后再操作。
+          </div>
+          <div style="font-size:11px;color:#454C59;margin-bottom:14px;">
+            将删除：<b>srv-web-01</b>（10.24.1.88）<br/>
+            来源系统：ESM 扫描 ｜ 平台内唯一 ID：AST-0000128
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <span class="wf-btn-primary">确认删除</span>
+            <span class="wf-btn">取消</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-annotation">
+        💡 <b>架构定位与 Why 依据</b>：删除为不可逆且涉及来源映射级联，按 <span class="tag-exp">D05-EP01</span> 用阻断弹窗 + 影响面清单 + 回显对象名称，而非轻量气泡确认，避免误点。<br/>
+        🛡️ <b>防呆拦截铁律</b>：确认主按钮统一用品牌蓝 <code>#1C6EFF</code>，不使用红色实心按钮（<span class="tag-exp">D05-EP04</span>）；必须原样回显资产名称与唯一 ID；批量删除时回显所选数量与对象集合。
+      </div>
+    </div>
+
+    <!-- 4.5 Page-05 -->
+    <h3>4.5 Page-05：导入 / 导出弹窗（居中弹窗 · 文件类操作）</h3>
+    <ul>
+      <li><b>页面定位与核心任务</b>：Excel/CSV 资产导入（模板 + 上传 + 冲突规则）与导出字段选择；翻转痛点 <span class="flag">🚩S1-P1</span>（来源分散、口径不一）。</li>
+      <li><b>选用页面模板</b>：<code>page-form-modal</code>（配置弹窗）。</li>
+    </ul>
+
+    <h4>Page-05 设计经验与组件选型映射清单</h4>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%;">界面区域 / 业务能力项</th>
+          <th style="width:18%;">组件 (idux / 蒸馏名)</th>
+          <th style="width:15%;">规范引用</th>
+          <th style="width:23%;">关键尺寸与 Token 硬指标</th>
+          <th style="width:14%;">设计经验</th>
+          <th style="width:10%;">来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>导入 / 导出入口下拉</td><td><code>IxDropdown</code></td><td>components/idux-component-map.md</td><td>高 32px；默认按钮样；菜单项：导入资产 / 导出资产</td><td><span class="tag-exp">D10-EP03</span></td><td>标杆复用</td></tr>
+        <tr><td>导入配置弹窗</td><td><code>IxModal</code> + <code>IxUpload</code></td><td>components/idux-component-map.md</td><td>宽 480px；下载模板 + 上传（.xlsx / .csv）+ 冲突规则（跳过 / 替换）单选组</td><td><span class="tag-exp">D10-EP03</span> <span class="tag-exp">D07-EP01</span></td><td>标杆复用</td></tr>
+        <tr><td>导出字段弹窗</td><td><code>IxModal</code> + <code>IxCheckbox</code></td><td>components/comp-modal.md</td><td>宽 640px；按钮组右对齐、主按钮在左；按分组字段复选（资产信息 / 责任人信息 / 类型专属字段）</td><td><span class="tag-exp">D10-EP03</span></td><td>标杆复用</td></tr>
+        <tr><td>导入结果与加载反馈</td><td><code>IxSpin</code> / <code>IxMessage</code></td><td>patterns/05-state-patterns.md</td><td>导入中 loading；完成后分级反馈（成功数 / 跳过数 / 失败清单）</td><td><span class="tag-exp">D04-EP01</span> <span class="tag-exp">D04-EP02</span></td><td>标杆复用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 导入 / 导出弹窗 · 界面结构线框示意图 (Modal Layout)</div>
+      <div class="wf-modal-overlay">
+        <div class="wf-modal-body" style="width:640px;">
+          <div class="wf-header" style="background:#FFFFFF;padding:0 0 10px 0;margin-bottom:10px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:13px;font-weight:600;color:#1E293B;">导入资产</span>
+            <span style="color:#94A3B8;">✕</span>
+          </div>
+          <div style="font-size:11px;color:#454C59;line-height:2;">
+            <div>● 下载模板　　还没有导入模板？先下载并填写对应信息。　<span class="wf-btn">下载模板</span></div>
+            <div>● 上传文件　　支持 .xlsx / .csv，请按照模板字段填写。　<span class="wf-btn">上传文件</span></div>
+            <div>● 导入规则　　当导入数据与已有数据存在冲突时：（●）跳过　（ ）替换</div>
+          </div>
+          <div style="border-top:1px dashed #E2E8F0;margin:12px 0;"></div>
+          <div style="font-size:11px;color:#94A3B8;">— 切换为「导出资产」时 —</div>
+          <div style="font-size:11px;color:#454C59;line-height:2;margin-top:6px;">
+            <div>● 资产信息　　☑全部　☑资产名称　☑最近/当前 IP　☑来源系统　☑在库状态</div>
+            <div>● 责任人信息　☑全部　☑责任人</div>
+            <div>● 类型专属字段　☑全部　☑开放端口　☑Host/域名　☑MAC</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+            <span class="wf-btn-primary">确定</span>
+            <span class="wf-btn">取消</span>
+          </div>
+        </div>
+      </div>
+      <div class="wf-annotation">
+        💡 <b>架构定位与 Why 依据</b>：导入含“模板、冲突规则”等多个决策点，单按钮装不下，故按 <span class="tag-exp">D10-EP03</span> 用顶部「导入 / 导出 ▾」下拉拆分场景、以居中弹窗收配置。<br/>
+        🧭 <b>业务动作落点</b>：<b>导入</b>＝下载模板 ➔ 上传 ➔ 选冲突规则（跳过 / 替换）➔ 确定；<b>导出</b>＝按分组勾选字段 ➔ 确定。<br/>
+        🛡️ <b>状态机与异常规则</b>：导入前需具备导入权限，权限不足拒绝且不改数据（REQ-HOST-011）；导入中 loading、完成后分级反馈（成功 / 跳过 / 失败清单，对应 <span class="tag-exp">D04-EP01</span>、<span class="tag-exp">D04-EP02</span>）；导出 10 万级大表建议转后台并在通知入口回看下载。
+      </div>
+    </div>
+
+    <!-- ==================== 五、页面体验与异常保护规则 ==================== -->
+    <h2>五、页面体验与异常保护规则</h2>
+    <ul>
+      <li>🛑 <b>状态覆盖完备性</b>：列表与详情均需覆盖加载 / 空 / 部分失败三类态；识别与入库失败的完整状态机、重试与幂等属 OPEN-TR1-008，在系统需求阶段冻结，本期不在前台新增异常状态页。</li>
+      <li>🛑 <b>加载态与空状态</b>：首屏用 <code>IxSpin</code>（重页带文案）；空数据保留工具栏并展示 <code>IxEmpty</code>；筛选无结果时给“修改筛选条件”引导，不堆砌无关引导语。</li>
+      <li>🛑 <b>高危破坏性操作防呆</b>：删除一律走 <code>IxModal</code> 阻断确认，原样回显资产名称与唯一 ID，并列出将受影响的来源映射与引用；批量删除回显所选数量与对象集合。</li>
+      <li>🎨 <b>按钮用色铁律</b>：全系统只有品牌蓝主按钮（<code>#1C6EFF</code>）与描边普通按钮，<b>不使用红色实心按钮</b>；破坏性操作靠“二次确认 + 影响面回显”防呆。</li>
+      <li>🛑 <b>批量动作安全带</b>：未勾选任何资产时，批量编辑 / 删除 / 导出整组置灰并保留可见，勾选后激活并回显“已选（N）”；表头全选仅作用当前页。</li>
+      <li>🔍 <b>来源与字段可解释</b>：字段值支持查看来源观察与命中依据；人工值优先级最高，不被自动来源覆盖；存在字段冲突时保留待处理状态而非静默覆盖（REQ-HOST-009）。</li>
+      <li>🔐 <b>权限与审计</b>：导入、人工修改、来源映射与合并等关键操作按平台权限体系校验，权限不足时拒绝且不改变数据；操作记录可追溯（对象 / 来源 / 关键依据 / 结果 / 操作者，REQ-HOST-011）。</li>
+      <li>📈 <b>规模与结果护栏</b>：支持 10 万级资产查询与查看；结果集超出引擎上限时显式提示“仅展示前 N 条”，不静默丢记录；分页默认每页 20。</li>
+      <li>🧾 <b>客户端与页面文案人性化</b>：面向资产运营人员的提示使用业务语言，专业代码与字段标识放括号内辅助，不出现底层报错码。</li>
+      <li>🚫 <b>范围护栏</b>：不提供风险数量、风险摘要或风险跳转入口；不把资产能力推导为前台风险能力（Non-Goals 已冻结）。</li>
+    </ul>
+
+    <div class="checkpoint">
+      <b>🚦 人机协作共识确认关卡 (Human-in-the-loop Checkpoint)</b>
+      规划老师好，以上为您梳理的【主机资产发现与识别 · 资产台账】设计说明书。请重点把关：<br/>
+      1. <b>页面清单与架构拓扑</b>：Page-01 台账 / Page-02 详情抽屉 / Page-03 新增编辑抽屉 / Page-04 删除确认 / Page-05 导入导出，是否完整覆盖“查 / 看 / 增 / 改 / 删 / 导入导出 / 追溯 / 统计”的运维闭环？<br/>
+      2. <b>经验采纳与自研边界</b>：本次因 Type-01 分册未蒸馏，全量采纳横向通用决策经验（<code>D0x-EPxx</code>）；标注为“业务独立推导”的部分（识别入库异常不建前台页、多主源裁决不建界面、字段清单复用 WEB 口径）是否符合预期？<br/>
+      3. <b>线框结构与组件选型</b>：台账“常规表格 + 顶部 Tab + 顶部统计卡”的骨架、抽屉承载详情与表单、删除走阻断确认，以及 idux 组件与尺寸 Token 是否严谨？<br/>
+      <br/>
+      <b>若您认可，请回复【确认】；若需调整，请指出具体细节。共识达成前，织雨绝不提前生成前端代码！</b>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
