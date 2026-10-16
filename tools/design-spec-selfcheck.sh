@@ -14,6 +14,8 @@
 #   ④ 线框规范符合度: 弹窗/抽屉页脚主按钮在左；操作按钮不带前置图标；
 #                     表单 Label 非必填项须留星号占位；弹窗/抽屉宽度须命中允许档位；
 #                     页面模板与线框容器原语一致（drawer ↔ modal 不得跨用）；UI 文案不泄漏 EP 编号
+#   ⑤ 可视化件完整性: 含可视化件的页面，其《可视化件声明》(class="viz-decl") 五字段须齐全
+#                     （件型 / 图形编码规则 / 风格规范 / 交互与退化 / 可替代性）
 #
 # 退出码: 0 = 全部通过（可进入共识确认闸门）；1 = 存在未通过项（必须先修）
 # ============================================================
@@ -43,14 +45,14 @@ echo " 目标文件: $SPEC"
 echo "============================================================"
 
 # ---------- 1. 结构完整性 ----------
-head_ "1/10 结构完整性（五章 + 分页面小节）"
+head_ "1/11 结构完整性（五章 + 分页面小节）"
 H2=$(grep -c '<h2' "$SPEC" || true)
 H3P=$(grep -oE '<h3[^>]*>\s*4\.[0-9]' "$SPEC" | wc -l | tr -d ' ')
 if [ "$H2" -eq 5 ]; then echo "  ✅ 五章齐备 (h2 = $H2)"; else echo "  ❌ 章节数异常: h2 = ${H2}（应为 5）"; is_bad; fi
 if [ "$H3P" -ge 1 ]; then echo "  ✅ 分页面小节 $H3P 个"; else echo "  ❌ 未找到分页面小节 (h3 4.x)"; is_bad; fi
 
 # ---------- 2. 组件真实性（两轨制）----------
-head_ "2/10 组件真实性（已登记 或 已显式声明来源）"
+head_ "2/11 组件真实性（已登记 或 已显式声明来源）"
 MAPTOK=$(grep -oE 'Ix[A-Za-z]+' "$MAP" | sort -u)
 DECL_RE='未在|未登记|保留蒸馏|查无|无对应|产线|已声明'
 UNDEF=""
@@ -65,7 +67,7 @@ else
 fi
 
 # ---------- 3. 模板真实性 ----------
-head_ "3/10 页面模板真实性（资产库存在 或 已显式声明）"
+head_ "3/11 页面模板真实性（资产库存在 或 已显式声明）"
 REALTPL=$(grep -oE 'page-[a-z]+-[a-z]+' "$PAGES" | sort -u)
 TPL_DECL_RE='无对应模板|套头借|模板库|自定义|产线|已声明'
 BADTPL=""
@@ -80,7 +82,7 @@ else
 fi
 
 # ---------- 4. 色值白名单 ----------
-head_ "4/10 色值合规（必须命中 03-design-assets/ 全量色板）"
+head_ "4/11 色值合规（必须命中 03-design-assets/ 全量色板）"
 WHITE=$(find "$ASSETS" -type f -name '*.md' | while read -r f; do grep -oE '#[0-9A-Fa-f]{6}' "$f"; done | tr 'a-f' 'A-F' | sort -u)
 BADC=""
 # 排除说明性文字行（含违规/禁止/示例/举例/均属/反例等关键词的行是规则描述，非实际使用色值）
@@ -97,7 +99,7 @@ else
 fi
 
 # ---------- 5. 按钮用色铁律 ----------
-head_ "5/10 按钮用色铁律（无红色 / 危险型按钮）"
+head_ "5/11 按钮用色铁律（无红色 / 危险型按钮）"
 # 排除自检规则说明行（含「扫描」「不存在」「严格」「严禁」「铁律」等词的行是规则描述，非实际代码）
 DANGER_BTN=$(grep -nE '危险型' "$SPEC" | grep -vE '(扫描|不存在|严格|严禁|检查|铁律|规则|自检|说明)' || true)
 if [ -z "$DANGER_BTN" ]; then
@@ -113,7 +115,7 @@ else
 fi
 
 # ---------- 6. 引用文件可解析 ----------
-head_ "6/10 引用文件可解析（.md 必须存在）"
+head_ "6/11 引用文件可解析（.md 必须存在）"
 MISSING=""
 for r in $(grep -oE '[a-zA-Z0-9_./-]+\.md' "$SPEC" | sort -u); do
   if [ -f "$ROOT/$r" ] || [ -f "$ASSETS/$r" ] || [ -n "$(find "$ROOT" -name "$(basename "$r")" -not -path '*/node_modules/*' -print -quit 2>/dev/null)" ]; then :; else MISSING="$MISSING $r"; fi
@@ -125,7 +127,7 @@ else
 fi
 
 # ---------- 7. 经验落点（无空头引用）----------
-head_ "7/10 经验落点（纵向 EP 与横向 D0x-EPxx 均须在四、核心页面中有承载）"
+head_ "7/11 经验落点（纵向 EP 与横向 D0x-EPxx 均须在四、核心页面中有承载）"
 FOURTH=$(grep -n '<h2' "$SPEC" | sed -n '4p' | cut -d: -f1)
 if [ -z "$FOURTH" ]; then
   echo "  ⚠️ 未定位到第四章，跳过本项"
@@ -153,7 +155,7 @@ else
 fi
 
 # ---------- 8. 表单左右结构铁律 ----------
-head_ "8/10 表单结构合规（遵循 design-form.md 第 14 条左右结构铁律）"
+head_ "8/11 表单结构合规（遵循 design-form.md 第 14 条左右结构铁律）"
 VERTICAL_FORM=$(grep -nE '(<br\s*/?>\s*<input|[:：]\s*(</span>)?\s*<br\s*/?>\s*<input|<label>[^<]*<br\s*/?>\s*<input)' "$SPEC" || true)
 if [ -z "$VERTICAL_FORM" ]; then
   echo "  ✅ 未检出表单上下堆叠反模式（严格遵循左 Label 右 Control 水平左右结构）"
@@ -162,7 +164,7 @@ else
 fi
 
 # ---------- 9. 标杆经验特征物保真度（数据驱动动态契约比对）----------
-head_ "9/10 标杆经验特征物保真度（动态特征指纹契约比对）"
+head_ "9/11 标杆经验特征物保真度（动态特征指纹契约比对）"
 DOC_TYPE=$(grep -oE 'Type-0[1-7]' "$SPEC" | head -1 || true)
 SIG_DIR="$ROOT/01-system-solution-design/②设计思考与决策/需求大类设计决策/signatures"
 SIG_FILE="$SIG_DIR/${DOC_TYPE}.json"
@@ -214,7 +216,7 @@ else
 fi
 
 # ---------- 10. 线框规范符合度（对接 03-design-assets 组件规范）----------
-head_ "10/10 线框规范符合度（页脚按钮顺序 / 按钮图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号）"
+head_ "10/11 线框规范符合度（页脚按钮顺序 / 按钮图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号）"
 WF_RESULT=$(node -e '
   const fs = require("fs");
   const spec = fs.readFileSync(process.argv[1], "utf-8");
@@ -314,11 +316,39 @@ else
   is_bad
 fi
 
+# ---------- 11. 可视化件声明完整性 ----------
+head_ "11/11 可视化件声明完整性（含可视化件的页面须五字段齐全）"
+VIZ_SIG="$ROOT/01-system-solution-design/②设计思考与决策/需求大类设计决策/signatures/viz-signatures.json"
+VIZ_RESULT=$(node -e '
+  const fs = require("fs");
+  const spec = fs.readFileSync(process.argv[1], "utf-8");
+  let reg = null;
+  try { reg = JSON.parse(fs.readFileSync(process.argv[2], "utf-8")); } catch (e) { reg = null; }
+  const required = (reg && reg.required_fields) || ["件型","图形编码规则","风格规范","交互与退化","可替代性"];
+  const blocks = [...spec.matchAll(/<div class="viz-decl">([\s\S]*?)<\/div>/g)].map(m => m[1]);
+  if (blocks.length === 0) { console.log("PASS|本说明书未声明可视化件，本项自适应跳过"); process.exit(0); }
+  const errors = [];
+  blocks.forEach((body, i) => {
+    const missing = required.filter(f => body.indexOf(f) === -1);
+    if (missing.length) errors.push("第 " + (i + 1) + " 个《可视化件声明》缺字段：" + missing.join("、"));
+  });
+  if (errors.length) console.log("FAIL|" + errors.join("；"));
+  else console.log("PASS|已核验 " + blocks.length + " 个《可视化件声明》，五字段齐全");
+' "$SPEC" "$VIZ_SIG")
+VIZ_STATUS=$(echo "$VIZ_RESULT" | cut -d'|' -f1)
+VIZ_MSG=$(echo "$VIZ_RESULT" | cut -d'|' -f2-)
+if [ "$VIZ_STATUS" = "PASS" ]; then
+  echo "  ✅ $VIZ_MSG"
+else
+  echo "  ❌ $VIZ_MSG"
+  is_bad
+fi
+
 # ---------- 结论 ----------
 echo
 echo "============================================================"
 if [ "$FAIL" -eq 0 ]; then
-  echo "🎉 自检通过（10/10）：可进入「🚦 人机共识确认闸门」向规划人员汇报。"
+  echo "🎉 自检通过（11/11）：可进入「🚦 人机共识确认闸门」向规划人员汇报。"
   exit 0
 else
   echo "🚫 自检未通过（$FAIL 项）：严禁进入共识确认，必须先修至全绿。"
