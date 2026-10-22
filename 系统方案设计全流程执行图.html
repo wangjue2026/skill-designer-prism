@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>织雨 · 系统方案设计全流程执行图（含门禁卡点与调用环节）</title>
+<style>
+  :root{
+    --bg:#F7F9FC; --card:#FFFFFF; --line:#E1E5EB; --line2:#D3D7DE;
+    --t1:#2F3540; --t2:#6F7785; --t3:#A1A7B3;
+    --blue:#1C6EFF; --blue-l:#E8F4FF; --blue-bd:#BAE6FD;
+    --green:#12A679; --green-l:#F6FFED; --green-bd:#B7EB8F;
+    --warn:#A35F40; --warn-l:#FFFAF2; --warn-bd:#FFE58F;
+    --red:#D9363E; --red-l:#FFF1F0; --red-bd:#FFA39E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.7;
+    font-family:"Inter","PingFang SC","Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 24px 60px;}
+  h1{font-size:22px;line-height:32px;margin:0 0 6px;font-weight:700;}
+  .sub{color:var(--t2);font-size:12px;margin:0 0 18px;}
+  h2{font-size:15px;font-weight:700;margin:34px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  h3{font-size:13.5px;font-weight:700;margin:0 0 4px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;padding:10px 14px;font-size:11.5px;color:var(--t2);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .d-main{background:var(--blue);} .d-stop{background:var(--warn);}
+  .d-gate{background:var(--green);} .d-back{background:var(--red);}
+
+  /* 顶部全景 */
+  .overview{display:flex;align-items:stretch;gap:0;margin:16px 0 6px;flex-wrap:nowrap;overflow-x:auto;}
+  .ov{flex:1;min-width:132px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px;}
+  .ov .k{font-size:10.5px;color:var(--t3);letter-spacing:.4px;}
+  .ov .v{font-size:12.5px;font-weight:700;margin-top:2px;}
+  .ov small{display:block;font-size:10.5px;color:var(--t2);margin-top:2px;font-weight:400;}
+  .ov.gate{background:var(--green-l);border-color:var(--green-bd);}
+  .ov.stop{background:var(--blue-l);border-color:var(--blue-bd);}
+  .arrow{align-self:center;color:var(--t3);font-size:14px;padding:0 6px;}
+
+  /* 流程 */
+  .flow{position:relative;margin-left:34px;padding-left:22px;border-left:2px solid var(--line);}
+  .step{position:relative;margin:0 0 10px;}
+  .step::before{content:"";position:absolute;left:-30px;top:16px;width:10px;height:10px;border-radius:50%;
+    background:var(--blue);border:2px solid #FFFFFF;box-shadow:0 0 0 2px var(--blue-bd);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px 14px;}
+  .card .no{display:inline-block;font-size:10.5px;font-weight:700;color:var(--blue);background:var(--blue-l);
+    border:1px solid var(--blue-bd);border-radius:2px;padding:0 6px;margin-right:8px;vertical-align:2px;}
+  .card p{margin:4px 0 0;font-size:12px;color:var(--t2);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .chip{font-size:10.5px;padding:1px 8px;border-radius:2px;border:1px solid var(--line2);
+    background:#F8FAFC;color:#454C59;font-family:"JetBrains Mono","Menlo",monospace;}
+  .chip.call{border-style:dashed;background:#FFFFFF;color:#64748B;}
+  .chip.out{background:var(--green-l);border-color:var(--green-bd);color:#12A679;font-weight:600;}
+  .chip.tool{background:#F1F5F9;border-color:#E2E8F0;color:#454C59;}
+
+  /* 门禁条 */
+  .gate{position:relative;margin:0 0 10px 0;padding:8px 12px;border-radius:4px;
+    background:var(--green-l);border:1px solid var(--green-bd);font-size:11.5px;color:#454C59;}
+  .gate::before{content:"▣";position:absolute;left:-29px;top:8px;color:var(--green);font-size:12px;}
+  .gate b{color:#12A679;font-family:"JetBrains Mono","Menlo",monospace;font-size:11px;}
+  .gate .note{color:var(--t2);}
+  .gate.stop{background:var(--blue-l);border-color:var(--blue-bd);}
+  .gate.stop::before{content:"⏸";color:var(--blue);}
+  .gate.stop b{color:var(--blue);}
+  .gate.stop .stopbadge{display:inline-block;background:var(--blue);color:#FFFFFF;font-size:10.5px;
+    font-weight:700;border-radius:2px;padding:0 6px;margin-right:6px;}
+  .gate.back{background:var(--red-l);border-color:var(--red-bd);}
+  .gate.back::before{content:"↺";color:var(--red);}
+  .gate.back b{color:var(--red);}
+
+  /* 停顿点大带 */
+  .stopband{background:var(--blue-l);border:1px solid var(--blue-bd);border-left:4px solid var(--blue);
+    border-radius:6px;padding:12px 16px;margin:14px 0;}
+  .stopband h3{color:var(--blue);}
+  .stopband p{margin:4px 0 0;font-size:12px;color:#454C59;}
+
+  /* 旁路 */
+  .branch{background:var(--card);border:1px dashed var(--line2);border-radius:6px;padding:12px 14px;margin-top:10px;}
+  .branch .hd{font-size:12px;font-weight:700;color:#454C59;margin-bottom:6px;}
+  .branch-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--t2);}
+  .pill{background:#F8FAFC;border:1px solid var(--line2);border-radius:12px;padding:2px 10px;font-size:11px;color:#454C59;}
+  .pill.g{background:var(--green-l);border-color:var(--green-bd);color:#12A679;}
+  .pill.r{background:var(--red-l);border-color:var(--red-bd);color:var(--red);}
+
+  /* 表 */
+  table{width:100%;border-collapse:collapse;font-size:11.5px;background:var(--card);margin-top:8px;}
+  th{background:#EDF1F7;color:#454C59;font-weight:500;text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:#454C59;}
+  td code,th code{font-family:"JetBrains Mono","Menlo",monospace;font-size:10.5px;background:#F1F5F9;padding:0 4px;border-radius:2px;}
+  .mono{font-family:"JetBrains Mono","Menlo",monospace;font-size:10.5px;}
+  .tag-m{display:inline-block;font-size:10px;background:#F1F5F9;border:1px solid #E2E8F0;color:#64748B;border-radius:2px;padding:0 5px;}
+  .tag-h{display:inline-block;font-size:10px;background:#FFFBE6;border:1px solid var(--warn-bd);color:var(--warn);border-radius:2px;padding:0 5px;}
+  .note{background:#F8FAFC;border-left:3px solid var(--blue);padding:8px 14px;font-size:11.5px;color:#454C59;margin:12px 0;}
+  .foot{color:var(--t3);font-size:11px;margin-top:28px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>织雨 · 系统方案设计全流程执行图</h1>
+  <p class="sub">含门禁卡点（EX / SP）、调用的文档与资产、每环产物，以及两处人工停顿点。口径来源：<span class="mono">04-workflows-and-cases/准出门禁总表.md</span></p>
+
+  <div class="note" style="margin-top:0;">
+    <b>第 0 原则（高于全流程所有步骤）：</b>禁止囫囵吞枣、不读完参考内容就草草完成任务，以输出质量第一、效率第二为原则。
+  </div>
+
+  <div class="legend">
+    <span><i class="dot d-main"></i>主线环节</span>
+    <span><i class="dot d-gate"></i>门禁（静默自检，失败只回退）</span>
+    <span><i class="dot d-stop"></i>停顿点（等用户）</span>
+    <span><i class="dot d-back"></i>门禁失败回退</span>
+    <span>虚线 chip = 调用的文档 / 资产</span>
+    <span>绿 chip = 本环产物（必须落盘）</span>
+  </div>
+
+  <h2>一、全景：五个段、两道人工闸门</h2>
+  <div class="overview">
+    <div class="ov"><div class="k">PART 1</div><div class="v">需求分析与思考</div><small>1.1 → 1.2 → 1.3 → 1.4　中途不停</small></div>
+    <div class="arrow">→</div>
+    <div class="ov stop"><div class="k">闸门 ①</div><div class="v">方向确认</div><small>EX-1.4-05 · 用户选定方案</small></div>
+    <div class="arrow">→</div>
+    <div class="ov"><div class="k">PART 2</div><div class="v">方案与说明书</div><small>4.1 → 4.2 → 5.0</small></div>
+    <div class="arrow">→</div>
+    <div class="ov stop"><div class="k">闸门 ②</div><div class="v">说明书确认</div><small>SP 全绿后等用户确认</small></div>
+    <div class="arrow">→</div>
+    <div class="ov"><div class="k">STEP 6</div><div class="v">Demo 与回测</div><small>EX-6.0-01~08</small></div>
+  </div>
+
+  <h2>二、主线逐环（调用 · 产物 · 门禁）</h2>
+
+  <div class="flow">
+
+    <!-- 0 分诊 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">00</span><h3 style="display:inline;">意图分诊与转轨判定</h3>
+        <p>判断是「全新方案」还是「局部微调」；微调一旦触碰骨架 / 流程 / 栅格，强制转轨回方案设计。</p>
+        <div class="chips">
+          <span class="chip call">00-triage-and-routing/triage-rules.md</span>
+          <span class="chip call">02-detail-tuning-design/b.1 转译词典</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate">
+      <b>分支判定</b> · <span class="note">撞击转轨红线 → 回主线 1.1；未撞线 → 走右侧「调优旁路」</span>
+    </div>
+
+    <!-- 读料 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">原则 0</span><h3 style="display:inline;">动笔前读完（不设机检）</h3>
+        <p>禁止囫囵吞枣、不读完参考内容就草草完成任务；质量第一，效率第二。</p>
+        <div class="chips">
+          <span class="chip call">1.1 / 1.2 / 1.3 / 1.4 四份定义文档</span>
+          <span class="chip call">命中的 D-0x 决策域、Type-0x 分册</span>
+          <span class="chip call">组件 / 模板 / Token 资产</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>原则约束</b> · <span class="note">不设机器门禁；没读透会由后面各环照出来（目标说不出人少干了什么、突破点只有一档）→ 停手回去读，不许先写后补</span></div>
+
+    <!-- 1.1 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">1.1</span><h3 style="display:inline;">需求理解与现状旅程</h3>
+        <p>角色画像、痛点清单、按责任域切主场景（2~5 条），Job 写成"一份要交付的东西 + 覆盖的工作"。</p>
+        <div class="chips">
+          <span class="chip call">①需求理解与分析/1.1-需求理解与现状旅程.md</span>
+          <span class="chip out">场景与 Job（落盘 01-场景与Job）</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>EX-1.1-01~05</b> · <span class="note">场景 2~5 / 名称无阶段词 / Job 成形 / 痛点带困住方式 / 编号不外泄</span></div>
+
+    <!-- 1.2 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">1.2</span><h3 style="display:inline;">体验目标（一场景一条）</h3>
+        <p>句式固定「<b>场景名</b>：一句话」，写"谁因此不必再做什么"，句内不许出现界面控件词。</p>
+        <div class="chips">
+          <span class="chip call">①需求理解与分析/1.2-体验目标.md</span>
+          <span class="chip out">体验目标（落盘 02-体验目标）</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>EX-1.2-01~04</b> · <span class="note">条数=场景数 / 标题照抄场景名 / 无界面词 / 无虚词且读得出跃迁</span></div>
+
+    <!-- 1.3 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">1.3</span><h3 style="display:inline;">体验突破点拆解</h3>
+        <p>先抠感受点，再从「目标 + 工作类型经验」两个入口扫，合并去重到 2~5 处，每处散四档点子。</p>
+        <p>读料只有两类：上游目标与痛点 + <b>命中的四类工作思考经验（入口 2）</b>。<b>不读</b>②设计思考与决策双决策库（纵向 / 横向）与横向库承接桥协议——那是 Part2 · 4.1 逐页匹配的料。</p>
+        <div class="chips">
+          <span class="chip call">①需求理解与分析/1.3-体验突破点拆解.md</span>
+          <span class="chip call">方案设计思考经验/①配置运维 ②运营分析 ③排障闭环 ④价值感知（按命中类读）</span>
+          <span class="chip out">突破点 + 四档（落盘 03-突破点）</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>EX-1.3-01~04</b> · <span class="note">2~5 处 / 每条有来源 / 能落场景 / 四档点子齐</span></div>
+
+    <!-- 1.4 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">1.4</span><h3 style="display:inline;">草图发散与方向确认</h3>
+        <p>五个岔口出 3~4 条走法 → 配档位 → 拼成两套（高水位 / 稳水位）→ 双 tab 单文件草图 + 动作覆盖表。</p>
+        <div class="chips">
+          <span class="chip call">1.4-草图发散与方向确认.md</span>
+          <span class="chip call">草图样板-SASE合规检测任务.html</span>
+          <span class="chip tool">tools/gate-ex.sh 1.4</span>
+          <span class="chip tool">tools/sketch-selfcheck.sh（5 条结构级）</span>
+          <span class="chip out">草图-&lt;业务&gt;.html</span>
+          <span class="chip out">动作覆盖表 + 选定记录</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>EX-1.4-01~04</b> · <span class="note">两套不画基线 / 两维有差 / 共性页照画 / 结构级 5 条（主按钮蓝、主左取右、抽屉贴左弹窗贴右、容器不混用、无 Ix* 与 px）</span></div>
+
+    <div class="stopband">
+      <h3>⏸ 停顿点 ①　方向确认闸门（EX-1.4-05）</h3>
+      <p>交草图 + 一句话问"选哪套"；只说两套走法、推荐哪套、各付什么代价、`【假设】`≤3 条，全程 ≤15 行。<br/>
+      未获选定 → <b>严禁</b>出页面清单、模板 ID、组件名、线框图。选高水位 = 同时授权改目标与指标，当场回填并留档。<br/>
+      唯一例外：用户<b>明确说出</b>"跳过草图"→ 按方案一执行，并在交付物开头写 <span class="mono">方案来源：用户明示跳过草图，按方案一执行</span>。</p>
+    </div>
+
+    <!-- 4.1 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">4.1</span><h3 style="display:inline;">定性 + 页面清单 + 逐页装配</h3>
+        <p>先定"度"（类型 / 严肃度）→ 场景对标杆 Job → 草图继承对账 → 定稿页面清单 → 逐页经验匹配。</p>
+        <div class="chips">
+          <span class="chip call">④布局与结构/4.1-业务页面框架选型指引.md</span>
+          <span class="chip call">②设计思考与决策/00-总览与类型定性.md</span>
+          <span class="chip call">2.0-设计决策总览与调度.md</span>
+          <span class="chip tool">tools/gate-ex.sh 4.1</span>
+          <span class="chip out">页面清单（模板 ID / 承接 Bx / 来源草图）</span>
+          <span class="chip out">覆盖率对账 + 继承对账结论</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>EX-4.1-01~02</b> + <b>EX-HO-01~03</b> · <span class="note">业务对象×动作全集逐项认领页面落点 / 继承差异 &gt;30% 回 1.4 / 上游可追、产出必进说明书、编号不重命名</span></div>
+
+    <!-- 4.2 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">4.2</span><h3 style="display:inline;">能力与组件选型（逐页装配）</h3>
+        <p>先问"要不要"，再问"用哪个"：模板 / 组件 / 功能模块 / 范式 / Token 五类分别判，数量与突破点成正比。</p>
+        <div class="chips">
+          <span class="chip call">4.2-业务能力与组件选型指引.md</span>
+          <span class="chip call">page-templates/01-page-types.md</span>
+          <span class="chip call">components/idux-component-map.md</span>
+          <span class="chip call">tokens-cheatsheet.md、patterns/01~06</span>
+          <span class="chip out">逐页：模板 + 真实组件 + Token 硬指标</span>
+          <span class="chip out">映射清单（双轨制标注）</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>SP-A-01~06 · SP-W-01~05（提前自检）</b> · <span class="note">组件 / 模板真实性、色值白名单、无红按钮、引用可解析、经验有落点、表单左右结构、线框规范、可视化件五字段</span></div>
+
+    <!-- 5.0 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">5.0</span><h3 style="display:inline;">设计说明书（单文件 HTML）</h3>
+        <p>两段式：Part1 思考（1~5 节）+ Part2 方案（6~8 节）；第 7 节逐页「两行头部 → 线框 → 映射清单 → 批注」+ 六节编码契约。</p>
+        <div class="chips">
+          <span class="chip call">⑤设计说明书/5.0-设计说明书标准模板.md</span>
+          <span class="chip call">准出门禁总表.md（口径）</span>
+          <span class="chip tool">tools/gate-sp.sh</span>
+          <span class="chip tool">tools/design-spec-selfcheck.sh（11 项）</span>
+          <span class="chip out">design-spec-&lt;业务&gt;.html</span>
+          <span class="chip out">Part A / Part B 两段回执</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>SP-S 结构 · SP-A 资产 · SP-W 线框 · SP-C 内容 · SP-D 自包含 · SP-0 回执</b> · <span class="note">五组全过才可交；任一不过按组退回（SP-C 不过 → 回 1.1/1.2/1.3；SP-W 不过 → 回 4.2）</span></div>
+
+    <div class="stopband">
+      <h3>⏸ 停顿点 ②　说明书共识确认（SP 全绿之后）</h3>
+      <p>汇报时贴两段回执（Part A 环节 + Part B 说明书）；用户回复【确认】前，<b>绝不生成前端代码</b>。<br/>
+      用户要改 → 分两种：动结构回 1.4 重出草图；只动细节回 4.2/5.0 就地改，改完重跑 SP。</p>
+    </div>
+
+    <!-- 6.0 -->
+    <div class="step">
+      <div class="card">
+        <span class="no">6.0</span><h3 style="display:inline;">前端 Demo 与反向回测</h3>
+        <p>按说明书逐页生成高保真 Demo，并对照页面清单与映射清单逐项核验，输出回测报告。</p>
+        <div class="chips">
+          <span class="chip call">⑥AI coding 要求/6.0-前端 demo 输出要求.md</span>
+          <span class="chip out">Demo 代码</span>
+          <span class="chip out">回测表（七维）</span>
+        </div>
+      </div>
+    </div>
+    <div class="gate"><b>EX-6.0-01~08</b> · <span class="note">套头 / 能力清单 / 组件硬指标 / 视觉降噪 / 安全带 / 可视化件 / 映射清单含折叠行 / 四重防破坏</span></div>
+
+  </div>
+
+  <h2>三、旁路：局部细节调优（b → c）</h2>
+  <div class="branch">
+    <div class="hd">入口在分诊：未触碰转轨红线才走这条；碰线立即回主线</div>
+    <div class="branch-flow">
+      <span class="pill">b.1 吐槽转译（三层穿透）</span><span>→</span>
+      <span class="pill">b.2 8 维走查 + 尼尔森依据</span><span>→</span>
+      <span class="pill">b.3 15 项坏味道 + 八重安全带</span><span>→</span>
+      <span class="pill">c 补丁模板（输出 A 说服 / 输出 B 代码）</span><span>→</span>
+      <span class="pill g">EX-BC-01 未触红线</span>
+      <span class="pill g">EX-BC-02 前后可核对</span>
+      <span class="pill r">撞线 → 转轨回 1.1</span>
+    </div>
+  </div>
+
+  <h2>四、门禁速查（谁在什么时候拦什么）</h2>
+  <table>
+    <thead><tr><th style="width:16%">门禁段</th><th style="width:12%">时机</th><th style="width:44%">拦什么</th><th style="width:14%">类型</th><th style="width:14%">失败退回</th></tr></thead>
+    <tbody>
+      <tr><td><code>原则 0</code>（EX-0-01）</td><td>动笔前</td><td>没读 1.1~1.4 与命中决策域就开写；以"快"为由省环节</td><td><span class="tag-h">原则</span></td><td>停手回去读</td></tr>
+      <tr><td><code>EX-1.1-01~05</code></td><td>1.1 后</td><td>场景切碎 / 名称带阶段词 / Job 写成一次操作 / 编号外泄</td><td><span class="tag-m">机检</span> <span class="tag-h">人检</span></td><td>回 1.1</td></tr>
+      <tr><td><code>EX-1.2-01~04</code></td><td>1.2 后</td><td>条数≠场景数 / 自造短语 / 界面控件词 / 虚词 / 只到任务级</td><td><span class="tag-m">机检</span> <span class="tag-h">人检</span></td><td>回 1.2</td></tr>
+      <tr><td><code>EX-1.3-01~04</code></td><td>1.3 后</td><td>突破点超量 / 无来源 / 落不到场景 / 只有一档</td><td><span class="tag-m">机检</span> <span class="tag-h">人检</span></td><td>回 1.3</td></tr>
+      <tr><td><code>EX-1.4-01~04</code></td><td>1.4 后</td><td>单套 / 基线版 / 共性页缺失 / 结构级 5 条错</td><td><span class="tag-m">机检</span></td><td>回 1.4</td></tr>
+      <tr><td><code>EX-1.4-05</code></td><td><b>停顿点 ①</b></td><td>方向未选定就进 Part2</td><td><span class="tag-h">人</span></td><td>等用户</td></tr>
+      <tr><td><code>EX-4.1-01~02</code></td><td>定稿清单前</td><td>动作没页面落点 / 与草图结构走偏 &gt;30%</td><td><span class="tag-m">机检</span> <span class="tag-h">人检</span></td><td>回 4.1 / 回 1.4</td></tr>
+      <tr><td><code>EX-HO-01~03</code></td><td>Part2 每环</td><td>上游不可追 / 产出不进说明书 / 编号被重命名</td><td><span class="tag-m">机检</span></td><td>回补上游</td></tr>
+      <tr><td><code>SP-S · SP-A · SP-W</code></td><td>5.0 出稿</td><td>结构缺页 / 组件模板杜撰 / 自造色值 / 红按钮 / 线框不规范 / 可视化件缺声明</td><td><span class="tag-m">机检</span></td><td>回 4.2 / 5.0</td></tr>
+      <tr><td><code>SP-C</code></td><td>5.0 出稿</td><td>目标与场景对不上 / 突破点没落场景 / 页面空挂 / 无方案来源</td><td><span class="tag-m">机检</span></td><td>回 1.1~1.4</td></tr>
+      <tr><td><code>SP-D</code></td><td>5.0 出稿</td><td>六节编码契约缺失（状态机 / 口径 / Token / 文案 / 验收 / 边界）</td><td><span class="tag-m">机检</span> <span class="tag-h">人检</span></td><td>回 5.0</td></tr>
+      <tr><td><code>EX-BC-01~02</code></td><td>调优交付前</td><td>触碰骨架 / 流程 / 栅格；补丁前后不可核对</td><td><span class="tag-h">人检</span></td><td>升级为主线</td></tr>
+      <tr><td><code>EX-6.0-01~08</code></td><td>Demo 交付前</td><td>套头 / 能力 / 硬指标 / 降噪 / 安全带 / 可视化件 / 折叠行漏实现</td><td><span class="tag-m">机检</span> <span class="tag-h">人检</span></td><td>回 Demo 修</td></tr>
+    </tbody>
+  </table>
+
+  <h2>五、产物链（缺一件，下游不许开工）</h2>
+  <table>
+    <thead><tr><th style="width:12%">环节</th><th style="width:44%">必须产出</th><th style="width:44%">下游谁消费它</th></tr></thead>
+    <tbody>
+      <tr><td>1.1</td><td>角色 + 痛点 + 场景清单（含 Job）</td><td>1.2 的目标、6.2 的场景行</td></tr>
+      <tr><td>1.2</td><td>一场景一条体验目标（定稿，不再改）</td><td>第 3 节原话落位、SP-C-01 比对基准</td></tr>
+      <tr><td>1.3</td><td>2~5 处突破点 + 四档点子 + 来源</td><td>第 4 节、6.2 承接列、每页映射清单</td></tr>
+      <tr><td>1.4</td><td>两套草图 + 动作覆盖表 + <b>用户选定记录</b> + 目标/指标变更</td><td>4.1 继承对账、5.0 第 5 节草图、SP-C-06</td></tr>
+      <tr><td>4.1</td><td>页面清单（模板 / 承接 Bx / 来源草图）+ 覆盖率对账</td><td>4.2 逐页装配、第 7 节页面小节</td></tr>
+      <tr><td>4.2</td><td>逐页组件与 Token + 映射清单</td><td>第 7 节线框与清单、EX-6.0-07 计数</td></tr>
+      <tr><td>5.0</td><td>说明书 HTML + 两段门禁回执</td><td>用户确认、6.0 Demo 依据</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    🛑 <b>三处最容易被跳过的位置</b>：① 1.2 的"条数 = 场景数"（跳了，目标就会写成口号）；② 1.4 的选定记录（跳了，后面全白做）；③ 5.0 的 SP-C（跳了，结构全绿也交不了）。这三处正是 EX-1.2-01、EX-1.4-05、SP-C 存在的理由。
+  </div>
+
+  <p class="foot">离线单文件 · 无外部依赖 · 口径以 <span class="mono">04-workflows-and-cases/准出门禁总表.md</span> 为准</p>
+
+</div>
+</body>
+</html>

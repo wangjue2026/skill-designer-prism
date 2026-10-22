@@ -9,3 +9,10 @@ Thumbs.db
 # IDE & local agent cache
 .workbuddy/
 
+# 任务过程产物（草图 / 中间 md / design-spec / demo / 回测报告等，一任务一子文件夹）
+# 只留本地，不进版本库、不参与推送
+_output/
+
+# 本地回收站
+.trash/
+

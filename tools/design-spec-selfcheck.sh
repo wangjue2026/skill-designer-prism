@@ -77,6 +77,14 @@ if [ "$SCN" -gt 0 ]; then
   fi
 fi
 
+# 条数上限（1.3 / 5.0 统一口径：突破点 2~5 处）——只提示，不计入 11 项
+BPN=$(grep -oE '<td>\s*B[0-9]+\s*</td>' "$SPEC" | grep -oE 'B[0-9]+' | sort -u | wc -l | tr -d ' ' || true)
+if [ "$BPN" -gt 5 ]; then
+  echo "  ⚠️ 突破点 ${BPN} 处（编号去重），超过上限 5（1.3 / 5.0 统一口径）——先合并去重再砍，别靠加编号蒙过去"
+elif [ "$BPN" -gt 0 ]; then
+  echo "  ✅ 突破点 ${BPN} 处（编号去重 · 上限 5）"
+fi
+
 # ---------- 2. 组件真实性（两轨制）----------
 head_ "2/11 组件真实性（已登记 或 已显式声明来源）"
 MAPTOK=$(grep -oE 'Ix[A-Za-z]+' "$MAP" | sort -u)
@@ -401,6 +409,15 @@ if [ "$VIZ_STATUS" = "PASS" ]; then
 else
   echo "  ❌ $VIZ_MSG"
   is_bad
+fi
+
+# ---------- 附：线框数据完整度（提示项，不计入 11 项通过率） ----------
+head_ "附：线框数据完整度（提示项 · 不计入通过率）"
+PLACEHOLDER=$(grep -o '__' "$NOCKECK" 2>/dev/null | wc -l | tr -d ' ')
+if [ "${PLACEHOLDER:-0}" -gt 0 ]; then
+  echo "  ⚠️ 线框区（已排除草图折叠区）仍有 ${PLACEHOLDER} 处占位符 __；按 5.0 铁律第 18 条，线框须用跨页自洽的示例数据补齐，不得沿用草图占位"
+else
+  echo "  ✅ 线框区无占位符，数据完整度符合线框标准（草图区免检）"
 fi
 
 # ---------- 结论 ----------

@@ -1,0 +1,3313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <!-- aTrust 导航框架模版（Boilerplate）
+  - 来源：总览+tab版.html 导航框架抽离
+  - 包含：顶部一级导航 + 左侧多级菜单 + 空白业务内容区
+  - 样式：./assets/css/ai-dem.css、./assets/css/css-overrides.css
+  - 参考：SKillS/skill_seerdesign_demo_v2.0/SD Page Templates/boilerplate-l-nav.html
+  - 使用：复制本文件，在 Main Workspace 区域内填充业务内容即可
+-->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>aTrust 零信任控制中心 - 导航框架模版</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- 引入 Alpine.js 及 Collapse 插件实现顺滑手风琴折叠 -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- 引入 Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "PingFang SC", "sans-serif"], outfit: ["Outfit", "sans-serif"] },
+          colors: {
+            brand: { DEFAULT: "var(--color-blue)", hover: "var(--color-blue-l10)", active: "var(--color-blue-d10)", lightBg: "var(--color-blue-l50)" },
+            risk: "var(--color-red)", warning: "var(--color-orange)", success: "var(--color-green)",
+            text: { DEFAULT: "var(--color-graphite-d40)", title: "var(--color-graphite-d30)", mute: "var(--color-graphite)" },
+            border: "var(--color-graphite-l20)",
+            bg: { light: "var(--color-graphite-l50)", line: "var(--color-graphite-l30)" }
+          },
+          spacing: {
+            "4.5": "1.125rem"
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- 引入 SeerDesign 全局样式与 Token (内置) -->
+  <style>
+    @charset "UTF-8";
+    /* SeerDesign 视觉规范 - 全局 CSS 变量与通用组件样式类 */
+    /* 使用说明：本样式库提供 SeerDesign 核心规范 Token 变量，并提供原生 CSS 可用的 .sd- 前缀通用组件类，适用于纯原生 CSS / Tailwind CSS / React 等各种技术栈的快速 Demo 制作。 */
+
+    /* ============================================
+       0. 全局 CSS 变量定义 (Tokens)
+       ============================================ */
+    :root {
+      /* ========== Font Family Stack ========== */
+      --seer-font-family: "PingFang SC", "Helvetica Neue", Arial, "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", SimSun, sans-serif;
+
+      /* ========== Font Weights ========== */
+      --seer-font-weight-regular: 400;
+      --seer-font-weight-bold: 600;
+
+      /* ========== Font Sizes & Line Heights ========== */
+      /* 行高公式：字号 + 8px */
+      --seer-font-size-xs: 12px;
+      --seer-line-height-xs: 20px;
+
+      --seer-font-size-md: 14px;
+      --seer-line-height-md: 22px;
+
+      --seer-font-size-lg: 16px;
+      --seer-line-height-lg: 24px;
+
+      --seer-font-size-xl: 20px;
+      --seer-line-height-xl: 28px;
+
+      --seer-font-size-2xl: 24px;
+      --seer-line-height-2xl: 32px;
+
+      --seer-font-size-3xl: 30px;
+      --seer-line-height-3xl: 38px;
+
+      --seer-font-size-4xl: 36px;
+      --seer-line-height-4xl: 44px;
+
+      --seer-font-size-5xl: 48px;
+      --seer-line-height-5xl: 56px;
+
+      --seer-font-size-6xl: 56px;
+      --seer-line-height-6xl: 64px;
+
+      --seer-font-size-7xl: 64px;
+      --seer-line-height-7xl: 72px;
+
+      /* ========== Base Colors ========== */
+      --color-white: #FFFFFF;
+
+      /* ========== Brand Colors ========== */
+      --color-blue-l50: #E8F4FF;
+      --color-blue-l10: #4FA1FF;
+      --color-blue: #1C6EFF;
+      --color-blue-d10: #1458CC;
+      --color-turquoise: #6DD405;
+
+      /* ========== Status Colors ========== */
+      --color-red: #F52727;
+      --color-red-d10: #CF171D;
+      --color-red-d30: #82010E;
+      --color-turquoise-d10: #12A679;
+      --color-brown: #FDAA1D;
+      --color-cyan-d10: #0BA7B5;
+
+      /* ========== Security Level Colors ========== */
+      --color-orange: #FA721B;
+
+      /* ========== Metal Colors ========== */
+      --color-gold-l10: #F5C76C;
+      --color-gold: #E7AA40;
+      --color-gold-d10: #C2862D;
+      --color-silver-l10: #CBDED4;
+      --color-silver: #A9B4C8;
+      --color-silver-d10: #7F8AA1;
+      --color-bronze-l10: #D6A181;
+      --color-bronze: #C97F58;
+      --color-bronze-d10: #A35F40;
+
+      /* ========== Graphite / Grayscale ========== */
+      --color-graphite-l50: #F7F9FC;
+      --color-graphite-l40: #EDF1F7;
+      --color-graphite-l30: #E1E5EB;
+      --color-graphite-l20: #D3D7DE;
+      --color-graphite-l10: #BEC3CC;
+      --color-graphite: #A1A7B3;
+      --color-graphite-d10: #6F7785;
+      --color-graphite-d20: #5E6573;
+      --color-graphite-d30: #454C59;
+      --color-graphite-d40: #2F3540;
+      --color-graphite-d50: #1E232B;
+
+      /* ========== Shadows ========== */
+      --seer-dropshadow-s1: 0 2px 10px 0 rgba(30, 35, 43, 0.16);
+      --seer-dropshadow-s2: 0 4px 16px 0 rgba(30, 35, 43, 0.14);
+      --seer-dropshadow-s3: 0 8px 22px 0 rgba(30, 35, 43, 0.12);
+    }
+
+    /* ============================================
+       1. 全局手势与圆角
+       ============================================ */
+
+    /* 圆角与手势规范 - 对照组件和输入控件应用 */
+    .sd-input,
+    .sd-input-affix-wrapper,
+    .sd-btn:not([disabled]),
+    .sd-select:not(.sd-select-disabled),
+    .sd-picker:not(.sd-picker-disabled),
+    .sd-menu-item:not(.sd-menu-item-disabled),
+    .sd-tabs-tab:not(.sd-tabs-tab-disabled){
+      border-radius: 2px !important;
+      cursor: pointer;
+    }
+
+    /* 禁用态保持 not-allowed 光标 */
+    .sd-btn[disabled],
+    .sd-input[disabled],
+    .sd-select-disabled,
+    .sd-picker-disabled,
+    .sd-menu-item-disabled,
+    .sd-tabs-tab-disabled{
+      cursor: not-allowed !important;
+    }
+
+    /* ============================================
+       2. 表格组件：行高、字号、无圆角 (Table)
+       ============================================ */
+
+    /* 表格无圆角 - 全局 2px 圆角不适用于表格 */
+    .sd-table,
+    .sd-table-container,
+    .sd-table-content{
+      border-radius: 0 !important;
+      border-collapse: collapse;
+    }
+
+    /* 表头样式 */
+    .sd-table th{
+      height: 32px !important;
+      padding: 0 12px !important;
+      box-sizing: border-box !important;
+      line-height: 20px !important;
+      vertical-align: middle !important;
+      text-align: left !important;
+      position: relative !important;
+      background-color: var(--color-graphite-l40) !important; /* #EDF1F7 */
+      border-bottom: 1px solid var(--color-graphite-l30) !important; /* #E1E5EB */
+      white-space: nowrap !important; /* 表头文字不允许换行 */
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      font-family: var(--seer-font-family) !important;
+      color: var(--color-graphite-d30) !important; /* #454C59 */
+    }
+
+    /* 关闭表头默认伪元素分割线，避免和自定义 ::after 双线 */
+    .sd-table th::before{
+      display: none !important;
+    }
+
+    /* 表头分割线（配合 th 的 position: relative） */
+    .sd-table th:not(:last-child)::after{
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 16px;
+      width: 1px;
+      background-color: var(--color-graphite-l30); /* #E1E5EB */
+    }
+
+    /* 表格内容行 */
+    .sd-table td{
+      height: 40px !important;
+      box-sizing: border-box !important;
+      line-height: 20px !important;
+      vertical-align: middle !important;
+      text-align: left !important;
+      border: none !important;
+      border-bottom: 1px solid var(--color-graphite-l30) !important; /* 行间线：一级分割线颜色 #E1E5EB */
+      padding: 0 12px !important; /* 单元格文字左右间距 12px */
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      font-family: var(--seer-font-family) !important;
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+    }
+
+    /* 可点击文字样式 */
+    .sd-table .clickable-text{
+      color: var(--color-blue) !important; /* #1C6EFF */
+      cursor: pointer !important;
+    }
+
+    .sd-table .clickable-text:hover{
+      color: var(--color-blue-l10) !important; /* #4FA1FF */
+    }
+
+    /* 操作列文字 */
+    .sd-table .action-link{
+      color: var(--color-blue) !important;
+      cursor: pointer !important;
+      margin-right: 16px !important;
+      text-decoration: none;
+    }
+
+    .sd-table .action-link:last-child{
+      margin-right: 0 !important;
+    }
+
+    .sd-table .action-link:hover{
+      color: var(--color-blue-l10) !important;
+    }
+
+    /* 行 Hover 样式 */
+    .sd-table tr:hover td{
+      background-color: var(--color-graphite-l50) !important; /* 一级背景色 #F7F9FC */
+    }
+
+    /* 序号列 */
+    .sd-table th.serial-column,
+    .sd-table td.serial-column{
+      width: 40px !important;
+      text-align: center !important;
+    }
+
+    /* 多选框列 */
+    .sd-table-selection-column{
+      width: 40px !important;
+      text-align: center !important;
+    }
+
+    /* 数字列右对齐 */
+    .sd-table-cell.numeric-column,
+    .sd-table th.numeric-column{
+      text-align: right !important;
+    }
+
+    /* ============================================
+       3. 输入框规范 (Input)
+       ============================================ */
+
+    /* 输入框默认状态 - 禁止使用 line-height: 32px 实现垂直居中 */
+    .sd-input{
+      height: 32px !important;
+      font-size: 12px !important;
+      line-height: 20px !important;
+      padding: 5px 12px !important;
+      box-sizing: border-box !important;
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 2px !important;
+      background-color: var(--color-white) !important;
+      color: var(--color-graphite-d40) !important;
+      font-weight: 400 !important;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    /* 输入框焦点 */
+    .sd-input:focus,
+    .sd-input-focused,
+    .sd-input:hover{
+      border-color: var(--color-blue) !important;
+      box-shadow: none !important;
+    }
+
+    /* 输入框禁用 */
+    .sd-input-disabled,
+    .sd-input[disabled]{
+      background-color: var(--color-graphite-l30) !important;
+      border-color: var(--color-graphite-l20) !important;
+      color: var(--color-graphite) !important;
+      cursor: not-allowed !important;
+    }
+
+    /* 输入框错误 */
+    .sd-input.has-error{
+      border-color: var(--color-red-d10) !important;
+    }
+
+    /* Placeholder 样式 */
+    .sd-input::placeholder{
+      color: var(--color-graphite) !important; /* #A1A7B3 */
+      font-size: 12px !important;
+    }
+
+    /* 带前后缀/密码框/allowClear 输入框外层容器 */
+    .sd-input-affix-wrapper{
+      display: inline-flex;
+      align-items: center;
+      height: 32px !important;
+      padding: 5px 12px !important;
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 2px !important;
+      box-shadow: none !important;
+      background-color: var(--color-white) !important;
+      box-sizing: border-box;
+    }
+
+    .sd-input-affix-wrapper:hover,
+    .sd-input-affix-wrapper-focused{
+      border-color: var(--color-blue) !important;
+      box-shadow: none !important;
+    }
+
+    .sd-input-affix-wrapper.has-error{
+      border-color: var(--color-red-d10) !important;
+    }
+
+    /* affix-wrapper 内部 input */
+    .sd-input-affix-wrapper .sd-input{
+      border: none !important;
+      padding: 0 !important;
+      height: auto !important;
+      line-height: 20px !important;
+      background: transparent !important;
+    }
+
+    /* 文本域输入框 */
+    .sd-textarea{
+      font-size: 12px !important;
+      line-height: 20px !important;
+      padding: 6px 12px !important;
+      min-height: 52px !important;
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 2px !important;
+      background-color: var(--color-white) !important;
+      color: var(--color-graphite-d40) !important;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .sd-textarea:focus,
+    .sd-textarea:hover{
+      border-color: var(--color-blue) !important;
+      box-shadow: none !important;
+    }
+
+    /* ============================================
+       4. 基础搜索框规范 (Search)
+       ============================================ */
+
+    /* 基础搜索框容器 */
+    .basic-search {
+      position: relative;
+      display: inline-block;
+      height: 32px;
+    }
+
+    /* 基础搜索框 - 右侧图标区域 32px */
+    .basic-search .sd-input{
+      padding-right: 32px !important;
+    }
+
+    /* 基础搜索框 Placeholder */
+    .basic-search .sd-input::placeholder{
+      color: var(--color-graphite) !important;
+    }
+
+    /* 搜索图标区域 */
+    .basic-search .search-icon-wrapper {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .basic-search .search-icon {
+      color: var(--color-graphite);
+    }
+
+    /* 关闭图标 */
+    .basic-search .clear-icon {
+      margin-right: 4px;
+      color: var(--color-graphite);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .basic-search .clear-icon:hover {
+      color: var(--color-blue);
+    }
+
+    /* ============================================
+       5. 选择器规范 (Select)
+       ============================================ */
+
+    .sd-select{
+      display: inline-block;
+      position: relative;
+      font-size: 12px;
+    }
+
+    /* 原生 Select 支持 */
+    select.sd-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A7B3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 8px center !important;
+      background-size: 12px !important;
+      padding-right: 28px !important;
+    }
+
+    /* 选择器圆角与边框 */
+    .sd-select-selector{
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 2px !important;
+      background-color: var(--color-white) !important;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    /* 单选 Select 固定高度 */
+    .sd-select-single .sd-select-selector{
+      height: 32px !important;
+      display: flex;
+      align-items: center;
+      padding: 0 8px 0 12px !important;
+    }
+
+    /* 单选 Select 已选值和 Placeholder 文字垂直居中对齐 */
+    .sd-select-selection-item,
+    .sd-select-selection-placeholder{
+      line-height: 30px !important;
+      font-size: 12px !important;
+    }
+
+    /* 单选 Select 已选文字颜色 */
+    .sd-select-selection-item{
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+    }
+
+    /* 选择器 Placeholder 颜色 */
+    .sd-select-selection-placeholder{
+      color: var(--color-graphite) !important; /* #A1A7B3 */
+    }
+
+    /* 多选 Select 最小高度，允许换行 */
+    .sd-select-multiple .sd-select-selector{
+      min-height: 32px !important;
+      height: auto !important;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 2px 8px;
+      gap: 4px;
+    }
+
+    /* 选择器焦点 */
+    .sd-select-focused:not(.sd-select-disabled) .sd-select-selector{
+      border-color: var(--color-blue) !important;
+      box-shadow: none !important;
+    }
+
+    /* 选择器悬浮 (Hover) */
+    .sd-select:hover:not(.sd-select-disabled) .sd-select-selector {
+      border-color: var(--color-blue) !important;
+    }
+
+    /* 选择器禁用 */
+    .sd-select-disabled .sd-select-selector{
+      background-color: var(--color-graphite-l30) !important;
+      border-color: var(--color-graphite-l20) !important;
+      color: var(--color-graphite) !important;
+      cursor: not-allowed !important;
+    }
+
+    /* 下拉面板阴影 */
+    .sd-select-dropdown{
+      position: absolute;
+      left: 0;
+      top: 100%;
+      z-index: 1050;
+      box-shadow: var(--seer-dropshadow-s2) !important;
+      border-radius: 2px !important;
+      border: none !important;
+      background-color: var(--color-white);
+      padding: 4px 0 !important;
+    }
+
+    /* 下拉选项 */
+    .sd-select-item{
+      height: 32px !important;
+      line-height: 32px !important;
+      font-size: 12px !important;
+      padding: 0 12px !important;
+      color: var(--color-graphite-d40);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* 下拉选项选中 - 底色通栏展示，禁止勾选图标 */
+    .sd-select-item-selected{
+      background-color: var(--color-blue-l50) !important;
+      color: var(--color-blue) !important;
+    }
+
+    .sd-select-item-option-state{
+      display: none !important;
+    }
+
+    /* 下拉选项 hover */
+    .sd-select-item:hover:not(.sd-select-item-selected),
+    .sd-select-item-active:not(.sd-select-item-selected){
+      background-color: var(--color-graphite-l50) !important;
+    }
+
+    /* 多选选择器 Tags */
+    .sd-select-multiple .sd-select-selection-item{
+      background-color: var(--color-graphite-l40) !important; /* #EDF1F7 */
+      border: none !important;
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+      border-radius: 2px !important;
+      height: 20px !important;
+      line-height: 20px !important;
+      margin: 2px !important;
+      padding: 0 8px !important;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .sd-select-multiple .sd-select-selection-item-remove{
+      color: var(--color-graphite-d40) !important;
+      margin-left: 8px !important;
+      font-size: 12px !important;
+      cursor: pointer;
+    }
+
+    .sd-select-multiple .sd-select-selection-item-remove:hover{
+      color: var(--color-blue) !important;
+    }
+
+    /* ============================================
+       6. 复选框规范 (Checkbox)
+       ============================================ */
+
+    .sd-checkbox{
+      position: relative;
+      display: inline-block;
+      line-height: 1;
+      white-space: nowrap;
+      vertical-align: middle;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* 未选中状态 - 背景色白色 */
+    .sd-checkbox-inner{
+      display: block;
+      width: 14px;
+      height: 14px;
+      background-color: var(--color-white) !important;
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 2px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    /* 已选状态 - 无边框线 */
+    .sd-checkbox-checked .sd-checkbox-inner{
+      background-color: var(--color-blue) !important;
+      border-color: var(--color-blue) !important;
+    }
+
+    .sd-checkbox-checked .sd-checkbox-inner::after{
+      content: '';
+      position: absolute;
+      display: table;
+      border: 2px solid var(--color-white);
+      border-top: 0;
+      border-left: 0;
+      transform: rotate(45deg) scale(1) translate(-50%, -50%);
+      left: 21%;
+      top: 45%;
+      width: 4px;
+      height: 8px;
+    }
+
+    /* 半选状态 - 无边框线 */
+    .sd-checkbox-indeterminate .sd-checkbox-inner{
+      background-color: var(--color-blue) !important;
+      border-color: var(--color-blue) !important;
+    }
+
+    .sd-checkbox-indeterminate .sd-checkbox-inner::after{
+      content: '';
+      position: absolute;
+      height: 2px !important;
+      background-color: var(--color-white) !important;
+      width: 8px !important;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 禁用状态 */
+    .sd-checkbox-disabled.sd-checkbox-checked .sd-checkbox-inner::after{
+      border-color: var(--color-graphite-d10) !important;
+    }
+
+    .sd-checkbox-disabled .sd-checkbox-inner{
+      background-color: var(--color-graphite-l30) !important;
+      border-color: var(--color-graphite-l20) !important;
+    }
+
+    .sd-checkbox + span{
+      font-size: 12px;
+      padding-left: 8px;
+      padding-right: 8px;
+      color: var(--color-graphite-d40);
+    }
+
+    /* ============================================
+       7. 单选框规范 (Radio)
+       ============================================ */
+
+    .sd-radio{
+      position: relative;
+      display: inline-block;
+      line-height: 1;
+      white-space: nowrap;
+      vertical-align: middle;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* 未选状态 */
+    .sd-radio-inner{
+      display: block;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 50% !important;
+      background-color: transparent !important;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    /* 已选状态 - 蓝色圆点 */
+    .sd-radio-checked .sd-radio-inner{
+      border-color: var(--color-blue) !important;
+    }
+
+    .sd-radio-checked .sd-radio-inner::after{
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-blue) !important;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.75);
+    }
+
+    /* 悬浮态 */
+    .sd-radio-wrapper:hover .sd-radio-inner,
+    .sd-radio:hover .sd-radio-inner{
+      border-color: var(--color-blue) !important;
+    }
+
+    /* 点击态 */
+    .sd-radio-wrapper:active .sd-radio-inner,
+    .sd-radio:active .sd-radio-inner{
+      border-color: var(--color-blue-d10) !important;
+    }
+
+    /* 未选禁用 */
+    .sd-radio-disabled .sd-radio-inner{
+      border-color: var(--color-graphite-l20) !important;
+      background-color: var(--color-graphite-l30) !important;
+    }
+
+    /* 已选禁用 */
+    .sd-radio-disabled.sd-radio-checked .sd-radio-inner{
+      border-color: var(--color-graphite-l20) !important;
+      background-color: var(--color-graphite-l30) !important;
+    }
+
+    .sd-radio-disabled.sd-radio-checked .sd-radio-inner::after{
+      background-color: var(--color-graphite) !important;
+    }
+
+    /* 禁用文字颜色 */
+    .sd-radio-disabled + span{
+      color: var(--color-graphite) !important;
+      cursor: not-allowed;
+    }
+
+    /* 单选框文字样式 */
+    .sd-radio-wrapper{
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      color: var(--color-graphite-d40) !important;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       8. 按钮规范 (Button)
+       ============================================ */
+
+    /* 按钮基础 - 字重 400 */
+    .sd-btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 400 !important;
+      border-radius: 2px !important;
+      height: 32px !important;
+      font-size: 12px !important;
+      padding: 0 16px;
+      border: 1px solid var(--color-graphite-l20);
+      background-color: var(--color-white);
+      color: var(--color-graphite-d40);
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    /* 主按钮 (Primary) */
+    .sd-btn-primary{
+      background-color: var(--color-blue) !important;
+      border-color: var(--color-blue) !important;
+      color: var(--color-white) !important;
+    }
+
+    .sd-btn-primary:hover{
+      background-color: var(--color-blue-l10) !important;
+      border-color: var(--color-blue-l10) !important;
+      color: var(--color-white) !important;
+    }
+
+    .sd-btn-primary:active{
+      background-color: var(--color-blue-d10) !important;
+      border-color: var(--color-blue-d10) !important;
+      color: var(--color-white) !important;
+    }
+
+    /* 普通按钮 / 次按钮 (Default) */
+    .sd-btn-default{
+      background-color: var(--color-white) !important;
+      color: var(--color-graphite-d40) !important;
+      border-color: var(--color-graphite-l20) !important;
+    }
+
+    .sd-btn-default:hover{
+      color: var(--color-blue) !important;
+      border-color: var(--color-blue) !important;
+      background-color: var(--color-white) !important;
+    }
+
+    .sd-btn-default:active{
+      color: var(--color-blue-d10) !important;
+      border-color: var(--color-blue-d10) !important;
+      background-color: var(--color-white) !important;
+    }
+
+    /* 双字按钮固定宽度 */
+    .sd-btn.two-chars{
+      width: 56px !important;
+      padding: 0 !important;
+      font-size: 12px !important;
+    }
+
+    /* 多字按钮自适应 */
+    .sd-btn:not(.two-chars):not(.sd-btn-icon-only){
+      padding: 0 16px !important;
+      font-size: 12px !important;
+    }
+
+    /* 禁用径向扩散阴影 */
+    .sd-btn:active::after{
+      display: none !important;
+    }
+
+    /* 按钮焦点 */
+    .sd-btn:focus{
+      box-shadow: none !important;
+    }
+
+    /* ============================================
+       9. 弹窗规范 (Modal)
+       ============================================ */
+
+    .sd-modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(30, 35, 43, 0.45);
+      z-index: 1000;
+    }
+
+    .sd-modal-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    /* 弹窗整体结构 */
+    .sd-modal{
+      background-color: var(--color-white);
+      border-radius: 2px !important;
+      box-shadow: var(--seer-dropshadow-s3);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    /* 弹窗标题栏 */
+    .sd-modal-header{
+      height: 48px !important;
+      min-height: 48px !important;
+      padding: 0 16px !important;
+      border-bottom: none !important;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      background: transparent !important;
+    }
+
+    .sd-modal-title{
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+      color: var(--color-graphite-d40) !important;
+    }
+
+    /* 弹窗内容区 - 左右边距 32px */
+    .sd-modal-body{
+      flex: 1;
+      padding: 0 32px !important;
+      overflow-y: auto;
+      font-size: 12px;
+      color: var(--color-graphite-d40);
+    }
+
+    /* 弹窗底部按钮栏 - 按钮右对齐，排列顺序：主按钮在左，取消按钮在右 */
+    .sd-modal-footer{
+      height: 56px !important;
+      min-height: 56px !important;
+      padding: 0 16px !important;
+      border-top: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      flex-direction: row-reverse !important; /* 主按钮在左，取消按钮在右，整体右对齐 */
+      gap: 8px !important;
+      flex-shrink: 0;
+      background: transparent !important;
+    }
+
+    .sd-modal-footer .sd-btn{
+      height: 32px !important;
+      font-size: 14px !important;
+      border-radius: 2px !important;
+    }
+
+    /* ============================================
+       10. 抽屉规范 (Drawer)
+       ============================================ */
+
+    .sd-drawer-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(30, 35, 43, 0.45);
+      z-index: 1000;
+    }
+
+    .sd-drawer-wrapper {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+    }
+
+    /* 抽屉整体结构 */
+    .sd-drawer{
+      background-color: var(--color-white);
+      box-shadow: var(--seer-dropshadow-s3);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* 抽屉标题栏 */
+    .sd-drawer-header{
+      height: 48px !important;
+      min-height: 48px !important;
+      padding: 0 16px !important;
+      border-bottom: none !important;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      background: transparent !important;
+    }
+
+    .sd-drawer-title{
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+      text-align: left !important;
+      color: var(--color-graphite-d40) !important;
+    }
+
+    /* 抽屉内容区 - 左右边距 32px */
+    .sd-drawer-body{
+      flex: 1;
+      padding: 0 32px !important;
+      overflow-y: auto;
+      overflow-x: hidden;
+      font-size: 12px;
+      color: var(--color-graphite-d40);
+    }
+
+    /* 抽屉底部按钮栏 - 按钮左对齐，主按钮在左 */
+    .sd-drawer-footer{
+      height: 56px !important;
+      min-height: 56px !important;
+      padding: 0 16px !important;
+      border-top: 1px solid var(--color-graphite-l30) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 8px !important;
+      flex-shrink: 0;
+      background: transparent !important;
+    }
+
+    .sd-drawer-footer .sd-btn{
+      height: 32px !important;
+      font-size: 14px !important;
+      border-radius: 2px !important;
+    }
+
+    /* 弹窗/抽屉底部按钮间间距 */
+    .sd-modal-footer .sd-btn + .sd-btn,
+    .sd-drawer-footer .sd-btn + .sd-btn{
+      margin-left: 0 !important;
+    }
+
+    /* ============================================
+       11. 分页器规范 (Pagination)
+       ============================================ */
+
+    /* 分页器默认右对齐 */
+    .sd-pagination{
+      text-align: right !important;
+      font-size: 12px !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 分页项尺寸统一 */
+    .sd-pagination-item{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px !important;
+      height: 32px !important;
+      border: 1px solid var(--color-graphite-l20);
+      border-radius: 2px;
+      background: var(--color-white);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    /* 当前页码 - 蓝色圆形，直径 24px */
+    .sd-pagination-item-active{
+      min-width: 24px !important;
+      width: 24px !important;
+      height: 24px !important;
+      background-color: var(--color-blue) !important;
+      border-color: var(--color-blue) !important;
+      border-radius: 50% !important;
+    }
+
+    .sd-pagination-item-active a{
+      color: var(--color-white) !important;
+    }
+
+    /* 页码悬浮边框 */
+    .sd-pagination-item:not(.sd-pagination-item-active):hover{
+      border-color: var(--color-blue) !important;
+    }
+
+    /* 页码点击边框 */
+    .sd-pagination-item:not(.sd-pagination-item-active):active{
+      border-color: var(--color-blue-d10) !important;
+    }
+
+    /* 分页器文字颜色 */
+    .sd-pagination-total{
+      color: var(--color-graphite-d10) !important;
+    }
+
+    /* 分页器数字颜色 */
+    .sd-pagination-item a{
+      color: var(--color-graphite-d40) !important;
+      text-decoration: none;
+    }
+
+    /* 快速跳转输入框 */
+    .sd-pagination-jumper input{
+      width: 48px !important;
+      height: 32px !important;
+      border: 1px solid var(--color-graphite-l20) !important;
+      border-radius: 2px !important;
+      font-size: 12px !important;
+      color: var(--color-graphite-d40) !important;
+      outline: none;
+      text-align: center;
+    }
+
+    .sd-pagination-jumper input:focus{
+      border-color: var(--color-blue) !important;
+      box-shadow: none !important;
+    }
+
+    /* 禁用状态 */
+    .sd-pagination-disabled .sd-pagination-item{
+      color: var(--color-graphite-l10) !important;
+      border-color: var(--color-graphite-l10) !important;
+    }
+
+    /* ============================================
+       12. 全局提示规范 (Message)
+       ============================================ */
+
+    /* Message 基础容器 */
+    .sd-message-notice{
+      border-radius: 2px !important;
+      background-color: var(--color-white) !important;
+      box-shadow: var(--seer-dropshadow-s3) !important;
+      border: none !important;
+      padding: 8px 16px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 20px !important;
+      box-sizing: border-box;
+    }
+
+    /* Message 图标区域 */
+    .sd-message-notice-icon{
+      font-size: 16px !important;
+    }
+
+    /* Message 图标与文字间距 */
+    .sd-message-notice-icon + span{
+      margin-left: 8px !important;
+    }
+
+    /* Message 成功图标颜色 */
+    .sd-message-success .sd-message-notice-icon{
+      color: var(--color-turquoise-d10) !important;
+    }
+
+    /* Message 信息图标颜色 */
+    .sd-message-info .sd-message-notice-icon{
+      color: var(--color-blue) !important;
+    }
+
+    /* Message 警告图标颜色 */
+    .sd-message-warning .sd-message-notice-icon{
+      color: var(--color-orange) !important;
+    }
+
+    /* Message 错误图标颜色 */
+    .sd-message-error .sd-message-notice-icon{
+      color: var(--color-red-d10) !important;
+    }
+
+    /* Message 加载图标颜色 */
+    .sd-message-loading .sd-message-notice-icon{
+      color: var(--color-blue) !important;
+    }
+
+    /* ============================================
+       13. 警告提示规范 (Alert)
+       ============================================ */
+
+    /* Alert 基础样式 - 无边框，最小高度 32px */
+    .sd-alert{
+      border: none !important;
+      min-height: 32px !important;
+      border-radius: 2px !important;
+      padding: 6px 12px !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    /* Alert banner 模式圆角为 0 */
+    .sd-alert-banner{
+      border-radius: 0 !important;
+    }
+
+    /* Alert 图标尺寸 */
+    .sd-alert-icon{
+      font-size: 16px !important;
+      margin-right: 8px;
+    }
+
+    /* 普通提示条 - graphite-d10 图标和文字，#F7F7F8 背景 */
+    .sd-alert-info{
+      background-color: #F7F7F8 !important;
+      border: none !important;
+    }
+
+    .sd-alert-info .sd-alert-icon{
+      color: var(--color-graphite-d10) !important; /* #6F7785 */
+    }
+
+    .sd-alert-info .sd-alert-message,
+    .sd-alert-info .sd-alert-description{
+      color: var(--color-graphite-d10) !important; /* #6F7785 */
+    }
+
+    /* 告警提示条 - bronze-d10 图标和文字，#FFFAF2 背景 */
+    .sd-alert-warning{
+      background-color: #FFFAF2 !important;
+      border: none !important;
+    }
+
+    .sd-alert-warning .sd-alert-icon{
+      color: var(--color-bronze-d10) !important; /* #A35F40 */
+    }
+
+    .sd-alert-warning .sd-alert-message,
+    .sd-alert-warning .sd-alert-description{
+      color: var(--color-bronze-d10) !important; /* #A35F40 */
+    }
+
+    /* Alert 链接样式 */
+    .sd-alert a{
+      margin-left: 16px !important;
+      color: var(--color-blue);
+      text-decoration: none;
+    }
+
+    /* Alert 关闭按钮右对齐 */
+    .sd-alert-close{
+      margin-left: auto !important;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       14. 日期选择器规范 (Date Picker)
+       ============================================ */
+
+    .sd-picker{
+      display: inline-flex;
+      align-items: center;
+      height: 32px !important;
+      padding: 4px 12px;
+      border: 1px solid var(--color-graphite-l20);
+      border-radius: 2px;
+      background-color: var(--color-white);
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    /* 日期选择器焦点 */
+    .sd-picker:hover,
+    .sd-picker-focused{
+      border-color: var(--color-blue) !important;
+      box-shadow: none !important;
+    }
+
+    /* 日期选择器下拉面板阴影 */
+    .sd-picker-dropdown{
+      box-shadow: var(--seer-dropshadow-s2) !important;
+      border-radius: 2px !important;
+    }
+
+    /* ============================================
+       15. 标签页规范 (Tabs)
+       ============================================ */
+
+    .sd-tabs-nav{
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+
+    /* 标签页容器底部 1px 分割线 */
+    .sd-tabs-nav::before{
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      border-bottom: 1px solid var(--color-graphite-l30) !important; /* #E1E5EB */
+    }
+
+    /* 未选中状态 - 字重400，颜色graphite-d40 */
+    .sd-tabs-tab{
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      font-weight: 400 !important;
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+      font-size: 14px !important;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    /* 选中状态 - 字重600，颜色blue */
+    .sd-tabs-tab-active{
+      font-weight: 600 !important;
+      color: var(--color-blue) !important; /* #1C6EFF */
+    }
+
+    /* 下划线 - 高度2px，左上右上圆角2px，左下右下直角，覆盖在容器底部分割线上 */
+    .sd-tabs-ink-bar{
+      position: absolute;
+      bottom: 0;
+      height: 2px !important;
+      border-radius: 2px 2px 0 0 !important;
+      background: var(--color-blue) !important; /* #1C6EFF */
+      transition: all 0.2s;
+    }
+
+    /* --- 分段式标签页 (Segment Style) --- */
+
+    /* 分段标签页通用 - 圆角2px */
+    .sd-segment-tabs,
+    .seer-segment-tabs {
+      display: inline-flex;
+      background-color: var(--color-graphite-l50);
+      padding: 2px;
+      border-radius: 2px;
+    }
+
+    .sd-segment-tabs-item{
+      border-radius: 2px !important;
+      font-size: 12px !important;
+      height: 32px !important;
+      line-height: 30px !important;
+      padding: 0 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid transparent;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    /* 重标签样式 (Heavy) - 未选中 */
+    .sd-segment-tabs-heavy .sd-segment-tabs-item{
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+      background-color: var(--color-white) !important;
+      border-color: var(--color-graphite-l20) !important; /* #D3D7DE */
+    }
+
+    /* 重标签样式 - 选中 */
+    .sd-segment-tabs-heavy .sd-segment-tabs-item-active{
+      color: var(--color-white) !important;
+      background-color: var(--color-blue) !important; /* #1C6EFF */
+      border-color: var(--color-blue) !important;
+    }
+
+    /* 重标签样式 - Hover */
+    .sd-segment-tabs-heavy .sd-segment-tabs-item:not(.sd-segment-tabs-item-active):hover{
+      color: var(--color-blue) !important; /* #1C6EFF */
+      background-color: #E8F0FF !important;
+      border-color: #B3CCFF !important;
+    }
+
+    /* 重标签样式 - 禁用 */
+    .sd-segment-tabs-heavy .sd-segment-tabs-item-disabled{
+      color: #C0C4CC !important;
+      background-color: #F7F8FA !important;
+      border-color: #DCDFE6 !important;
+      cursor: not-allowed !important;
+    }
+
+    /* 轻量样式 (Light) - 未选中 */
+    .sd-segment-tabs-light .sd-segment-tabs-item{
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+      background-color: var(--color-white) !important;
+      border-color: var(--color-graphite-l20) !important; /* #D3D7DE */
+    }
+
+    /* 轻量样式 - 选中 */
+    .sd-segment-tabs-light .sd-segment-tabs-item-active{
+      color: var(--color-blue) !important; /* #1C6EFF */
+      background-color: var(--color-white) !important;
+      border-color: var(--color-blue) !important;
+    }
+
+    /* 轻量样式 - Hover */
+    .sd-segment-tabs-light .sd-segment-tabs-item:not(.sd-segment-tabs-item-active):hover{
+      color: #458FFF !important;
+      background-color: var(--color-white) !important;
+      border-color: #458FFF !important;
+    }
+
+    /* 轻量样式 - 禁用 */
+    .sd-segment-tabs-light .sd-segment-tabs-item-disabled{
+      color: #C0C4CC !important;
+      background-color: #F7F8FA !important;
+      border-color: #DCDFE6 !important;
+      cursor: not-allowed !important;
+    }
+
+    /* ============================================
+       16. 下拉/浮层投影
+       ============================================ */
+    .sd-dropdown-menu{
+      box-shadow: var(--seer-dropshadow-s2) !important;
+      border-radius: 2px !important;
+      border: none !important;
+      background: var(--color-white);
+      padding: 4px 0 !important;
+    }
+
+    /* ============================================
+       17. 复合搜索框 (Composite Search)
+       ============================================ */
+    .composite-search {
+      width: min(660px, 100%);
+      min-width: 0;
+      max-width: 660px;
+    }
+
+    /* 搜索按钮正方形 - 32x32 */
+    .composite-search .sd-input-search-button{
+      width: 32px !important;
+      height: 32px !important;
+      background: var(--color-blue) !important;
+      border-color: var(--color-blue) !important;
+      color: var(--color-white) !important;
+      padding: 0 !important;
+    }
+
+    /* 复合搜索框 Tags 样式 */
+    .composite-search .sd-tag{
+      background-color: var(--color-graphite-l50) !important;
+      border: 1px solid var(--color-graphite-l30) !important;
+      color: var(--color-graphite-d40) !important;
+      border-radius: 2px !important;
+    }
+
+    .composite-search .sd-tag-close{
+      color: var(--color-graphite-d20) !important;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       18. 复合日期筛选器布局
+       ============================================ */
+    .date-picker-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    .date-picker-wrapper .sd-select{
+      min-width: 88px;
+    }
+
+    .date-picker-wrapper .sd-picker-range{
+      width: min(340px, 100%);
+      margin-left: 0 !important;
+    }
+
+    /* ============================================
+       19. 表单规范 (Form)
+       ============================================ */
+
+    /* 通用表单变量 */
+    .sd-form {
+      --sd-form-label-width: 64px;
+      --sd-form-label-gap: 16px;
+      --sd-form-item-gap: 8px;
+      --sd-form-control-height: 32px;
+      --sd-form-control-padding-x: 12px;
+
+      width: 100% !important;
+      padding: 0 !important;
+      max-width: none !important;
+    }
+
+    /* 表单项布局 */
+    .sd-form-item{
+      display: flex !important;
+      column-gap: var(--sd-form-label-gap) !important;
+      margin-bottom: var(--sd-form-item-gap) !important;
+    }
+
+    /* 抽屉内表单 */
+    .sd-form--drawer {
+      --sd-form-label-width: 64px;
+    }
+
+    /* 表单 Label 样式 */
+    .sd-form-item-label{
+      width: var(--sd-form-label-width) !important;
+      flex: none !important;
+      display: flex;
+      align-items: center;
+    }
+
+    .sd-form-item-label > label{
+      color: var(--color-graphite-d10) !important; /* #6F7785 */
+      font-size: 12px !important;
+      font-weight: 400 !important;
+    }
+
+    /* Label 不显示冒号 */
+    .sd-form-item-label > label::after{
+      content: none !important;
+    }
+
+    /* 表单必填星号 - absolute 定位，不占用 Label 宽度 */
+    .sd-form-item-label > label.is-required::before,
+    .sd-form-item-label.is-required::before{
+      content: '*' !important;
+      color: var(--color-red) !important; /* #F52727 */
+      margin-right: 4px !important; /* 星号与Label文字间距4px */
+    }
+
+    /* 表单错误提示 */
+    .sd-form-explain-error{
+      font-size: 12px !important;
+      color: var(--color-red-d10) !important; /* #CF171D */
+      margin-top: 4px !important;
+    }
+
+    /* 控件高度统一 32px */
+    .sd-form .sd-input,
+    .sd-form .sd-select-selector,
+    .sd-form .sd-picker{
+      height: var(--sd-form-control-height) !important;
+    }
+
+    /* Placeholder 统一样式 */
+    .sd-form .sd-input::placeholder,
+    .sd-form .sd-select-selection-placeholder{
+      font-size: 12px !important;
+      color: var(--color-graphite) !important; /* #A1A7B3 */
+    }
+
+    /* ============================================
+       20. 全局字体设置
+       ============================================ */
+    body {
+      font-family: var(--seer-font-family);
+      font-weight: var(--seer-font-weight-regular);
+      font-size: var(--seer-font-size-md);
+      line-height: var(--seer-line-height-md);
+      color: var(--color-graphite-d40);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: var(--seer-font-weight-bold);
+    }
+
+    /* 小尺寸组件字体对齐 */
+    .sd-btn-sm,
+    .sd-input-sm,
+    .sd-select-sm .sd-select-selector{
+      font-size: var(--seer-font-size-xs);
+      line-height: var(--seer-line-height-xs);
+    }
+
+    /* ============================================
+       21. 详情概览卡片 (Detail Overview Card)
+       ============================================ */
+
+    /* 卡片容器 - 浅蓝色背景 */
+    .detail-overview-card {
+      width: 100%;
+      background-color: var(--color-blue-l50) !important; /* #E8F4FF */
+      border-radius: 2px !important;
+      padding: 16px !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      box-sizing: border-box !important;
+    }
+
+    /* 对象图标区 */
+    .detail-overview-card .card-icon {
+      width: 32px !important;
+      min-width: 32px !important;
+      height: 32px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: var(--color-blue) !important;
+      margin-right: 24px !important;
+    }
+
+    /* 大图标模式 */
+    .detail-overview-card .card-icon-large {
+      width: 64px !important;
+      min-width: 64px !important;
+      height: 64px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: var(--color-blue) !important;
+      margin-right: 24px !important;
+    }
+
+    /* 核心信息区 - 自适应宽度 */
+    .detail-overview-card .card-info {
+      flex: 1 !important;
+      min-width: 0 !important;
+    }
+
+    /* 对象名称 */
+    .detail-overview-card .card-name {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: var(--color-graphite-d40) !important;
+      line-height: 22px !important;
+    }
+
+    /* 状态标签与名称间距 */
+    .detail-overview-card .card-name .sd-tag{
+      margin-left: 8px !important;
+      height: 20px !important;
+      font-size: 12px !important;
+      vertical-align: middle !important;
+    }
+
+    /* 关键属性行 */
+    .detail-overview-card .card-attrs {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      column-gap: 16px !important;
+      row-gap: 8px !important;
+      margin-top: 4px !important;
+    }
+
+    /* 单个属性片段 */
+    .detail-overview-card .card-attr-item {
+      display: flex !important;
+      align-items: center !important;
+      font-size: 12px !important;
+      line-height: 20px !important;
+    }
+
+    .detail-overview-card .card-attr-label {
+      color: var(--color-graphite) !important; /* #A1A7B3 */
+      margin-right: 16px !important;
+      white-space: nowrap !important;
+    }
+
+    .detail-overview-card .card-attr-value {
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    /* 右侧操作区 - 固定右侧，顶部对齐 */
+    .detail-overview-card .card-actions {
+      display: flex !important;
+      align-items: flex-start !important;
+      gap: 12px !important;
+      margin-left: 8px !important;
+      flex-shrink: 0 !important;
+    }
+
+    .detail-overview-card .card-actions .sd-btn{
+      height: 32px !important;
+      font-size: 12px !important;
+    }
+
+    /* ============================================
+       22. 表单一级标题 (Form Section Title)
+       ============================================ */
+
+    /* 表单一级标题通用样式 */
+    .sd-form .form-section-title {
+      height: 32px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: var(--color-graphite-d40) !important;
+      line-height: 32px !important;
+      margin-bottom: 8px !important;
+      background: none !important;
+      border: none !important;
+    }
+
+    /* 蓝色竖条标题 */
+    .sd-form .form-section-title-blue::before {
+      content: '' !important;
+      display: inline-block !important;
+      width: 2px !important;
+      height: 12px !important;
+      border-radius: 0.2px !important;
+      background-color: var(--color-blue) !important;
+      margin-right: 4px !important;
+      vertical-align: middle !important;
+    }
+
+    /* ============================================
+       23. 前后置输入框 (Prefix/Suffix Input)
+       ============================================ */
+
+    /* 组合控件整体容器 */
+    .input-combined {
+      display: inline-flex !important;
+      align-items: center !important;
+      height: 32px !important;
+      border-radius: 2px !important;
+      border: 1px solid var(--color-graphite-l20) !important;
+      background-color: var(--color-white) !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+
+    /* 前置/后置区域通用样式 */
+    .input-combined .input-addon {
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+      padding: 0 12px !important;
+      font-size: 12px !important;
+      white-space: nowrap !important;
+      background-color: var(--color-graphite-l50) !important; /* #F7F9FC */
+      color: var(--color-graphite-d40) !important; /* #2F3540 */
+      border-right: 1px solid var(--color-graphite-l20) !important;
+    }
+
+    .input-combined .input-addon:last-child {
+      border-right: none !important;
+      border-left: 1px solid var(--color-graphite-l20) !important;
+    }
+
+    /* 固定展示型前后置 - 最小宽度 48px */
+    .input-combined .input-addon-fixed {
+      min-width: 48px !important;
+    }
+
+    /* 可切换选择型前后置 - 最小宽度 64px，显示下拉icon */
+    .input-combined .input-addon-selectable {
+      min-width: 64px !important;
+      cursor: pointer !important;
+    }
+
+    .input-combined .input-addon-selectable .addon-icon {
+      margin-left: 8px !important;
+      font-size: 12px !important;
+    }
+
+    /* 输入区域 - 无边框 */
+    .input-combined .sd-input{
+      border: none !important;
+      min-width: 80px !important;
+      height: 30px !important;
+      padding: 0 12px !important;
+      border-radius: 0 !important;
+    }
+
+    .input-combined .sd-input:focus{
+      box-shadow: none !important;
+    }
+
+    /* focus/error/disabled 状态作用于整体控件 */
+    .input-combined:focus-within {
+      border-color: var(--color-blue) !important;
+    }
+
+    .input-combined.has-error {
+      border-color: var(--color-red-d10) !important;
+    }
+
+    .input-combined.is-disabled {
+      background-color: var(--color-graphite-l30) !important;
+      border-color: var(--color-graphite-l20) !important;
+      cursor: not-allowed !important;
+    }
+
+    /* ============================================
+       24. 表单说明文字
+       ============================================ */
+
+    /* 表单项说明文字 - 控件行下方 */
+    .sd-form-item-extra{
+      font-size: 12px !important;
+      color: var(--color-graphite) !important; /* #A1A7B3 */
+      line-height: 20px !important;
+      margin-top: 4px !important;
+    }
+
+    /* ============================================
+       25. 表格更多列 / 列设置列 (Table Extra Columns)
+       ============================================ */
+
+    /* 更多列固定宽度 40px */
+    .sd-table-more-column{
+      width: 40px !important;
+      min-width: 40px !important;
+      max-width: 40px !important;
+      text-align: center !important;
+      padding: 0 !important;
+    }
+
+    /* 表头更多列 - 居中省略号图标 */
+    .sd-table th.sd-table-more-column{
+      text-align: center !important;
+    }
+
+    /* 内容区更多列 - 空白不可点击 */
+    .sd-table td.sd-table-more-column{
+      cursor: default !important;
+    }
+  </style>
+
+  <!-- 引入 aTrust 导航框架专用 Layout 样式 (内置) -->
+  <style>
+    :root {
+      --app-sider-bg: #272E38;
+      --color-green: #12A679;
+    }
+
+    /* aTrust 顶部导航 Segment Tabs */
+    .at-top-nav-item {
+      height: 32px;
+      padding: 0 16px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-graphite-d40);
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+
+    .at-top-nav-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .at-top-nav-item.active {
+      background: var(--color-blue);
+      color: #FFFFFF;
+      font-weight: 500;
+    }
+
+    /* aTrust 左侧导航 (Sider) - 严格修正 48px 高度 */
+    .at-sider {
+      background: var(--app-sider-bg);
+      width: 240px;
+    }
+
+    .at-sider-title {
+      height: 48px;
+      min-height: 48px;
+      max-height: 48px;
+      box-sizing: border-box;
+      /* 强行锁死高度防撑开 */
+      color: #A1A7B3;
+      font-size: 16px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* aTrust L2 二级菜单 */
+    .at-menu-l2 {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
+      color: #EDF1F7;
+      font-size: 13px;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    .at-menu-l2:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #FFFFFF;
+    }
+
+    .at-menu-l2-icon {
+      width: 16px;
+      height: 16px;
+      margin-left: 24px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .at-menu-l2.active {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    /* aTrust L3 三级菜单 (阅读对齐线: 48px) */
+    .at-menu-l3 {
+      height: 32px;
+      padding-left: 48px;
+      padding-right: 16px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
+      color: #BEC3CC;
+      font-size: 12px;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    .at-menu-l3:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .at-menu-l3.active {
+      color: #FFFFFF;
+      font-weight: 600;
+      background: linear-gradient(90deg, rgba(28, 110, 255, 0.2), transparent);
+    }
+
+    .at-menu-l3.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--color-blue);
+    }
+
+    /* 表格基础重置 */
+    .sd-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .sd-table th {
+      height: 32px;
+      background: var(--color-graphite-l50);
+      color: var(--color-graphite);
+      font-weight: 400;
+      text-align: left;
+      border-bottom: 1px solid var(--color-graphite-l20);
+      padding: 0 12px;
+      position: relative !important;
+    }
+
+    .sd-table td {
+      height: 40px;
+      border-bottom: 1px solid var(--color-graphite-l30);
+      padding: 0 12px;
+      color: var(--color-graphite-d40);
+      white-space: nowrap;
+    }
+
+    [x-cloak] {
+      display: none !important;
+    }
+
+    .at-menu-l4 {
+      height: 32px;
+      padding-left: 60px;
+      padding-right: 16px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #BEC3CC;
+      font-size: 12px;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    .at-menu-l4:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .at-menu-l4.active {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .at-menu-group {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      color: #5E6573;
+      font-size: 12px;
+      cursor: default;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* --- 新增高科技与AI特效样式 --- */
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+
+    .animate-flow {
+      stroke-dasharray: 6, 4;
+      animation: dash 1s linear infinite;
+    }
+
+    @keyframes radar {
+      0% {
+        transform: scale(0.5);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(2.5);
+        opacity: 0;
+      }
+    }
+
+    .radar-ring {
+      animation: radar 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+    }
+
+    @keyframes ai-pulse {
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(28, 110, 255, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(28, 110, 255, 0.8);
+      }
+    }
+
+    .ai-glowing {
+      animation: ai-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(28, 110, 255, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(28, 110, 255, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(28, 110, 255, 0);
+      }
+    }
+
+    .ai-pulsing-button {
+      animation: pulse-ring 2s infinite;
+    }
+
+    /* 斑马线/磨砂玻璃效果 */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(225, 229, 235, 0.6);
+    }
+
+    @keyframes radar-scan {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .radar-scan-icon {
+      animation: radar-scan 4s linear infinite;
+      transform-origin: 12px 12px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+  </style>
+</head>
+
+<body class="bg-bg-light text-text font-sans overflow-hidden w-screen h-screen">
+
+  <!-- ======================================================
+    Global SVG Definitions / 全局 SVG 定义
+    用途：定义全局渐变，用于图标渲染，避免 background-clip 导致隐身。
+    排障提示：如图标渐变、发光、颜色异常，优先检查此区域和 assets/css/ai-dem.css。
+  ======================================================= -->
+  <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#1C6EFF" />
+        <stop offset="100%" stop-color="#6DD405" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- ======================================================
+    App Root State / 应用根级交互状态
+    用途：维护顶部导航、左侧菜单展开项、当前叶子菜单、全局抽屉开关等 Alpine 状态。
+    排障提示：如导航切换、菜单高亮、抽屉打开异常，优先检查此 x-data。
+  ======================================================= -->
+  <div class="flex flex-col w-full h-full" x-data="{
+         topNav: '监控中心',
+         expandedL2: 'm_0_0', 
+         expandedL3: '',
+         activeLeaf: 'm_0_0_0',
+         navDefaults: {
+           '监控中心': { l2: 'm_0_0', l3: '', leaf: 'm_0_0_0' },
+           '全球安全互联': { l2: 'm_1_0', l3: '', leaf: 'm_1_0_0' },
+           '零信任安全接入': { l2: '', l3: '', leaf: 'm_2_0' },
+           '互联网安全访问': { l2: '', l3: '', leaf: 'm_3_0' },
+           '数据保护': { l2: 'm_4_0', l3: 'm_4_0_0', leaf: 'm_4_0_0_0' },
+           '业务管理': { l2: '', l3: '', leaf: 'm_5_0' },
+           '系统管理': { l2: 'm_6_0', l3: '', leaf: 'm_6_0_0' },
+           '审计中心': { l2: 'm_7_0', l3: '', leaf: 'm_7_0_0' }
+         },
+         setTopNav(nav) {
+           this.topNav = nav;
+           const d = this.navDefaults[nav];
+           if(d) {
+             this.expandedL2 = d.l2; this.expandedL3 = d.l3; this.activeLeaf = d.leaf;
+           }
+         },
+         toggleL2(key, isLeaf = false) {
+           if(isLeaf) { this.activeLeaf = key; this.expandedL2 = key; this.expandedL3 = ''; } 
+           else { this.expandedL2 = this.expandedL2 === key ? '' : key; }
+         },
+         toggleL3(key) { this.expandedL3 = this.expandedL3 === key ? '' : key; },
+         toggleL4(key) { this.activeLeaf = key; }
+       }">
+
+    <!-- ======================================================
+      Header / 顶部导航栏，固定高度 56px
+      包含：Logo、产品标题、顶部一级导航、右侧用户入口。
+      排障提示：如顶部导航切换异常，检查 setTopNav(nav) 和 navDefaults。
+    ======================================================= -->
+    <header class="h-[56px] min-h-[56px] bg-white border-b border-bg-line flex items-center px-4 flex-shrink-0 z-30">
+      <div class="flex items-center w-[280px] flex-shrink-0">
+        <img src="https://i.imgur.com/jrWvSot.png" alt="Logo" class="w-[40px] h-[40px] object-contain flex-shrink-0">
+        <span class="ml-3 text-lg font-semibold text-text-title whitespace-nowrap">零信任控制中心</span>
+        <div class="ml-6 flex items-center gap-1 cursor-pointer text-xs text-text-title">
+          <span>全订阅</span>
+          <svg class="w-3 h-3 text-text-mute" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 中间 NavCenter -->
+      <div class="flex-1 flex justify-center">
+        <div class="flex items-center gap-1">
+          <template x-for="nav in ['监控中心', '全球安全互联', '零信任安全接入', '互联网安全访问', '数据保护', '业务管理', '系统管理', '审计中心']">
+            <div class="at-top-nav-item" :class="topNav === nav && 'active'" @click="setTopNav(nav)" x-text="nav"></div>
+          </template>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 w-[280px] justify-end pr-4">
+        <svg class="w-4 h-4 text-text-title cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <div class="flex items-center gap-2 cursor-pointer">
+          <div class="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center font-semibold text-xs">A
+          </div>
+          <span class="text-xs font-medium text-text-title">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ======================================================
+      App Layout Shell / 应用主体布局容器
+      包含：左侧 Sider 菜单 + 右侧 Main Workspace。
+      排障提示：如页面高度、滚动、左右区域挤压异常，优先检查此布局容器和 overflow 设置。
+    ======================================================= -->
+    <div class="flex-1 flex overflow-hidden">
+
+      <!-- ======================================================
+        Sidebar / 左侧导航菜单，宽度约 240px
+        包含：按 topNav 切换的二级、三级、四级菜单。
+        排障提示：如菜单展开/收起、高亮、默认选中异常，检查 expandedL2、expandedL3、activeLeaf。
+      ======================================================= -->
+      <aside class="at-sider flex flex-col flex-shrink-0 select-none">
+        <div class="at-sider-title flex-shrink-0">
+          <span x-text="topNav"></span>
+          <svg class="w-4 h-4 opacity-60 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </div>
+        <div class="flex-1 overflow-y-auto py-2 custom-scrollbar">
+          <template x-if="topNav === '监控中心'">
+            <div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_0_0' || activeLeaf.startsWith('m_0_0_')) ? 'active' : (expandedL2 === 'm_0_0' ? 'text-white' : '')"
+                @click="toggleL2('m_0_0')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_0_0' || activeLeaf.startsWith('m_0_0_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 12h-4l-3 9L9 3l-3 9H2">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_0_0' || activeLeaf.startsWith('m_0_0_')) ? 'font-semibold' : ''">访问体验监测</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_0_0' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_0_0'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_0_0' ? 'active' : ''" @click="toggleL4('m_0_0_0')">
+                  概览</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_0_1' ? 'active' : ''" @click="toggleL4('m_0_0_1')">
+                  体验监控</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_0_2' ? 'active' : ''" @click="toggleL4('m_0_0_2')">
+                  监控配置</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_0_1' ? 'active' : ''" @click="toggleL2('m_0_1', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_0_1' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm0 10a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM6 15h.01M6 7h.01">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_0_1' ? 'font-semibold' : ''">设备状态</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_0_2' || activeLeaf.startsWith('m_0_2_')) ? 'active' : (expandedL2 === 'm_0_2' ? 'text-white' : '')"
+                @click="toggleL2('m_0_2')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_0_2' || activeLeaf.startsWith('m_0_2_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_0_2' || activeLeaf.startsWith('m_0_2_')) ? 'font-semibold' : ''">用户监控</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_0_2' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_0_2'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_2_0' ? 'active' : ''" @click="toggleL4('m_0_2_0')">
+                  在线列表</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_2_1' ? 'active' : ''" @click="toggleL4('m_0_2_1')">
+                  用户状态</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_2_2' ? 'active' : ''" @click="toggleL4('m_0_2_2')">
+                  爆破锁定IP</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_2_3' ? 'active' : ''" @click="toggleL4('m_0_2_3')">
+                  闲置账号</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_0_3' ? 'active' : ''" @click="toggleL2('m_0_3', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_0_3' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17v-6a2 2 0 012-2h2m4 8V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_0_3' ? 'font-semibold' : ''">设备监控</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_0_4' || activeLeaf.startsWith('m_0_4_')) ? 'active' : (expandedL2 === 'm_0_4' ? 'text-white' : '')"
+                @click="toggleL2('m_0_4')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_0_4' || activeLeaf.startsWith('m_0_4_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_0_4' || activeLeaf.startsWith('m_0_4_')) ? 'font-semibold' : ''">告警管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_0_4' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_0_4'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_4_0' ? 'active' : ''" @click="toggleL4('m_0_4_0')">
+                  告警列表</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_4_1' ? 'active' : ''" @click="toggleL4('m_0_4_1')">
+                  告警设置</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_0_4_2' ? 'active' : ''" @click="toggleL4('m_0_4_2')">
+                  邮件告警配置</div>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '全球安全互联'">
+            <div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_1_0' || activeLeaf.startsWith('m_1_0_')) ? 'active' : (expandedL2 === 'm_1_0' ? 'text-white' : '')"
+                @click="toggleL2('m_1_0')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_1_0' || activeLeaf.startsWith('m_1_0_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_1_0' || activeLeaf.startsWith('m_1_0_')) ? 'font-semibold' : ''">防火墙集中管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_1_0' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_1_0'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_0_0' ? 'active' : ''" @click="toggleL4('m_1_0_0')">
+                  TOPN</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_0_1' ? 'active' : ''" @click="toggleL4('m_1_0_1')">
+                  策略管理</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_0_2' ? 'active' : ''" @click="toggleL4('m_1_0_2')">
+                  模版管理</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_0_3' ? 'active' : ''" @click="toggleL4('m_1_0_3')">
+                  设备视图</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_1_1' || activeLeaf.startsWith('m_1_1_')) ? 'active' : (expandedL2 === 'm_1_1' ? 'text-white' : '')"
+                @click="toggleL2('m_1_1')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_1_1' || activeLeaf.startsWith('m_1_1_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2V8a2 2 0 00-2-2zm0 10H6a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-3a2 2 0 00-2-2zm10-5h-4a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-3a2 2 0 00-2-2zM12 9h4M12 19h4M8 11v5">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_1_1' || activeLeaf.startsWith('m_1_1_')) ? 'font-semibold' : ''">SD-WAN组网</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_1_1' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_1_1'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_1_0' ? 'active' : ''" @click="toggleL4('m_1_1_0')">
+                  VPN配置列表</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_1_1' ? 'active' : ''" @click="toggleL4('m_1_1_1')">
+                  拓扑管理</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_1_2' ? 'active' : ''" @click="toggleL4('m_1_1_2')">
+                  智能选路</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_1_2' || activeLeaf.startsWith('m_1_2_')) ? 'active' : (expandedL2 === 'm_1_2' ? 'text-white' : '')"
+                @click="toggleL2('m_1_2')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_1_2' || activeLeaf.startsWith('m_1_2_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_1_2' || activeLeaf.startsWith('m_1_2_')) ? 'font-semibold' : ''">全球加速</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_1_2' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_1_2'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_2_0' ? 'active' : ''" @click="toggleL4('m_1_2_0')">
+                  加速用量分析</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_2_1' ? 'active' : ''" @click="toggleL4('m_1_2_1')">
+                  加速配置</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_1_2_2' ? 'active' : ''" @click="toggleL4('m_1_2_2')">
+                  加速资源</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_1_3' ? 'active' : ''" @click="toggleL2('m_1_3', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_1_3' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_1_3' ? 'font-semibold' : ''">下发任务管理</span>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '零信任安全接入'">
+            <div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_2_0' ? 'active' : ''" @click="toggleL2('m_2_0', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_2_0' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M4 10h16 M10 10v10"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_2_0' ? 'font-semibold' : ''">安全概览</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_2_1' || activeLeaf.startsWith('m_2_1_')) ? 'active' : (expandedL2 === 'm_2_1' ? 'text-white' : '')"
+                @click="toggleL2('m_2_1')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_2_1' || activeLeaf.startsWith('m_2_1_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 22a10 10 0 100-20 10 10 0 000 20z M12 16a4 4 0 100-8 4 4 0 000 8z M12 2v4 M12 18v4 M2 12h4 M18 12h4">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_2_1' || activeLeaf.startsWith('m_2_1_')) ? 'font-semibold' : ''">安全雷达</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_2_1' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_2_1'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_1_0' ? 'active' : ''" @click="toggleL4('m_2_1_0')">
+                  防线可视</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_1_1' ? 'active' : ''" @click="toggleL4('m_2_1_1')">
+                  实体调查</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_1_2' ? 'active' : ''" @click="toggleL4('m_2_1_2')">
+                  行为洞察</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_2_2' || activeLeaf.startsWith('m_2_2_')) ? 'active' : (expandedL2 === 'm_2_2' ? 'text-white' : '')"
+                @click="toggleL2('m_2_2')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_2_2' || activeLeaf.startsWith('m_2_2_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 8V6a6 6 0 1112 0v2m-9 4v4m6-4v4"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_2_2' || activeLeaf.startsWith('m_2_2_')) ? 'font-semibold' : ''">威胁诱捕</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_2_2' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_2_2'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_2_0' ? 'active' : ''" @click="toggleL4('m_2_2_0')">
+                  蜜罐主机</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_2_1' ? 'active' : ''" @click="toggleL4('m_2_2_1')">
+                  诱捕策略</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_2_2' ? 'active' : ''" @click="toggleL4('m_2_2_2')">
+                  诱捕日志</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_2_3' || activeLeaf.startsWith('m_2_3_')) ? 'active' : (expandedL2 === 'm_2_3' ? 'text-white' : '')"
+                @click="toggleL2('m_2_3')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_2_3' || activeLeaf.startsWith('m_2_3_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 20v-2M6.5 15.5l-2 2M17.5 15.5l2 2M5 10H3M21 10h-2M6.5 4.5l-2-2M17.5 4.5l2-2M15 10a3 3 0 01-6 0c0-1.5.5-3 3-5s3 3.5 3 5z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_2_3' || activeLeaf.startsWith('m_2_3_')) ? 'font-semibold' : ''">恶意识别</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_2_3' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_2_3'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_3_0' ? 'active' : ''" @click="toggleL4('m_2_3_0')">
+                  恶意文件分析</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_3_1' ? 'active' : ''" @click="toggleL4('m_2_3_1')">
+                  恶意流量检测</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_3_2' ? 'active' : ''" @click="toggleL4('m_2_3_2')">
+                  恶意样本库</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_2_4' ? 'active' : ''" @click="toggleL2('m_2_4', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_2_4' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_2_4' ? 'font-semibold' : ''">处置策略</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_2_5' || activeLeaf.startsWith('m_2_5_')) ? 'active' : (expandedL2 === 'm_2_5' ? 'text-white' : '')"
+                @click="toggleL2('m_2_5')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_2_5' || activeLeaf.startsWith('m_2_5_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6h16v12H4z M8 6v4 M12 6v6 M16 6v4"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_2_5' || activeLeaf.startsWith('m_2_5_')) ? 'font-semibold' : ''">安全基线</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_2_5' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_2_5'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_5_0' ? 'active' : ''" @click="toggleL4('m_2_5_0')">
+                  应用防护策略</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_5_1' ? 'active' : ''" @click="toggleL4('m_2_5_1')">
+                  上线准入策略</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_2_6' || activeLeaf.startsWith('m_2_6_')) ? 'active' : (expandedL2 === 'm_2_6' ? 'text-white' : '')"
+                @click="toggleL2('m_2_6')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_2_6' || activeLeaf.startsWith('m_2_6_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_2_6' || activeLeaf.startsWith('m_2_6_')) ? 'font-semibold' : ''">服务隐身</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_2_6' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_2_6'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_6_0' ? 'active' : ''" @click="toggleL4('m_2_6_0')">
+                  SPA防护</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_6_1' ? 'active' : ''" @click="toggleL4('m_2_6_1')">
+                  安全码管理</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_2_7' || activeLeaf.startsWith('m_2_7_')) ? 'active' : (expandedL2 === 'm_2_7' ? 'text-white' : '')"
+                @click="toggleL2('m_2_7')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_2_7' || activeLeaf.startsWith('m_2_7_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_2_7' || activeLeaf.startsWith('m_2_7_')) ? 'font-semibold' : ''">虚拟网络域</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_2_7' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_2_7'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_7_0' ? 'active' : ''" @click="toggleL4('m_2_7_0')">
+                  网络域管理</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_2_7_1' ? 'active' : ''" @click="toggleL4('m_2_7_1')">
+                  网络切换策略</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_2_8' ? 'active' : ''" @click="toggleL2('m_2_8', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_2_8' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_2_8' ? 'font-semibold' : ''">第三方安全集成</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_2_9' ? 'active' : ''" @click="toggleL2('m_2_9', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_2_9' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M8 10l2 2-2 2 M14 14h2"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_2_9' ? 'font-semibold' : ''">可信进程</span>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '互联网安全访问'">
+            <div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_0' ? 'active' : ''" @click="toggleL2('m_3_0', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_0' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M4 10h16 M10 10v10"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_0' ? 'font-semibold' : ''">互联网安全访问概览</span>
+              </div>
+              <div class="at-menu-group" style="padding-left: 28px;">分析</div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_2' ? 'active' : ''" @click="toggleL2('m_3_2', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_2' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M8 14v-4 M12 14v-6 M16 14v-8">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_2' ? 'font-semibold' : ''">上网行为分析</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_3' ? 'active' : ''" @click="toggleL2('m_3_3', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_3' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_3' ? 'font-semibold' : ''">上网管控分析</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_4' ? 'active' : ''" @click="toggleL2('m_3_4', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_4' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4 M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_4' ? 'font-semibold' : ''">云威胁情报分析</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_5' ? 'active' : ''" @click="toggleL2('m_3_5', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_5' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 22a10 10 0 100-20 10 10 0 000 20z M12 16a4 4 0 100-8 4 4 0 000 8z M12 2v4 M12 18v4 M2 12h4 M18 12h4">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_5' ? 'font-semibold' : ''">风险终端分析</span>
+              </div>
+              <div class="at-menu-group" style="padding-left: 28px;">策略</div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_7' ? 'active' : ''" @click="toggleL2('m_3_7', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_7' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zm10 0a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_7' ? 'font-semibold' : ''">互联网应用管控</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_8' ? 'active' : ''" @click="toggleL2('m_3_8', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_8' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17v1a3 3 0 11-6 0v-1m6 0a3 3 0 006 0v-1m-6 0H9 M15 10a3 3 0 11-6 0 3 3 0 016 0z M17.5 12.5L21 16">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_8' ? 'font-semibold' : ''">互联网应用审计</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_9' ? 'active' : ''" @click="toggleL2('m_3_9', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_9' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_9' ? 'font-semibold' : ''">威胁管理</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_10' ? 'active' : ''"
+                @click="toggleL2('m_3_10', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_10' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7h8M8 11h8M10 3v4M14 3v4M12 15v6"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_10' ? 'font-semibold' : ''">接入管理</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_11' ? 'active' : ''"
+                @click="toggleL2('m_3_11', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_11' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_11' ? 'font-semibold' : ''">SSL解密配置</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_3_12' ? 'active' : ''"
+                @click="toggleL2('m_3_12', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_3_12' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 10h10a8 8 0 018 8v2 M3 10l6 6 M3 10l6-6"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_3_12' ? 'font-semibold' : ''">重定向设置</span>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '数据保护'">
+            <div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_4_0' || activeLeaf.startsWith('m_4_0_')) ? 'active' : (expandedL2 === 'm_4_0' ? 'text-white' : '')"
+                @click="toggleL2('m_4_0')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_4_0' || activeLeaf.startsWith('m_4_0_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_4_0' || activeLeaf.startsWith('m_4_0_')) ? 'font-semibold' : ''">UEM</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_4_0' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_4_0'" x-collapse x-cloak>
+                <div class="at-menu-l3"
+                  :class="(activeLeaf === 'm_4_0_0' || activeLeaf.startsWith('m_4_0_0_')) ? 'text-white' : ''"
+                  @click="toggleL3('m_4_0_0')">
+                  <span
+                    :class="(activeLeaf === 'm_4_0_0' || activeLeaf.startsWith('m_4_0_0_')) ? 'font-semibold' : ''">移动数据安全</span>
+                  <svg class="ml-auto w-3 h-3 opacity-60 transition-transform"
+                    :class="expandedL3 === 'm_4_0_0' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+                <div x-show="expandedL3 === 'm_4_0_0'" x-collapse x-cloak>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_0_0' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_0_0')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_0_0' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">终端管控</span>
+                  </div>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_0_1' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_0_1')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_0_1' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">应用管控</span>
+                  </div>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_0_2' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_0_2')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_0_2' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">数据管控</span>
+                  </div>
+                </div>
+                <div class="at-menu-l3"
+                  :class="(activeLeaf === 'm_4_0_1' || activeLeaf.startsWith('m_4_0_1_')) ? 'text-white' : ''"
+                  @click="toggleL3('m_4_0_1')">
+                  <span
+                    :class="(activeLeaf === 'm_4_0_1' || activeLeaf.startsWith('m_4_0_1_')) ? 'font-semibold' : ''">PC数据安全</span>
+                  <svg class="ml-auto w-3 h-3 opacity-60 transition-transform"
+                    :class="expandedL3 === 'm_4_0_1' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+                <div x-show="expandedL3 === 'm_4_0_1'" x-collapse x-cloak>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_1_0' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_1_0')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_1_0' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">终端管控</span>
+                  </div>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_1_1' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_1_1')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_1_1' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">应用管控</span>
+                  </div>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_1_2' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_1_2')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_1_2' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">数据管控</span>
+                  </div>
+                </div>
+                <div class="at-menu-l3"
+                  :class="(activeLeaf === 'm_4_0_2' || activeLeaf.startsWith('m_4_0_2_')) ? 'text-white' : ''"
+                  @click="toggleL3('m_4_0_2')">
+                  <span
+                    :class="(activeLeaf === 'm_4_0_2' || activeLeaf.startsWith('m_4_0_2_')) ? 'font-semibold' : ''">审批管理</span>
+                  <svg class="ml-auto w-3 h-3 opacity-60 transition-transform"
+                    :class="expandedL3 === 'm_4_0_2' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+                <div x-show="expandedL3 === 'm_4_0_2'" x-collapse x-cloak>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_2_0' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_2_0')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_2_0' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">审批流程</span>
+                  </div>
+                  <div class="at-menu-l4" :class="activeLeaf === 'm_4_0_2_1' ? 'active' : ''"
+                    @click="toggleL4('m_4_0_2_1')">
+                    <span class="w-1 h-1 rounded-full flex-shrink-0"
+                      :class="activeLeaf === 'm_4_0_2_1' ? 'bg-white' : 'bg-[#6F7785]'"></span>
+                    <span class="ml-2">审批记录</span>
+                  </div>
+                </div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_0_3' ? 'active' : ''" @click="toggleL4('m_4_0_3')">
+                  UEM高级设置</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_0_4' ? 'active' : ''" @click="toggleL4('m_4_0_4')">
+                  UEM授权终端统计</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_4_1' || activeLeaf.startsWith('m_4_1_')) ? 'active' : (expandedL2 === 'm_4_1' ? 'text-white' : '')"
+                @click="toggleL2('m_4_1')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_4_1' || activeLeaf.startsWith('m_4_1_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z M15 10V7">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_4_1' || activeLeaf.startsWith('m_4_1_')) ? 'font-semibold' : ''">数据防泄密</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_4_1' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_4_1'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_0' ? 'active' : ''" @click="toggleL4('m_4_1_0')">
+                  数据防泄密概览</div>
+                <div class="at-menu-group" style="padding-left: 48px;">分析</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_2' ? 'active' : ''" @click="toggleL4('m_4_1_2')">
+                  数据外发分析</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_3' ? 'active' : ''" @click="toggleL4('m_4_1_3')">
+                  泄密事件分析</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_4' ? 'active' : ''" @click="toggleL4('m_4_1_4')">
+                  泄密风险用户</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_5' ? 'active' : ''" @click="toggleL4('m_4_1_5')">
+                  泄密追溯中心</div>
+                <div class="at-menu-group" style="padding-left: 48px;">策略</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_7' ? 'active' : ''" @click="toggleL4('m_4_1_7')">
+                  终端泄密审计</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_8' ? 'active' : ''" @click="toggleL4('m_4_1_8')">
+                  终端泄密管控</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_9' ? 'active' : ''" @click="toggleL4('m_4_1_9')">
+                  泄密分析规则</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_10' ? 'active' : ''"
+                  @click="toggleL4('m_4_1_10')">敏感对象定义</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_4_1_11' ? 'active' : ''"
+                  @click="toggleL4('m_4_1_11')">高级配置</div>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '业务管理'">
+            <div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_5_0' ? 'active' : ''" @click="toggleL2('m_5_0', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_5_0' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_5_0' ? 'font-semibold' : ''">用户与角色</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_5_1' || activeLeaf.startsWith('m_5_1_')) ? 'active' : (expandedL2 === 'm_5_1' ? 'text-white' : '')"
+                @click="toggleL2('m_5_1')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_5_1' || activeLeaf.startsWith('m_5_1_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_5_1' || activeLeaf.startsWith('m_5_1_')) ? 'font-semibold' : ''">认证管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_5_1' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_5_1'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_1_0' ? 'active' : ''" @click="toggleL4('m_5_1_0')">
+                  认证服务器</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_1_1' ? 'active' : ''" @click="toggleL4('m_5_1_1')">
+                  认证策略</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_5_2' || activeLeaf.startsWith('m_5_2_')) ? 'active' : (expandedL2 === 'm_5_2' ? 'text-white' : '')"
+                @click="toggleL2('m_5_2')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_5_2' || activeLeaf.startsWith('m_5_2_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zm10 0a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_5_2' || activeLeaf.startsWith('m_5_2_')) ? 'font-semibold' : ''">应用管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_5_2' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_5_2'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_2_0' ? 'active' : ''" @click="toggleL4('m_5_2_0')">
+                  应用列表</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_2_1' ? 'active' : ''" @click="toggleL4('m_5_2_1')">
+                  应用授权</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_2_2' ? 'active' : ''" @click="toggleL4('m_5_2_2')">
+                  应用权限审批</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_5_3' || activeLeaf.startsWith('m_5_3_')) ? 'active' : (expandedL2 === 'm_5_3' ? 'text-white' : '')"
+                @click="toggleL2('m_5_3')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_5_3' || activeLeaf.startsWith('m_5_3_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_5_3' || activeLeaf.startsWith('m_5_3_')) ? 'font-semibold' : ''">终端管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_5_3' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_5_3'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_3_0' ? 'active' : ''" @click="toggleL4('m_5_3_0')">
+                  终端资产</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_3_1' ? 'active' : ''" @click="toggleL4('m_5_3_1')">
+                  软件管理</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_3_2' ? 'active' : ''" @click="toggleL4('m_5_3_2')">
+                  终端管控</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_3_3' ? 'active' : ''" @click="toggleL4('m_5_3_3')">
+                  终端日志获取</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_5_4' || activeLeaf.startsWith('m_5_4_')) ? 'active' : (expandedL2 === 'm_5_4' ? 'text-white' : '')"
+                @click="toggleL2('m_5_4')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_5_4' || activeLeaf.startsWith('m_5_4_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm0 10a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM6 15h.01M6 7h.01">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_5_4' || activeLeaf.startsWith('m_5_4_')) ? 'font-semibold' : ''">设备管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_5_4' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_5_4'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_4_0' ? 'active' : ''" @click="toggleL4('m_5_4_0')">
+                  设备列表</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_4_1' ? 'active' : ''" @click="toggleL4('m_5_4_1')">
+                  设备备份</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_4_2' ? 'active' : ''" @click="toggleL4('m_5_4_2')">
+                  版本补丁包升级</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_4_3' ? 'active' : ''" @click="toggleL4('m_5_4_3')">
+                  规则库升级</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_5_5' || activeLeaf.startsWith('m_5_5_')) ? 'active' : (expandedL2 === 'm_5_5' ? 'text-white' : '')"
+                @click="toggleL2('m_5_5')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_5_5' || activeLeaf.startsWith('m_5_5_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_5_5' || activeLeaf.startsWith('m_5_5_')) ? 'font-semibold' : ''">策略管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_5_5' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_5_5'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_5_0' ? 'active' : ''" @click="toggleL4('m_5_5_0')">
+                  全局策略</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_5_1' ? 'active' : ''" @click="toggleL4('m_5_5_1')">
+                  用户策略</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_5_6' || activeLeaf.startsWith('m_5_6_')) ? 'active' : (expandedL2 === 'm_5_6' ? 'text-white' : '')"
+                @click="toggleL2('m_5_6')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_5_6' || activeLeaf.startsWith('m_5_6_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_5_6' || activeLeaf.startsWith('m_5_6_')) ? 'font-semibold' : ''">对象管理</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_5_6' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_5_6'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_0' ? 'active' : ''" @click="toggleL4('m_5_6_0')">
+                  网络区域</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_1' ? 'active' : ''" @click="toggleL4('m_5_6_1')">
+                  IP地址</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_2' ? 'active' : ''" @click="toggleL4('m_5_6_2')">
+                  文件类型组</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_3' ? 'active' : ''" @click="toggleL4('m_5_6_3')">
+                  终端应用库</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_4' ? 'active' : ''" @click="toggleL4('m_5_6_4')">
+                  应用识别库</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_5' ? 'active' : ''" @click="toggleL4('m_5_6_5')">
+                  URL分类库</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_6' ? 'active' : ''" @click="toggleL4('m_5_6_6')">
+                  进程库</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_5_6_7' ? 'active' : ''" @click="toggleL4('m_5_6_7')">
+                  时间计划</div>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '系统管理'">
+            <div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_6_0' || activeLeaf.startsWith('m_6_0_')) ? 'active' : (expandedL2 === 'm_6_0' ? 'text-white' : '')"
+                @click="toggleL2('m_6_0')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_6_0' || activeLeaf.startsWith('m_6_0_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_6_0' || activeLeaf.startsWith('m_6_0_')) ? 'font-semibold' : ''">管理员配置</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_6_0' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_6_0'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_6_0_0' ? 'active' : ''" @click="toggleL4('m_6_0_0')">
+                  管理员账号</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_6_0_1' ? 'active' : ''" @click="toggleL4('m_6_0_1')">
+                  管理员认证</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_1' ? 'active' : ''" @click="toggleL2('m_6_1', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_1' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_1' ? 'font-semibold' : ''">系统配置</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_2' ? 'active' : ''" @click="toggleL2('m_6_2', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_2' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_2' ? 'font-semibold' : ''">客户端个性配置</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_3' ? 'active' : ''" @click="toggleL2('m_6_3', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_3' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2V8a2 2 0 00-2-2zm0 10H6a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-3a2 2 0 00-2-2zm10-5h-4a2 2 0 00-2 2v3a2 2 0 002 2h4a2 2 0 002-2v-3a2 2 0 00-2-2zM12 9h4M12 19h4M8 11v5">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_3' ? 'font-semibold' : ''">网络部署</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_4' ? 'active' : ''" @click="toggleL2('m_6_4', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_4' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_4' ? 'font-semibold' : ''">集群管理</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_5' ? 'active' : ''" @click="toggleL2('m_6_5', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_5' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_5' ? 'font-semibold' : ''">特性中心</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_6' ? 'active' : ''" @click="toggleL2('m_6_6', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_6' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_6' ? 'font-semibold' : ''">升级管理</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_7' ? 'active' : ''" @click="toggleL2('m_6_7', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_7' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.121 2.121 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_7' ? 'font-semibold' : ''">系统运维</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_8' ? 'active' : ''" @click="toggleL2('m_6_8', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_8' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_8' ? 'font-semibold' : ''">扩展能力对接</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_9' ? 'active' : ''" @click="toggleL2('m_6_9', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_9' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_9' ? 'font-semibold' : ''">代理网关管理</span>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_6_10' ? 'active' : ''"
+                @click="toggleL2('m_6_10', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_6_10' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_6_10' ? 'font-semibold' : ''">深信服联动设备</span>
+              </div>
+            </div>
+          </template>
+          <template x-if="topNav === '审计中心'">
+            <div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_7_0' || activeLeaf.startsWith('m_7_0_')) ? 'active' : (expandedL2 === 'm_7_0' ? 'text-white' : '')"
+                @click="toggleL2('m_7_0')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_7_0' || activeLeaf.startsWith('m_7_0_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_7_0' || activeLeaf.startsWith('m_7_0_')) ? 'font-semibold' : ''">防火墙集中管理日志</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_7_0' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_7_0'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_0_0' ? 'active' : ''" @click="toggleL4('m_7_0_0')">
+                  应用控制日志</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_0_1' ? 'active' : ''" @click="toggleL4('m_7_0_1')">
+                  安全日志</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_0_2' ? 'active' : ''" @click="toggleL4('m_7_0_2')">
+                  本地操作日志</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_0_3' ? 'active' : ''" @click="toggleL4('m_7_0_3')">
+                  本地系统日志</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_7_1' ? 'active' : ''" @click="toggleL2('m_7_1', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_7_1' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_7_1' ? 'font-semibold' : ''">零信任安全接入日志</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_7_2' || activeLeaf.startsWith('m_7_2_')) ? 'active' : (expandedL2 === 'm_7_2' ? 'text-white' : '')"
+                @click="toggleL2('m_7_2')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_7_2' || activeLeaf.startsWith('m_7_2_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_7_2' || activeLeaf.startsWith('m_7_2_')) ? 'font-semibold' : ''">互联网安全访问日志</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_7_2' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_7_2'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_2_0' ? 'active' : ''" @click="toggleL4('m_7_2_0')">
+                  上网行为日志</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_2_1' ? 'active' : ''" @click="toggleL4('m_7_2_1')">
+                  威胁防护日志</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_7_3' ? 'active' : ''" @click="toggleL2('m_7_3', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_7_3' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_7_3' ? 'font-semibold' : ''">数据防泄密日志</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_7_4' || activeLeaf.startsWith('m_7_4_')) ? 'active' : (expandedL2 === 'm_7_4' ? 'text-white' : '')"
+                @click="toggleL2('m_7_4')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_7_4' || activeLeaf.startsWith('m_7_4_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_7_4' || activeLeaf.startsWith('m_7_4_')) ? 'font-semibold' : ''">终端管理日志</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_7_4' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_7_4'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_4_0' ? 'active' : ''" @click="toggleL4('m_7_4_0')">
+                  终端管控日志</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_4_1' ? 'active' : ''" @click="toggleL4('m_7_4_1')">
+                  软件管控日志</div>
+              </div>
+              <div class="at-menu-l2" :class="activeLeaf === 'm_7_5' ? 'active' : ''" @click="toggleL2('m_7_5', true)">
+                <svg class="at-menu-l2-icon" :stroke="activeLeaf === 'm_7_5' ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span :class="activeLeaf === 'm_7_5' ? 'font-semibold' : ''">用户登录日志</span>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_7_6' || activeLeaf.startsWith('m_7_6_')) ? 'active' : (expandedL2 === 'm_7_6' ? 'text-white' : '')"
+                @click="toggleL2('m_7_6')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_7_6' || activeLeaf.startsWith('m_7_6_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_7_6' || activeLeaf.startsWith('m_7_6_')) ? 'font-semibold' : ''">设备运维日志</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_7_6' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_7_6'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_6_0' ? 'active' : ''" @click="toggleL4('m_7_6_0')">
+                  管理员运维日志</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_6_1' ? 'active' : ''" @click="toggleL4('m_7_6_1')">
+                  设备与系统日志</div>
+              </div>
+              <div class="at-menu-l2"
+                :class="(activeLeaf === 'm_7_7' || activeLeaf.startsWith('m_7_7_')) ? 'active' : (expandedL2 === 'm_7_7' ? 'text-white' : '')"
+                @click="toggleL2('m_7_7')">
+                <svg class="at-menu-l2-icon"
+                  :stroke="(activeLeaf === 'm_7_7' || activeLeaf.startsWith('m_7_7_')) ? 'url(#icon-grad)' : 'currentColor'"
+                  fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                  </path>
+                </svg>
+                <span
+                  :class="(activeLeaf === 'm_7_7' || activeLeaf.startsWith('m_7_7_')) ? 'font-semibold' : ''">审计中心配置</span>
+                <svg class="ml-auto mr-4 w-4 h-4 opacity-60 transition-transform"
+                  :class="expandedL2 === 'm_7_7' ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div x-show="expandedL2 === 'm_7_7'" x-collapse x-cloak>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_7_0' ? 'active' : ''" @click="toggleL4('m_7_7_0')">
+                  日志存储及审计配置</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_7_1' ? 'active' : ''" @click="toggleL4('m_7_7_1')">
+                  Syslog日志同步</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_7_2' ? 'active' : ''" @click="toggleL4('m_7_7_2')">
+                  零信任流量镜像</div>
+                <div class="at-menu-l3" :class="activeLeaf === 'm_7_7_3' ? 'active' : ''" @click="toggleL4('m_7_7_3')">
+                  零信任分析中心对接</div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </aside>
+
+      <!-- ======================================================
+        Main Workspace / 右侧主工作区（业务内容占位）
+        用途：承载当前选中菜单对应的业务页面。
+        使用说明：在此区域内添加 PageTitle、筛选 Toolbar、表格、表单等业务组件。
+      ======================================================= -->
+      <main class="flex-1 bg-bg-light p-0 flex flex-col overflow-hidden">
+
+        <!-- 页面页头占位（可按需添加 PageTitle + Tab） -->
+        <div class="h-12 bg-white border-b border-bg-line flex items-center pl-4 flex-shrink-0 select-none">
+          <span class="text-xs font-semibold text-text-title" x-text="topNav"></span>
+          <span class="w-[1px] h-4 bg-bg-line mx-3"></span>
+          <span class="text-xs text-text-mute">页面标题 / Tab 切换区</span>
+        </div>
+
+        <!-- 业务内容容器（带 12px/p-3 边距，展现底色 EDF1F7） -->
+        <div class="flex-1 p-3 flex flex-col overflow-hidden">
+          
+          <!-- 业务内容区底色纯白色 -->
+          <div class="bg-white rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex-1 flex flex-col overflow-hidden">
+            <!-- 业务内容占位区 -->
+            <div class="flex-1 flex flex-col overflow-hidden p-3">
+              <div class="flex-1 border border-dashed border-border flex flex-col items-center justify-center text-text-mute text-xs rounded-control gap-2">
+                <span>【业务内容区】</span>
+                <span>在此处添加筛选 Toolbar、数据表格 <code class="text-brand">.sd-table</code>、表单或业务组件</span>
+                <span class="text-[10px] text-text-mute mt-2">当前菜单：<span class="text-text" x-text="activeLeaf"></span></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
