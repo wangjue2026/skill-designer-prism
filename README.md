@@ -35,10 +35,11 @@ graph TD
     end
     
     subgraph Assets ["03-design-assets/ (统一设计资产库)"]
-        Comps["components/ (20+ 基础原子组件)"]
-        Pages["page-templates/ (业务框架套头库)"]
-        Patterns["patterns/ (专家范式机制库 P-01~P-08)"]
-        PKB["product-lines-knowledge/ (产线知识库与速查表三)"]
+        Comps["components/ (20+ 基础原子组件 + idux 组件映射)"]
+        Feature["feature/ (高频功能模块: 批量编辑/导入/导出/执行周期/标签/优先级)"]
+        Pages["page-templates/ (页面类型与布局: 01-page-types)"]
+        Patterns["patterns/ (通用设计范式 01~06: 导航/表格/表单/交互/状态/文案)"]
+        PKB["product-lines-knowledge/ (产线导航知识库: SASE / XDR / aES)"]
         Tokens["tokens-cheatsheet.md & global-styles/"]
     end
 
@@ -58,13 +59,16 @@ skill-designer-prism/
 ├── 00-triage-and-routing/                           # 【分诊与转轨中枢】
 │   └── triage-rules.md                              # 方案设计 vs 细节调优决策树与转轨红线
 │
-├── 01-system-solution-design/                       # 【方案系统设计主线 (1~5 步)】
-│   ├── ①需求理解与分析/                            # 步骤 1：需求理解与分析 (精简为 2 篇核心指南)
+├── 01-system-solution-design/                       # 【方案系统设计主线 (Part1 → 🚦 → Part2)】
+│   ├── ①需求理解与分析/                            # Part1：需求分析与思考
 │   │   ├── 1.1-需求理解与现状旅程.md        # 涵盖现状痛点穿透 + 目标用户主要任务旅程 (JTBD)
-│   │   └── 1.2-体验目标.md                  # 涵盖体验收益与务实版体验目标推导指南 (去口号化)
-│   ├── ②设计思考与决策/                       # 步骤 2：设计思考与决策（含双决策库）
+│   │   ├── 1.2-体验目标.md                  # 涵盖体验收益与务实版体验目标推导指南 (去口号化)
+│   │   ├── 1.3-体验突破点拆解.md            # 目标 → 突破点 → 分档点子（双入口扫法 + 来源标注 + 裁剪 + 指标回校）
+│   │   ├── 1.4-草图发散与方向确认.md        # 两套方案（走法 × 档位：高水位/稳水位）的极简草图 + 🚦 方案闸门（确认前不得进 Part2）
+│   │   ├── 方案设计思考经验/                # ①配置运维 ②运营分析 ③排障闭环 ④价值感知（入口 2 的经验底座）
+│   │   └── 演练案例/                        # 1.3 突破点拆解演练集（验证方法稳不稳）
+│   ├── ②设计思考与决策/                       # 双决策库（经验底座，Part2 的素材来源）
 │   │   ├── 2.0-设计决策总览与调度.md           # 双库总入口 + 三用途定位 + 裁决/兜底调度
-│   │   ├── 2.1-设计思考与发力点.md             # 思考方法：痛点 → 发力点 → 机制
 │   │   ├── 需求大类设计决策/                    # 【纵向库】按需求大类的方案经验（标杆案例背书）
 │   │   │   ├── 00-总览与类型定性.md            # 类型全景图 + 类型定性判据 + 分册索引
 │   │   │   ├── Type-01~07-*.md                 # 一类型一文件（经验层 EP + 案例层证据）
@@ -92,21 +96,18 @@ skill-designer-prism/
 │       └── c-局部调优补丁执行模板.md                # c 局部调优补丁执行 Prompt 模板
 │
 ├── 03-design-assets/                                # 【设计资产库基座】
-│   ├── components/                                  # 20+ 基础原子组件规范 (Table, Button, Pro-Search等)
-│   ├── page-templates/                              # 页面模板与业务框架套头库 (监控/配置/对象套头)
-│   │   └── tpl-dashboard-header.md                  # 标杆：监控大盘标准套头
-│   ├── patterns/                                    # 专家范式（机制）库
-│   │   ├── patterns-cheatsheet.md                   # P-01~P-08 范式索引与反查速查表
-│   │   └── pattern-p01..p08-*.md                    # 各范式详情（机制/骨架/闭环/反模式）
-│   ├── product-lines-knowledge/                     # 产品线设计知识库
-│   │   ├── product-lines-taxonomy.md                # 产品线业务属性与严肃度定性速查表
-│   │   └── product-knowledge-cheatsheet-3.md        # 产品业务设计知识库速查表三骨架
+│   ├── components/                                  # 20+ 基础原子组件规范 (Table/Button/Pro-Search/设计表单/图标语义) + idux 组件映射
+│   ├── feature/                                     # 高频功能模块规范 (批量编辑/导入/导出/执行周期/优先级/标签)
+│   ├── page-templates/                              # 页面类型与骨架选型 (01-page-types.md)
+│   ├── patterns/                                    # 通用设计范式库 01~06 (导航/表格/表单/交互/状态/文案术语)
+│   ├── product-lines-knowledge/                     # 产线导航知识库 (SASE / XDR / aES 分目录纳管菜单层级与业务归属)
+│   ├── visual-styles/                               # 可视化件风格规范 (供说明书「可视化件声明」引用)
 │   ├── global-styles/                               # 全局原子规范 (色彩、网格、字阶、栅格)
 │   └── tokens-cheatsheet.md                         # 高频 Tokens 速查手册
 │
 ├── 04-workflows-and-cases/                          # 【执行 SOP 与协作协议】
 │   ├── agent-interaction-protocol.md                # 人机协作状态机 (含说明书确认闸门铁律)
-│   ├── execution-sop.md                             # 8 步端到端执行作业程序
+│   ├── execution-sop.md                             # 5 步主线 + 4 阶调优执行作业程序
 │   ├── few-shots.md                                 # 标杆实战 Few-Shot 样本库
 │   └── cases/                                       # 真实业务需求用例库 (PRD 实战演练)
 │

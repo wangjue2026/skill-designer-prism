@@ -75,6 +75,12 @@
 
     .checkpoint { background: var(--blue-l); border: 1px solid #BAE6FD; border-radius: 4px; padding: 16px 20px; margin-top: 36px; font-size: 12px; color: #1C6EFF; line-height: 1.8; }
     .checkpoint b { display: block; margin-bottom: 6px; font-size: 13px; color: #1C6EFF; }
+  
+    /* 映射清单折叠：默认只显示前 3 行，其余点击展开（DOM 中内容完整保留，不删行） */
+    tr.rows-extra { display: none; }
+    tr.rows-toggle-row > td { padding: 4px 12px; }
+    .rows-toggle { background: none; border: 0; padding: 0; color: #1C6EFF; font-size: 12px; font-family: inherit; cursor: pointer; }
+    .rows-toggle:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -493,7 +499,8 @@ graph LR
           <td><span class="tag-exp">D10-EP01</span> 主操作置顶栏</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-toggle-row"><td colspan="6"><button type="button" class="rows-toggle" aria-expanded="false">展开其余 5 行</button></td></tr>
+        <tr class="rows-extra">
           <td>工具栏：筛选搜索区</td>
           <td><code>IxSelect</code> + <code>IxInput</code></td>
           <td>01-page-types.md / comp-basic-search.md</td>
@@ -501,7 +508,7 @@ graph LR
           <td><span class="tag-exp">D09-EP02</span> ≤4 平铺 / <span class="tag-exp">D09-EP03</span> 显式提交</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>用户台账表格</td>
           <td><code>IxProTable</code> + <code>IxPagination</code></td>
           <td>comp-table.md</td>
@@ -509,7 +516,7 @@ graph LR
           <td><span class="tag-exp">D02-EP01</span> 左树 + 表格台账</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>状态与来源列</td>
           <td><code>IxTag</code> + <code>IxText</code></td>
           <td>comp-tag.md</td>
@@ -517,7 +524,7 @@ graph LR
           <td><span class="tag-exp">D04-EP04</span> 浅底深字状态标签</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>行内操作与更多收纳</td>
           <td><code>IxDropdown</code></td>
           <td>comp-button.md</td>
@@ -525,7 +532,7 @@ graph LR
           <td><span class="tag-exp">D10-EP01</span> 行内 ≤3、其余收纳</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>空态与加载</td>
           <td><code>IxEmpty</code> + <code>IxSpin</code></td>
           <td>idux-component-map.md</td>
@@ -609,9 +616,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：用户台账同时存在“组织层级深”与“字段需对照”两个矛盾，按 D01-EP03 / D02-EP01 采用左树 + 右表的主从同屏：树负责范围切换（选中节点覆盖全部下级，ORG-03），表格负责字段对照；“所属部门”列直接展示完整组织路径，消除同名部门歧义（ORG-04）。第三方用户源为低频配置，按 D01-EP02 收敛为标题栏同级 Tab，不占独立菜单。<br/>
-        🧭 <b>业务动作落点 (CRUD 闭环)</b>：<b>增</b>＝工具栏“新增用户”下钻整页（Page-02）、“批量导入”弹窗（Page-04）；<b>查</b>＝左树选范围 + 单行平铺筛选（≤4 项，回车 / 点搜索显式提交）；<b>改</b>＝行内“编辑”下钻整页；<b>状态变更</b>＝行内“更多”收纳禁用账号 / 关闭客户端权限，点击后进入 Page-07 阻断确认；<b>详情</b>＝行内“详情”下钻 Page-03。本需求无批量操作诉求，列表不设勾选列。<br/>
-        🛡️ <b>状态机与异常规则</b>：账号状态 / 客户端权限仅“启用、禁用”两档互斥，变更必须经 Page-07 确认后生效；组织范围无用户时表格区显示“当前组织范围暂无用户”，筛选无结果时显示“暂无匹配用户，可修改筛选条件”；工具栏在空态下保留可用。
+        💡 <b>为什么这样布局</b>：用户台账同时存在“组织层级深”与“字段需对照”两个矛盾，按 D01-EP03 / D02-EP01 采用左树 + 右表的主从同屏：树负责范围切换（选中节点覆盖全部下级，ORG-03），表格负责字段对照；“所属部门”列直接展示完整组织路径，消除同名部门歧义（ORG-04）。第三方用户源为低频配置，按 D01-EP02 收敛为标题栏同级 Tab，不占独立菜单。<br/>
+        🧭 <b>这页能做什么</b>：<b>增</b>＝工具栏“新增用户”下钻整页（Page-02）、“批量导入”弹窗（Page-04）；<b>查</b>＝左树选范围 + 单行平铺筛选（≤4 项，回车 / 点搜索显式提交）；<b>改</b>＝行内“编辑”下钻整页；<b>状态变更</b>＝行内“更多”收纳禁用账号 / 关闭客户端权限，点击后进入 Page-07 阻断确认；<b>详情</b>＝行内“详情”下钻 Page-03。本需求无批量操作诉求，列表不设勾选列。<br/>
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：账号状态 / 客户端权限仅“启用、禁用”两档互斥，变更必须经 Page-07 确认后生效；组织范围无用户时表格区显示“当前组织范围暂无用户”，筛选无结果时显示“暂无匹配用户，可修改筛选条件”；工具栏在空态下保留可用。
       </div>
     </div>
 
@@ -659,7 +666,8 @@ graph LR
           <td><span class="tag-exp">D07-EP02</span> 层级对象用树选择器</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-toggle-row"><td colspan="6"><button type="button" class="rows-toggle" aria-expanded="false">展开其余 6 行</button></td></tr>
+        <tr class="rows-extra">
           <td>办公地址（国内 / 海外双结构）</td>
           <td><code>IxCascader</code> + <code>IxInput</code></td>
           <td>design-form.md / comp-input.md</td>
@@ -667,7 +675,7 @@ graph LR
           <td><span class="deriv">业务独立推导</span> (双结构地址)</td>
           <td>业务独立推导</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>身份标签（选择 + 新增 + 维护）</td>
           <td><code>IxSelect</code> (multiple) + <code>IxPopconfirm</code></td>
           <td>comp-select.md</td>
@@ -675,7 +683,7 @@ graph LR
           <td><span class="deriv">业务独立推导</span> (标签一体化维护)</td>
           <td>业务独立推导</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>岗位职能（4 组 20 项）</td>
           <td><code>IxSelect</code> (multiple)</td>
           <td>comp-select.md</td>
@@ -683,7 +691,7 @@ graph LR
           <td><span class="tag-exp">D07-EP01</span> 多值枚举用多选下拉</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>客户端权限 / 设备权限 / 绑定目的等少档枚举</td>
           <td><code>IxRadioGroup</code></td>
           <td>comp-radio.md</td>
@@ -691,7 +699,7 @@ graph LR
           <td><span class="tag-exp">D07-EP01</span> 枚举 ≤3 档用单选组</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>绑定关系说明与条件集合</td>
           <td><code>IxAlert</code> + <code>IxProFormList</code> + <code>IxDatePicker</code></td>
           <td>comp-alert.md / design-form.md</td>
@@ -699,7 +707,7 @@ graph LR
           <td><span class="tag-exp">D02-EP05</span> 可增删条件用行内集合</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>提交与校验反馈</td>
           <td><code>IxButton</code> + <code>IxMessage</code></td>
           <td>comp-button.md / comp-message.md</td>
@@ -816,9 +824,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：新增用户要一次配完 5 个分组、含可增删绑定条件集合，内容远超 1.5 屏，按 D02-EP02 用下钻独立整页，弹窗 / 抽屉都装不下且会打断填写节奏；编辑态复用同一页面（新增 = 编辑同容器），第三方同步用户的账号名、所属部门、所属角色按 SOURCE-11 置灰禁用，数据来源只读展示。<br/>
-        🧭 <b>业务动作落点</b>：<b>保存</b>＝底部主按钮，提交前统一校验（必填、账号唯一、密码一致、地址完整性、标签重名、绑定地址格式与冲突、到期时间晚于当前）；<b>取消</b>＝有未保存修改时弹窗提醒（保存 / 放弃 / 继续编辑）；保存成功 Toast 后自动返回用户列表。<br/>
-        🛡️ <b>状态机与异常规则</b>：校验失败字段内联提示、页面不退出（D04-EP03）；启用绑定但未配置任何有效条件时禁止提交；绑定条件删除用 IxPopconfirm 就地确认；岗位职能严格保持 4 组 20 项，分组名不可作为选项保存。
+        💡 <b>为什么这样布局</b>：新增用户要一次配完 5 个分组、含可增删绑定条件集合，内容远超 1.5 屏，按 D02-EP02 用下钻独立整页，弹窗 / 抽屉都装不下且会打断填写节奏；编辑态复用同一页面（新增 = 编辑同容器），第三方同步用户的账号名、所属部门、所属角色按 SOURCE-11 置灰禁用，数据来源只读展示。<br/>
+        🧭 <b>这页能做什么</b>：<b>保存</b>＝底部主按钮，提交前统一校验（必填、账号唯一、密码一致、地址完整性、标签重名、绑定地址格式与冲突、到期时间晚于当前）；<b>取消</b>＝有未保存修改时弹窗提醒（保存 / 放弃 / 继续编辑）；保存成功 Toast 后自动返回用户列表。<br/>
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：校验失败字段内联提示、页面不退出（D04-EP03）；启用绑定但未配置任何有效条件时禁止提交；绑定条件删除用 IxPopconfirm 就地确认；岗位职能严格保持 4 组 20 项，分组名不可作为选项保存。
       </div>
     </div>
 
@@ -866,7 +874,8 @@ graph LR
           <td><span class="tag-exp">D02-EP03</span> 详情多 Tab 分区</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-toggle-row"><td colspan="6"><button type="button" class="rows-toggle" aria-expanded="false">展开其余 5 行</button></td></tr>
+        <tr class="rows-extra">
           <td>基本信息 Tab（含绑定条件子表）</td>
           <td><code>IxProDesc</code></td>
           <td>01-page-types.md</td>
@@ -874,7 +883,7 @@ graph LR
           <td><span class="deriv">业务独立推导</span> (字段去重)</td>
           <td>模板还原</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>关联策略 Tab（四类 0..N）</td>
           <td><code>IxTag</code> + <code>IxEmpty</code></td>
           <td>comp-tag.md</td>
@@ -882,7 +891,7 @@ graph LR
           <td><span class="tag-exp">D04-EP02</span> 空态明确表达</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>在线终端 Tab（客户端 / 移动端子表）</td>
           <td><code>IxTabs</code> (segment) + <code>IxProTable</code></td>
           <td>comp-table.md</td>
@@ -890,7 +899,7 @@ graph LR
           <td><span class="tag-exp">D02-EP03</span> 从属子表承载</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>状态标签（账号 / 客户端权限）</td>
           <td><code>IxTag</code></td>
           <td>comp-tag.md</td>
@@ -898,7 +907,7 @@ graph LR
           <td><span class="tag-exp">D04-EP04</span> 浅底深字标签</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>终端下线入口</td>
           <td><code>IxButton</code> (链接型)</td>
           <td>comp-button.md</td>
@@ -952,9 +961,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：用户详情含 3 个 Tab 与两类终端子表，信息量超过抽屉的舒适承载区，按 D02-EP03 用下钻详情页；概览卡只放身份与摘要字段，下方 Tab 按去重规则不重复展示，避免同一信息出现两次。<br/>
-        🧭 <b>业务动作落点</b>：<b>编辑</b>＝概览卡右侧主按钮，下钻 Page-02 同容器编辑；<b>禁用账号 / 关闭客户端权限</b>＝“更多”收纳，点击进 Page-07；<b>终端下线</b>＝在线终端行内“下线”链接，点击进 Page-07 阻断确认，成功后该行从在线列表移除；<b>返回</b>＝标题栏返回入口回到列表并保留筛选与游标。<br/>
-        🛡️ <b>状态机与异常规则</b>：用户无在线终端时对应子表显示“当前无在线终端”（DEVICE-10）；某类策略无关联时明确显示“暂无关联策略”（POLICY-06）；下线执行前若终端已自行离线，反馈“该终端已离线”避免重复处置；公网 IP / 设备位置未识别时显示“—”，不按加载异常处理。
+        💡 <b>为什么这样布局</b>：用户详情含 3 个 Tab 与两类终端子表，信息量超过抽屉的舒适承载区，按 D02-EP03 用下钻详情页；概览卡只放身份与摘要字段，下方 Tab 按去重规则不重复展示，避免同一信息出现两次。<br/>
+        🧭 <b>这页能做什么</b>：<b>编辑</b>＝概览卡右侧主按钮，下钻 Page-02 同容器编辑；<b>禁用账号 / 关闭客户端权限</b>＝“更多”收纳，点击进 Page-07；<b>终端下线</b>＝在线终端行内“下线”链接，点击进 Page-07 阻断确认，成功后该行从在线列表移除；<b>返回</b>＝标题栏返回入口回到列表并保留筛选与游标。<br/>
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：用户无在线终端时对应子表显示“当前无在线终端”（DEVICE-10）；某类策略无关联时明确显示“暂无关联策略”（POLICY-06）；下线执行前若终端已自行离线，反馈“该终端已离线”避免重复处置；公网 IP / 设备位置未识别时显示“—”，不按加载异常处理。
       </div>
     </div>
 
@@ -1002,7 +1011,8 @@ graph LR
           <td><span class="tag-exp">D10-EP03</span> 上传 + 规则确认流程</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-toggle-row"><td colspan="6"><button type="button" class="rows-toggle" aria-expanded="false">展开其余 3 行</button></td></tr>
+        <tr class="rows-extra">
           <td>校验确认区（有效 / 异常）</td>
           <td><code>IxProTable</code> + <code>IxTag</code></td>
           <td>comp-table.md / comp-tag.md</td>
@@ -1010,7 +1020,7 @@ graph LR
           <td><span class="deriv">业务独立推导</span> (按 IMPORT-06/08)</td>
           <td>业务独立推导</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>结果反馈区</td>
           <td><code>IxAlert</code> + <code>IxProTable</code></td>
           <td>comp-alert.md / comp-table.md</td>
@@ -1018,7 +1028,7 @@ graph LR
           <td><span class="tag-exp">D04-EP03</span> 失败明细就地告知</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>底部操作条</td>
           <td><code>IxButton</code></td>
           <td>comp-button.md</td>
@@ -1058,9 +1068,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：导入是“先给规则、再给结果”的流程型动作，按 D10-EP03 用顶部按钮直达居中弹窗；确认与结果两阶段在同一弹窗内推进，管理员执行前能看清有效 / 异常数据（IMPORT-06），执行后能逐条核对失败原因（IMPORT-08）。<br/>
-        🧭 <b>业务动作落点</b>：<b>获取模板</b>＝“下载模板”；<b>上传</b>＝拖拽区，格式 / 大小 / 条数超限就地拦截（IMPORT-02/10/11）；<b>确认导入</b>＝主按钮，仅导入有效数据；<b>结果</b>＝展示成功与失败数量、失败明细保留弹窗内；<b>取消</b>＝任意阶段可退出，已上传文件不生效。<br/>
-        🛡️ <b>状态机与异常规则</b>：单条失败不影响其他合法数据（IMPORT-07）；文件整体不可解析时不进入确认阶段并说明原因；导入成功的数据来源统一记录为“批量导入”；提交期间主按钮 loading 防重复点击。
+        💡 <b>为什么这样布局</b>：导入是“先给规则、再给结果”的流程型动作，按 D10-EP03 用顶部按钮直达居中弹窗；确认与结果两阶段在同一弹窗内推进，管理员执行前能看清有效 / 异常数据（IMPORT-06），执行后能逐条核对失败原因（IMPORT-08）。<br/>
+        🧭 <b>这页能做什么</b>：<b>获取模板</b>＝“下载模板”；<b>上传</b>＝拖拽区，格式 / 大小 / 条数超限就地拦截（IMPORT-02/10/11）；<b>确认导入</b>＝主按钮，仅导入有效数据；<b>结果</b>＝展示成功与失败数量、失败明细保留弹窗内；<b>取消</b>＝任意阶段可退出，已上传文件不生效。<br/>
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：单条失败不影响其他合法数据（IMPORT-07）；文件整体不可解析时不进入确认阶段并说明原因；导入成功的数据来源统一记录为“批量导入”；提交期间主按钮 loading 防重复点击。
       </div>
     </div>
 
@@ -1108,7 +1118,8 @@ graph LR
           <td><span class="tag-exp">D10-EP01</span> 主操作置顶栏</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-toggle-row"><td colspan="6"><button type="button" class="rows-toggle" aria-expanded="false">展开其余 3 行</button></td></tr>
+        <tr class="rows-extra">
           <td>类型与同步信息列</td>
           <td><code>IxTag</code> + <code>IxText</code></td>
           <td>comp-tag.md</td>
@@ -1116,7 +1127,7 @@ graph LR
           <td><span class="deriv">业务独立推导</span> (按 SOURCE-08)</td>
           <td>模板还原</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>行内操作</td>
           <td><code>IxButton</code> (链接型)</td>
           <td>comp-button.md</td>
@@ -1124,7 +1135,7 @@ graph LR
           <td><span class="tag-exp">D10-EP01</span> 行内操作列</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>空态</td>
           <td><code>IxEmpty</code></td>
           <td>idux-component-map.md</td>
@@ -1171,9 +1182,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：用户源实例是“可枚举、需逐条维护”的配置对象，量级小（个位数到几十个），按 D02-EP01 用常规表格 + 行内操作，不做左树不做卡片；作为低频配置按 D01-EP02 收敛为模块内 Tab，与用户管理共享菜单入口。<br/>
-        🧭 <b>业务动作落点</b>：<b>增</b>＝工具栏“新增用户源”弹窗（Page-06）；<b>查</b>＝配置名称搜索，回车提交；<b>改</b>＝行内“编辑”同容器弹窗；本期不提供实例删除（需求未含，列入边界）。<br/>
-        🛡️ <b>状态机与异常规则</b>：凭据无效或“同步至部门”节点不可用的实例不得视为正常配置，编辑时按字段内联提示阻断保存；同步遇到账号名冲突时跳过该用户并记录跳过原因（SOURCE-13），冲突明细在同步结果中可核对。
+        💡 <b>为什么这样布局</b>：用户源实例是“可枚举、需逐条维护”的配置对象，量级小（个位数到几十个），按 D02-EP01 用常规表格 + 行内操作，不做左树不做卡片；作为低频配置按 D01-EP02 收敛为模块内 Tab，与用户管理共享菜单入口。<br/>
+        🧭 <b>这页能做什么</b>：<b>增</b>＝工具栏“新增用户源”弹窗（Page-06）；<b>查</b>＝配置名称搜索，回车提交；<b>改</b>＝行内“编辑”同容器弹窗；本期不提供实例删除（需求未含，列入边界）。<br/>
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：凭据无效或“同步至部门”节点不可用的实例不得视为正常配置，编辑时按字段内联提示阻断保存；同步遇到账号名冲突时跳过该用户并记录跳过原因（SOURCE-13），冲突明细在同步结果中可核对。
       </div>
     </div>
 
@@ -1221,7 +1232,8 @@ graph LR
           <td><span class="tag-exp">D07-EP01</span> 枚举 ≤3 档用单选组</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-toggle-row"><td colspan="6"><button type="button" class="rows-toggle" aria-expanded="false">展开其余 4 行</button></td></tr>
+        <tr class="rows-extra">
           <td>配置名称 / App ID / App Secret</td>
           <td><code>IxInput</code></td>
           <td>comp-input.md</td>
@@ -1229,7 +1241,7 @@ graph LR
           <td><span class="tag-exp">D04-EP03</span> 内联校验</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>同步至部门</td>
           <td><code>IxTreeSelect</code></td>
           <td>comp-tree.md</td>
@@ -1237,7 +1249,7 @@ graph LR
           <td><span class="tag-exp">D07-EP02</span> 层级对象用树选择器</td>
           <td>标杆复用</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>定时同步计划（周期 + 执行日 + 执行时间）</td>
           <td><code>IxSelect</code> + <code>IxDatePicker</code></td>
           <td>comp-select.md / comp-date-picker.md</td>
@@ -1245,7 +1257,7 @@ graph LR
           <td><span class="deriv">业务独立推导</span> (周期联动复合行)</td>
           <td>业务独立推导</td>
         </tr>
-        <tr>
+        <tr class="rows-extra">
           <td>底部操作条</td>
           <td><code>IxButton</code></td>
           <td>comp-button.md</td>
@@ -1309,9 +1321,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：单实例配置项约 10 项、不含规则编辑器类复杂控件，按配置页容器规则用弹窗表单承载；定时同步启用后才展开“周期 + 执行日 + 执行时间”复合行，未启用时不占位，减少首屏干扰。<br/>
-        🧭 <b>业务动作落点</b>：<b>确定</b>＝保存前统一校验（配置名称唯一、凭据完整、同步至部门有效、启用定时同步时周期 / 执行日 / 执行时间完整），成功后关闭弹窗并刷新实例台账；<b>取消</b>＝有未保存修改时提醒。<br/>
-        🛡️ <b>状态机与异常规则</b>：校验失败字段内联提示、弹窗不关闭（D04-EP03）；凭据无效或部门节点不可用时按字段内联报错，配置不得视为可用；启用定时同步但计划不完整时禁止保存（SOURCE-09）。
+        💡 <b>为什么这样布局</b>：单实例配置项约 10 项、不含规则编辑器类复杂控件，按配置页容器规则用弹窗表单承载；定时同步启用后才展开“周期 + 执行日 + 执行时间”复合行，未启用时不占位，减少首屏干扰。<br/>
+        🧭 <b>这页能做什么</b>：<b>确定</b>＝保存前统一校验（配置名称唯一、凭据完整、同步至部门有效、启用定时同步时周期 / 执行日 / 执行时间完整），成功后关闭弹窗并刷新实例台账；<b>取消</b>＝有未保存修改时提醒。<br/>
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：校验失败字段内联提示、弹窗不关闭（D04-EP03）；凭据无效或部门节点不可用时按字段内联报错，配置不得视为可用；启用定时同步但计划不完整时禁止保存（SOURCE-09）。
       </div>
     </div>
 
@@ -1390,9 +1402,9 @@ graph LR
         </div>
       </div>
       <div class="wf-annotation">
-        💡 <b>架构定位与 Why 依据</b>：禁用账号（注销全部客户端和移动端在线会话）、关闭客户端权限（已登录客户端自动注销）、终端下线（断开指定终端会话）都是“点了就影响真实用户工作”的高影响动作，按 D05-EP01 必须阻断弹窗二次确认，并把对象全名与影响范围讲清楚；确认按钮按 D05-EP04 统一品牌蓝，防呆靠确认与回显，不靠红色。<br/>
+        💡 <b>为什么这样布局</b>：禁用账号（注销全部客户端和移动端在线会话）、关闭客户端权限（已登录客户端自动注销）、终端下线（断开指定终端会话）都是“点了就影响真实用户工作”的高影响动作，按 D05-EP01 必须阻断弹窗二次确认，并把对象全名与影响范围讲清楚；确认按钮按 D05-EP04 统一品牌蓝，防呆靠确认与回显，不靠红色。<br/>
         🧭 <b>三类文案分工</b>：<b>禁用账号</b>＝回显用户全名 + “禁用后该用户所有客户端和移动端在线会话将立即注销”；<b>关闭客户端权限</b>＝回显用户全名 + “已登录客户端将自动注销”（如上图）；<b>终端下线</b>＝回显用户、终端类型（客户端 / 移动端）与终端标识 + “下线后该终端的当前在线会话将断开”。<br/>
-        🛡️ <b>防呆拦截铁律</b>：禁止红色实心按钮，统一品牌蓝主按钮；执行结果用轻提示反馈（成功 / 终端已离线 / 无操作权限 / 执行失败）；“启用账号 / 启用客户端权限”为可逆恢复动作，用普通确认即可，不套用本阻断弹窗。
+        🛡️ <b>哪些做不了、拦下后怎么提示</b>：禁止红色实心按钮，统一品牌蓝主按钮；执行结果用轻提示反馈（成功 / 终端已离线 / 无操作权限 / 执行失败）；“启用账号 / 启用客户端权限”为可逆恢复动作，用普通确认即可，不套用本阻断弹窗。
       </div>
     </div>
 
@@ -1424,6 +1436,18 @@ graph LR
 
 <script>
   mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+
+  // 映射清单折叠/展开（只影响渲染，不影响源码内容；AI coding 须按源码全量读取）
+  document.querySelectorAll('button.rows-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tb = btn.closest('tbody');
+      var rows = tb.querySelectorAll('tr.rows-extra');
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      rows.forEach(function (r) { r.style.display = expanded ? 'none' : 'table-row'; });
+      btn.setAttribute('aria-expanded', String(!expanded));
+      btn.textContent = expanded ? ('展开其余 ' + rows.length + ' 行') : ('收起，只看前 3 行');
+    });
+  });
 </script>
 </body>
 </html>

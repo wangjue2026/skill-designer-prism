@@ -45,11 +45,37 @@ echo " 目标文件: $SPEC"
 echo "============================================================"
 
 # ---------- 1. 结构完整性 ----------
-head_ "1/11 结构完整性（五章 + 分页面小节）"
+head_ "1/11 结构完整性（五章 或 Part1/Part2 两段式 + 分页面小节）"
 H2=$(grep -c '<h2' "$SPEC" || true)
-H3P=$(grep -oE '<h3[^>]*>\s*4\.[0-9]' "$SPEC" | wc -l | tr -d ' ')
-if [ "$H2" -eq 5 ]; then echo "  ✅ 五章齐备 (h2 = $H2)"; else echo "  ❌ 章节数异常: h2 = ${H2}（应为 5）"; is_bad; fi
-if [ "$H3P" -ge 1 ]; then echo "  ✅ 分页面小节 $H3P 个"; else echo "  ❌ 未找到分页面小节 (h3 4.x)"; is_bad; fi
+PART=$(grep -c '<h2[^>]*class="part"' "$SPEC" || true)
+# 分页面小节：旧结构 h3 4.x；新结构 h4 7.x（第7节下的页面小节）
+H3P=$(grep -oE '<h[34][^>]*>\s*(4|7)\.[0-9]' "$SPEC" | wc -l | tr -d ' ')
+if [ "$H2" -eq 5 ]; then
+  echo "  ✅ 五章齐备 (h2 = $H2)"
+elif [ "$H2" -eq 2 ] && [ "$PART" -eq 2 ]; then
+  echo "  ✅ 两段式结构齐备 (Part1 / Part2, h2 = $H2)"
+else
+  echo "  ❌ 章节数异常: h2 = ${H2}、part 标题 = ${PART}（应为 5，或 2 个 part 标题）"; is_bad
+fi
+if [ "$H3P" -ge 1 ]; then echo "  ✅ 分页面小节 $H3P 个"; else echo "  ❌ 未找到分页面小节 (h3 4.x 或 h4 7.x)"; is_bad; fi
+
+# 场景切分（1.1 判据：数量 2~5 条；名字里不得带阶段/操作词，串行旅程必须合并）
+SCN=$(grep -oE '<td><b>S[0-9]+\.' "$SPEC" | wc -l | tr -d ' ')
+if [ "$SCN" -gt 0 ]; then
+  SCN_MSG=""
+  if [ "$SCN" -lt 2 ] || [ "$SCN" -gt 5 ]; then
+    SCN_MSG="$SCN_MSG【场景数量】主场景 $SCN 条，应为 2~5 条（不足=拆碎，过多=没收敛）；"
+  fi
+  BADNAME=$(grep -oE '<td><b>S[0-9]+\. [^<]*' "$SPEC" | sed 's|<td><b>||' | grep -E '(追踪|结果|查看|定位|详情|下发|提交|编辑|导入|导出|新建)' || true)
+  if [ -n "$BADNAME" ]; then
+    SCN_MSG="$SCN_MSG【场景串行】场景名含阶段/操作词（$(printf '%s' "$BADNAME" | tr '\n' ' ')），疑似把一段串行旅程拆成两个场景；A 的终态若是 B 的触发情境必须合并；"
+  fi
+  if [ -z "$SCN_MSG" ]; then
+    echo "  ✅ 场景切分合规（$SCN 条 · 名称不含阶段词）"
+  else
+    echo "  ❌ $SCN_MSG"; is_bad
+  fi
+fi
 
 # ---------- 2. 组件真实性（两轨制）----------
 head_ "2/11 组件真实性（已登记 或 已显式声明来源）"
@@ -82,16 +108,21 @@ else
 fi
 
 # ---------- 4. 色值白名单 ----------
-head_ "4/11 色值合规（必须命中 03-design-assets/ 全量色板）"
+head_ "4/11 色值合规（必须命中 03-design-assets/ 全量色板；草图折叠区免检）"
+# 剔除草图折叠区（details.sketch-fold 内）——草图不受设计规范约束，见 1.4 第五节
+NOCKECK=$(mktemp)
+TMPC=$(mktemp)
+awk '/<details class="sketch-fold">/{skip=1} !skip{print} /<\/details>/{skip=0}' "$SPEC" > "$NOCKECK"
 WHITE=$(find "$ASSETS" -type f -name '*.md' | while read -r f; do grep -oE '#[0-9A-Fa-f]{6}' "$f"; done | tr 'a-f' 'A-F' | sort -u)
-BADC=""
-# 排除说明性文字行（含违规/禁止/示例/举例/均属/反例等关键词的行是规则描述，非实际使用色值）
-for c in $(grep -oE '#[0-9A-Fa-f]{6}' "$SPEC" | tr 'a-f' 'A-F' | sort -u); do
-  if ! printf '%s\n' "$WHITE" | grep -qx "$c"; then
-    REAL_USAGE=$(grep -n "$c" "$SPEC" | grep -viE '(违规|禁止|示例|举例|均属|反例|规范中的|必须使用)' || true)
-    [ -n "$REAL_USAGE" ] && BADC="$BADC $c"
-  fi
-done
+# 豁免范围只看"这一行是不是说明性文字"，不看行内有没有某几个词（旧写法会被正文里的"违规"字样误判）
+#   ① HTML 注释行（<!-- ... -->）不算实际使用；
+#   ② Markdown 说明行（以 > 、| 、* 、- 、# 开头）不算实际使用；
+#   ③ 其余一律视为真实用法，必须命中白名单
+# 性能：先一次性过滤出"真实用法行"，再比对白名单（旧写法每个色值都全表扫一遍，大文件会卡死）
+# 用 awk 做集合比对（比逐个 grep -qx 快两个数量级）
+BADC=$(awk '!/^[[:space:]]*(<!--|>|\||\*|-|#)/' "$NOCKECK" \
+  | grep -oE '#[0-9A-Fa-f]{6}' | tr 'a-f' 'A-F' | sort -u > "$TMPC" ; \
+  awk 'NR==FNR{w[$0]=1; next} !($0 in w){print}' <(printf '%s\n' "$WHITE") "$TMPC" | tr '\n' ' ')
 if [ -z "$BADC" ]; then
   echo "  ✅ 全部色值均命中设计资产白名单"
 else
@@ -130,7 +161,11 @@ fi
 head_ "7/11 经验落点（纵向 EP 与横向 D0x-EPxx 均须在四、核心页面中有承载）"
 FOURTH=$(grep -n '<h2' "$SPEC" | sed -n '4p' | cut -d: -f1)
 if [ -z "$FOURTH" ]; then
-  echo "  ⚠️ 未定位到第四章，跳过本项"
+  # 两段式结构：以「7. 核心页面线框」为承载区起点
+  FOURTH=$(grep -n '<h3[^>]*>\s*7\.' "$SPEC" | head -1 | cut -d: -f1)
+fi
+if [ -z "$FOURTH" ]; then
+  echo "  ⚠️ 未定位到第四章 / 第7节，跳过本项"
 else
   ORPHAN=""
   # 只统计真实引用的纵向 EP（排除在说明性文字/举例/规则描述行中出现的 EP 编号）
@@ -216,10 +251,12 @@ else
 fi
 
 # ---------- 10. 线框规范符合度（对接 03-design-assets 组件规范）----------
-head_ "10/11 线框规范符合度（页脚按钮顺序 / 按钮图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号）"
+head_ "10/11 线框规范符合度（页面线框必检；草图折叠区免检）"
 WF_RESULT=$(node -e '
   const fs = require("fs");
-  const spec = fs.readFileSync(process.argv[1], "utf-8");
+  const raw = fs.readFileSync(process.argv[1], "utf-8");
+  // 剔除草图折叠区（details.sketch-fold）——草图不受设计规范约束，见 1.4 第五节
+  const spec = raw.replace(/<details class="sketch-fold">[\s\S]*?<\/details>/g, "");
   const errors = [];
   const lines = spec.split(/\r?\n/);
 
@@ -300,10 +337,32 @@ WF_RESULT=$(node -e '
   }
   if (seenUI.size) errors.push("【UI文案】线框可视区出现经验编号 " + [...seenUI].join("、") + "；EP/D0x-EPxx 不得写进线框 UI 文案，只能出现在映射表与批注中");
 
+  // 10g 弹窗/抽屉三段分区硬指标（comp-modal.md / comp-drawer.md）
+  const boxRe = /<div class="(wf-modal-body|wf-drawer-body)"[^>]*>/g;
+  while ((m = boxRe.exec(spec)) !== null) {
+    const kind = m[1];
+    const tail = spec.slice(m.index);
+    const endRel = tail.search(/<div class="wf-annotation">/);
+    const region = endRel === -1 ? tail : tail.slice(0, endRel);
+    const name = kind === "wf-modal-body" ? "弹窗" : "抽屉";
+    if (/wf-header[^>]*border-bottom/.test(region)) errors.push("【" + name + "分区】标题栏带底部分割线；comp-modal / comp-drawer 要求标题栏无底部分割线");
+    if (region.indexOf("height:48px") === -1) errors.push("【" + name + "分区】标题栏未标 48px 高度（规范硬指标）");
+    if (region.indexOf("height:56px") === -1) errors.push("【" + name + "分区】底部按钮栏未标 56px 高度（规范硬指标）");
+    if (kind === "wf-modal-body" && region.indexOf("justify-content:flex-end") === -1) errors.push("【弹窗分区】页脚按钮组未右对齐；comp-modal.md 要求按钮组整体右对齐（主按钮在左、取消在右）");
+    if (kind === "wf-drawer-body" && region.indexOf("justify-content:flex-start") === -1) errors.push("【抽屉分区】页脚按钮未左对齐；comp-drawer.md 要求按钮左对齐、主按钮最左");
+  }
+
+  // 10h 提示条规范（comp-alert.md）：一律无边框；红色三元组不得作为块级提示条底色
+  const redBlock = /<div[^>]*background:\s*(#FFF1F0|var\(--danger-b\))[^>]*>/gi;
+  if (redBlock.test(spec)) errors.push("【提示条】出现红色底块级警示条；comp-alert.md 只有普通条/告警条两档，红色不得用作 Alert 底色（红色只许用于文字级与 Tag）");
+  const alertBorderA = /<div[^>]*background:\s*(#FFFAF2|#F7F7F8)[^>]*border\s*:/gi;
+  const alertBorderB = /<div[^>]*border\s*:[^>]*background:\s*(#FFFAF2|#F7F7F8)/gi;
+  if (alertBorderA.test(spec) || alertBorderB.test(spec)) errors.push("【提示条】普通/告警提示条带了边框；comp-alert.md 规定无边框");
+
   if (errors.length > 0) {
     console.log("FAIL|" + [...new Set(errors)].join("；"));
   } else {
-    console.log("PASS|线框规范符合度通过（页脚按钮顺序 / 按钮无图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号）");
+    console.log("PASS|线框规范符合度通过（页脚按钮顺序 / 按钮无图标 / 表单星号占位 / 容器宽度档位 / 容器选型一致 / UI 文案无经验编号 / 弹窗三段分区 / 提示条无边框无红底）· 草图区已跳过");
   }
 ' "$SPEC")
 

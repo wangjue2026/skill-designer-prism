@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>织雨体验设计方案说明书：主机资产发现与识别 · 资产台账（样板）</title>
+<style>
+    :root {
+      --bg: #F7F9FC; --card: #FFFFFF; --border: #E1E5EB;
+      --text: #2F3540; --text-sub: #6F7785; --text-mute: #A1A7B3;
+      --blue: #1C6EFF; --blue-l: #E8F4FF; --blue-border: #BAE6FD;
+      --warn-t: #FA8C16; --warn-b: #FFFBE6; --warn-bd: #FFE58F;
+      --green-t: #12A679; --green-b: #F6FFED; --green-bd: #B7EB8F;
+      --danger-t: #D9363E; --danger-b: #FFF1F0; --danger-bd: #FFA39E;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: "Inter", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      font-size: 13px; line-height: 1.7;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+    .doc { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 36px; box-shadow: 0 1px 3px rgba(15,23,42,0.04); }
+    h1 { font-size: 22px; line-height: 30px; font-weight: 700; margin: 0 0 16px; color: #1E293B; }
+    h2 { font-size: 16px; line-height: 24px; font-weight: 600; margin: 36px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); color: #1E293B; }
+    h3 { font-size: 14px; font-weight: 600; margin: 24px 0 10px; color: #2F3540; }
+    h4 { font-size: 13px; font-weight: 600; margin: 16px 0 6px; color: var(--text-sub); }
+    
+    .meta { color: var(--text-sub); font-size: 12px; margin-bottom: 24px; line-height: 2; background: #F8FAFC; padding: 12px 16px; border-radius: 4px; border: 1px solid var(--border); }
+    .meta b { color: var(--text); }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 2px; background: var(--warn-b); color: var(--warn-t); border: 1px solid var(--warn-bd); font-size: 11px; font-weight: 500; }
+    
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+    th { background: #EDF1F7; color: #454C59; font-weight: 500; text-align: left; height: 32px; padding: 0 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { height: 38px; padding: 6px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    
+    /* 标签双轨制：标杆复用实线绿 vs 业务独立推导虚线灰 */
+    .tag { display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px; background: var(--blue-l); color: var(--blue); border: 1px solid var(--blue-border); }
+    .tag-exp { display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px; background: var(--green-b); color: var(--green-t); border: 1px solid var(--green-bd); font-weight: 600; }
+    .deriv { display: inline-block; padding: 1px 8px; border-radius: 2px; font-size: 11px; background: #F1F5F9; color: #454C59; border: 1px dashed #94A3B8; }
+    .flag { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 11px; background: var(--danger-b); color: var(--danger-t); border: 1px solid var(--danger-bd); }
+    
+    .mermaid { background: #F8FAFC; border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin: 14px 0; text-align: center; overflow-x: auto; }
+    ul { margin: 8px 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    .note { background: #F8FAFC; border-left: 3px solid var(--blue); padding: 8px 14px; margin: 10px 0; font-size: 12px; color: #454C59; }
+
+    /* ========== 通用线框图视觉基础原语 (Universal Wireframe Primitives) ========== */
+    .wf-container { background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 16px; margin: 16px 0; }
+    .wf-label { display: inline-block; font-size: 11px; font-weight: 700; color: #454C59; margin-bottom: 6px; }
+    .wf-shell { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; box-shadow: 0 1px 3px rgba(15,23,42,0.05); overflow: hidden; }
+    .wf-header { background: #F1F5F9; border-bottom: 1px solid #E2E8F0; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: #454C59; }
+    .wf-body { padding: 12px; }
+    .wf-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+    .wf-col { flex: 1; }
+    .wf-card { background: #F8FAFC; border: 1px solid #E1E5EB; border-radius: 2px; padding: 8px 10px; font-size: 11px; }
+    .wf-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+    .wf-table th { background: #EDF1F7; padding: 6px 8px; border-bottom: 1px solid #E2E8F0; text-align: left; height: auto; }
+    .wf-table td { padding: 6px 8px; border-bottom: 1px dashed #E2E8F0; color: #64748B; height: auto; }
+    .wf-btn { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 11px; background: #FFFFFF; color: #2F3540; border: 1px solid #D3D7DE; }
+    .wf-btn-primary { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 11px; background: var(--blue); color: #FFFFFF; border: 1px solid var(--blue); }
+    .wf-btn-disabled { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 11px; background: #EDF1F7; color: #BEC3CC; border: 1px solid #E2E8F0; }
+    .wf-drawer-overlay { display: flex; background: rgba(15, 23, 42, 0.15); border: 1px dashed #94A3B8; border-radius: 4px; min-height: 280px; position: relative; }
+    .wf-drawer-body { width: 440px; background: #FFFFFF; border-left: 2px solid var(--blue); padding: 16px; margin-left: auto; box-shadow: -4px 0 16px rgba(15,23,42,0.12); display: flex; flex-direction: column; }
+    .wf-modal-overlay { display: flex; justify-content: center; align-items: center; background: rgba(15, 23, 42, 0.25); border: 1px dashed #94A3B8; border-radius: 4px; min-height: 240px; padding: 20px; }
+    .wf-modal-body { width: 480px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 4px; padding: 16px; box-shadow: 0 4px 16px rgba(15,23,42,0.14); }
+    .wf-annotation { font-size: 11px; color: #1C6EFF; background: #E8F4FF; padding: 6px 10px; border-radius: 2px; border-left: 3px solid var(--blue); margin-top: 10px; line-height: 1.6; }
+
+    /* 表单专用线框原语（严格左右结构：左 Label 固定宽 + 间距 16px + 右 Control） */
+    .wf-form-item { display: flex; align-items: flex-start; margin-bottom: 12px; }
+    .wf-form-label { width: 110px; flex-shrink: 0; color: #6F7785; font-size: 11px; padding-top: 4px; text-align: left; }
+    .wf-form-control { flex: 1; min-width: 0; }
+
+    /* 底部评审共识关卡浮层 */
+    .checkpoint { background: var(--blue-l); border: 1px solid #BAE6FD; border-radius: 4px; padding: 16px 20px; margin-top: 36px; font-size: 12px; color: #1C6EFF; line-height: 1.8; }
+    .checkpoint b { display: block; margin-bottom: 6px; font-size: 13px; color: #1C6EFF; }
+
+    /* ========== 角色卡片 (Role Cards) ========== */
+    .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin: 14px 0 6px; }
+    .role-card { background: #FFFFFF; border: 1px solid #E1E5EB; border-radius: 6px; padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .role-card.primary { border-color: #BAE6FD; box-shadow: 0 1px 4px rgba(28,110,255,0.06); }
+    .role-hd { display: flex; gap: 10px; align-items: center; padding: 13px 14px; background: #F7F9FC; border-bottom: 1px solid #EDF1F7; }
+    .role-card.primary .role-hd { background: #F0F3FF; }
+    .role-avatar { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #EDF1F7;
+      display: flex; align-items: center; justify-content: center; font-size: 15px; color: #6F7785; }
+    .role-card.primary .role-avatar { background: #E8F4FF; color: #1C6EFF; }
+    .role-name { font-size: 13px; font-weight: 700; color: #2F3540; line-height: 1.35; }
+    .role-post { font-size: 11px; color: #8A92A1; margin-top: 1px; }
+    .role-bd { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .role-row { font-size: 12px; line-height: 1.65; }
+    .role-row .k { display: block; font-size: 10.5px; color: #A1A7B3; letter-spacing: .3px; margin-bottom: 2px; }
+    .role-row .v { color: #454C59; }
+    .role-jtbd { background: #F8FAFC; border-left: 3px solid #1C6EFF; border-radius: 0 3px 3px 0;
+      padding: 8px 11px; font-size: 12px; color: #2F3540; line-height: 1.7; }
+    .role-jtbd .q { color: #1C6EFF; font-weight: 700; margin-right: 3px; }
+    .role-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+    .role-tag { font-size: 10.5px; padding: 1px 8px; border-radius: 9px; background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
+
+    h2.part { font-size: 19px; font-weight: 800; letter-spacing: -.3px; color: #2F3540;
+      margin: 34px 0 14px; padding: 10px 0 8px; border-top: 2px solid #1C6EFF; border-bottom: 1px solid #E1E5EB; }
+    details.sketch-fold { border: 1px solid #E1E5EB; border-radius: 6px; background: #FFFFFF; margin: 12px 0; }
+    details.sketch-fold > summary { cursor: pointer; padding: 9px 14px; font-size: 12px; font-weight: 600;
+      color: #1C6EFF; background: #F7F9FC; border-radius: 6px; list-style: none; }
+    details.sketch-fold > summary::-webkit-details-marker { display: none; }
+    details.sketch-fold > summary::before { content: "▸ "; }
+    details.sketch-fold[open] > summary::before { content: "▾ "; }
+    details.sketch-fold[open] > summary { border-bottom: 1px solid #E1E5EB; border-radius: 6px 6px 0 0; }
+    details.sketch-fold .sketch-body { padding: 12px 14px; }
+    .gate-pass { display: flex; align-items: center; gap: 10px; background: #F6FFED;
+      border: 1px solid #B7EB8F; border-radius: 4px; padding: 10px 14px; font-size: 12px; color: #454C59; }
+    .gp-badge { font-weight: 700; color: #12A679; white-space: nowrap; }
+  </style></head>
+<body>
+<div class="wrap">
+  <div class="doc">
+    <h1>🎨 织雨体验设计方案说明书：主机资产发现与识别 · 资产台账</h1>
+    <div class="meta">
+      <b>方案制定者</b>：设计师织雨 (Virtual Designer Zhiyu)<br/>
+      <b>产线</b>：RGP 风险治理平台<br/>
+      <b>需求定性</b>：<code>配置运维 | 资产管理台账</code><br/>
+      <b>需求输入</b>：<a href="#">DSP 主机资产发现与识别_小需求用户需求说明_评审版</a>
+    </div>
+
+    <h2 class="part">Part1　需求分析与思考</h2>
+
+    <h3>1. 目标用户与核心任务 (JTBD)</h3>
+    <div class="role-grid">
+
+      <div class="role-card primary">
+        <div class="role-hd">
+          <div class="role-avatar">👤</div>
+          <div>
+            <div class="role-name">资产运营人员</div>
+            <div class="role-post">主维护角色 · 资产台账日常负责人</div>
+          </div>
+        </div>
+        <div class="role-bd">
+          <div class="role-row">
+            <span class="k">使用情境</span>
+            <span class="v">ESM 扫描、被动流量、端侧上报、Excel 文件四类来源不断产生记录，字段与标识口径各不相同；要收敛成一套可维护、可追溯的服务器与终端资产。</span>
+          </div>
+          <div class="role-jtbd">
+            <span class="q">“</span>我要把各来源送上来的资产记录，一次整理成不会重复、不会分错类型的正式资产，并且能像维护现有 WEB 应用资产那样查、改、导出和对账。<span class="q">”</span>
+          </div>
+          <div class="role-tags">
+            <span class="role-tag">不重复</span>
+            <span class="role-tag">不误归类</span>
+            <span class="role-tag">能对账</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-hd">
+          <div class="role-avatar">👥</div>
+          <div>
+            <div class="role-name">安全运营人员</div>
+            <div class="role-post">消费角色 · 下游安全运营引用方</div>
+          </div>
+        </div>
+        <div class="role-bd">
+          <div class="role-row">
+            <span class="k">使用情境</span>
+            <span class="v">不直接维护资产字段，但要把统一资产对象引用到后续安全运营中。</span>
+          </div>
+          <div class="role-jtbd">
+            <span class="q">“</span>我需要一套口径稳定、标识唯一的资产清单，让我直接引用而不用再核对。<span class="q">”</span>
+          </div>
+          <div class="role-tags">
+            <span class="role-tag">口径稳定</span>
+            <span class="role-tag">标识唯一</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <h3>2. 主场景清单与现状痛点</h3>
+    <table>
+      <thead>
+        <tr><th style="width:16%;">场景（编号. 名称）</th><th style="width:19%;">触发情境</th><th style="width:11%;">主要角色</th><th style="width:16%;">用户 Job</th><th style="width:38%;">现状卡点</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>S1. 资产录入</b></td>
+          <td>任务中心扫描产出 ESM 结果，或被动流量、端侧系统、文件产生资产记录</td>
+          <td>资产运营人员</td>
+          <td><b>四路数据进来，变成一份不重不漏的正式清单</b></td>
+          <td>
+            <ul style="margin:0;padding-left:14px;">
+              <li><b>来源分散、口径不一</b>：多来源记录缺统一入口与结果口径，重复整理仍难得到完整的服务器与终端范围</li>
+              <li><b>身份易重复 / 错归</b>：人工比对 Agent、IP、历史 IP 与来源字段，容易产生重复资产或错误合并</li>
+              <li><b>分型边界不清</b>：服务器、终端与网络设备口径不同，未知记录可能被错误入池</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td><b>S2. 资产盘点与维护</b></td>
+          <td>资产入池后需要查询、增删改、批量处理、导入导出与数量统计</td>
+          <td>资产运营人员<br/>安全运营人员</td>
+          <td><b>台账随时对得上账，下游敢直接引用</b></td>
+          <td>
+            <ul style="margin:0;padding-left:14px;">
+              <li><b>字段不完整</b>：可查看字段不全，关键属性要跨页拼</li>
+              <li><b>口径与 WEB 应用资产不一致</b>：统计与运维定义不同，增加核对成本</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3. 核心体验改进目标</h3>
+    <ul>
+      <li><b>多源整理</b>：四类来源分散整理（不同入口、不同口径）<b>➔</b> 统一入池、一次识别。可观察判据：任一首期来源结果到达或文件导入完成后即形成服务器或终端资产，通用字段完整率 <b>≥ 95%</b>。</li>
+      <li><b>身份连续性</b>：人工比对（易重复、易错归）<b>➔</b> 规则化归并、连续可追溯。可观察判据：同一 Agent 标识的资产 IP 变化后，平台仍引用同一内部资产标识，并更新当前 IP、保留历史 IP。</li>
+      <li><b>台账维护</b>：字段缺失、口径不一 <b>➔</b> 完整字段 + 与 WEB 应用资产同口径的就地查看与维护。可观察判据：服务器 / 终端可获取全部通用字段与专属字段；<b>10 万级</b>资产可查询、可查看。</li>
+    </ul>
+    <p class="note">🚫 <b>本期不承诺</b>：识别与入库失败的状态机、重试与幂等；风险数量 / 摘要 / 跳转；第三方资产平台与 CMDB 自动同步；影子资产、主机漏洞、主动渗透与风险处置；国际化与 NFV。以上不派生为前台能力。</p>
+
+    <h3>4. 体验突破点思考</h3>
+
+    <p><b>4.1 体验突破点清单（来自 1.3）</b></p>
+    <table>
+      <thead>
+        <tr><th style="width:7%;">编号</th><th style="width:13%;">面对的感受点</th><th style="width:33%;">突破点（体验语言）</th><th style="width:20%;">来源</th><th style="width:11%;">本方案取档</th><th style="width:16%;">落点页面</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>B1</td><td>不用猜口径</td><td>让人不必先弄清四种来源的字段差异，上传后就知道哪些成了资产、哪些没成</td><td>目标 + <b>①原则1 看得懂</b></td><td>优化版</td><td>Page-05</td></tr>
+        <tr><td>B2</td><td>不重复对账</td><td>让人不用人工比对 IP 与 Agent，就能信任两条记录是同一台设备</td><td>目标（部分）+ <b>①原则4 配完敢信（目标没提）</b></td><td><b>创新版</b></td><td>Page-02</td></tr>
+        <tr><td>B3</td><td>不误判归属</td><td>让人一眼看出这台机器为什么被归成服务器而不是终端</td><td>目标 + ②原则2 结论查得到依据</td><td>优化版</td><td>Page-02</td></tr>
+        <tr><td>B4</td><td>不用跨页拼</td><td>让人在一个地方看全这台机器的字段，不用去 WEB 应用那边对口径</td><td><b>④原则2 数字经得起追（目标没提）</b></td><td>优化版</td><td>Page-01</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. 草图发散</h3>
+
+    <p><b>5.1 方案取舍</b></p>
+    <table>
+      <thead>
+        <tr><th style="width:11%;">方案</th><th style="width:28%;">一句话走法</th><th style="width:23%;">用户还要出什么力</th><th style="width:23%;">主要代价 / 前提</th><th style="width:15%;">结论</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>方案一</td><td>来源追溯 Tab：各来源观察并列，人自己判断是否同一台</td><td>仍需自己下"是不是同一台"的判断</td><td>改动小，但没解决"敢不敢信"</td><td>未采纳</td></tr>
+        <tr><td>方案二</td><td><b>规则化归并 + 命中依据显性化</b>：系统给结论与依据，人只核对例外</td><td>只需核对系统标出的冲突项</td><td>依赖 Agent ID 覆盖率；无 Agent 的机器走人工兜底</td><td><b>✅ 采纳</b></td></tr>
+      </tbody>
+    </table>
+
+    <p><b>5.2 页面清单与职责划分</b></p>
+    <table>
+      <thead>
+        <tr><th style="width:9%;">页面</th><th style="width:22%;">名称</th><th style="width:14%;">形态</th><th style="width:24%;">职责</th><th style="width:17%;">承接突破点</th><th style="width:14%;">新建 / 改现有</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>P1</td><td>主机资产台账</td><td>列表主页</td><td>查 / 筛 / 看 / 盘点</td><td>B4</td><td>改现有</td></tr>
+        <tr><td>P2</td><td>资产详情抽屉</td><td>右侧抽屉</td><td>核对身份、看来源追溯</td><td>B2、B3</td><td>新建</td></tr>
+        <tr><td>P3</td><td>新增 / 编辑抽屉</td><td>右侧抽屉</td><td>手工补录与修改</td><td>—</td><td>改现有</td></tr>
+        <tr><td>P4</td><td>删除确认弹窗</td><td>居中弹窗</td><td>破坏性操作防呆</td><td>—</td><td>新建</td></tr>
+        <tr><td>P5</td><td>导入 / 导出弹窗</td><td>居中弹窗</td><td>文件类批量进出</td><td>B1</td><td>新建</td></tr>
+      </tbody>
+    </table>
+
+    <p><b>5.3 草图</b></p>
+    <details class="sketch-fold">
+      <summary>展开查看草图（方案二 · 共 5 个页面，当前展示 P1 / P2）</summary>
+      <div class="sketch-body">
+        <div class="wf-container">
+          <div class="wf-label">P1 · 主机资产台账（草图）</div>
+          <div class="wf-shell">
+            <div class="wf-header"><span>主机资产台账</span><span>服务器 / 终端</span></div>
+            <div class="wf-body">
+              <div class="wf-row">
+                <div class="wf-card" style="flex:1;"><b>2,140</b> 服务器</div>
+                <div class="wf-card" style="flex:1;"><b>8,923</b> 终端</div>
+                <div class="wf-card" style="flex:1;"><b>27</b> 待确认</div>
+              </div>
+              <div class="wf-row"><div class="wf-card" style="flex:1;">🔍 搜索</div><div class="wf-btn">导入 / 导出 ▾</div><div class="wf-btn-primary">新增资产</div></div>
+              <div style="height:56px;background:#F7F9FC;border:1px dashed #CBD5E1;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#A1A7B3;font-size:11px;">资产表格（本次不动）</div>
+            </div>
+          </div>
+          <div class="wf-label" style="margin-top:12px;">P2 · 资产详情抽屉（草图）</div>
+          <div class="wf-drawer-overlay" style="min-height:170px;">
+            <div class="wf-drawer-body" style="width:400px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;">rd-build-01 · 10.12.3.41</div>
+              <div class="wf-card" style="background:#F6FFED;border-color:#B7EB8F;margin-bottom:8px;">
+                <b style="color:#12A679;">已合并</b> 3 条来源记录 → 同一台（依据：Agent ID 一致）
+              </div>
+              <div style="display:flex;gap:6px;">
+                <div class="wf-btn">基本信息</div><div class="wf-btn-primary">来源追溯</div><div class="wf-btn">变更记录</div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-annotation">草图批注：P1 只把"四类统计 + 分类 Tab + 检索 + 新增"摆出来，资产表格整块留灰（本次不动）；P2 的设计点在"已合并 + 依据"这一条，人不用自己比对 IP。</div>
+        </div>
+      </div>
+    </details>
+
+    <h2 class="part">Part2　需求解决方案全景</h2>
+
+    <h3>6. 设计决策经验匹配与采纳</h3>
+
+    <h4>6.1 需求类型分析</h4>
+    <ul>
+      <li><b>需求定性</b>：配置运维 | 资产管理台账（Type-01）。判据：主键是实体，对象长期存在并带台账属性，需按类型批量维护且有生命周期。</li>
+      <li><b>业务属性与严肃度</b>：企业统一资产治理，<b>中等严肃度</b>。资产是下游安全运营的引用基础，字段口径要求稳定准确，但单条操作多为可逆维护。</li>
+      <li><b>色彩基调</b>：现代扁平 / 高效规整。超浅底 <code>#F7F9FC</code> 划分区域、卡片白底、去框线化、线条 1px；状态用"浅底 + 深字 + 浅边框"三元组；只有品牌蓝主按钮，不用红色实心按钮。</li>
+      <li><b>页面职责分工</b>：<b>台账页只管"查 / 筛 / 看 / 维护 / 盘点"</b>；资产识别与入库是后台统一链路，本期不新增前台识别页。</li>
+    </ul>
+
+    <h4>6.2 业务场景 → 设计决策经验匹配与承接突破点</h4>
+    <table>
+      <thead>
+        <tr><th style="width:13%;">业务场景</th><th style="width:17%;">命中的经验</th><th style="width:12%;">承接突破点</th><th style="width:16%;">用户痛点</th><th style="width:26%;">系统设计解法</th><th style="width:16%;">自行设计补充</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>S1. 资产录入</td>
+          <td><span class="tag-exp">D10-EP03</span></td>
+          <td><b>B1</b>（优化版）</td>
+          <td>来源分散、字段口径不一</td>
+          <td>文件导入走顶部「导入 / 导出 ▾」→ 居中弹窗（下载模板 / 上传 / 冲突规则"跳过·替换"）；其余三类来源由后台同一链路接收，保留来源系统与来源 ID</td>
+          <td><span class="deriv">业务独立推导</span> 失败状态机本期不建前台页</td>
+        </tr>
+        <tr>
+          <td>S1. 资产录入</td>
+          <td><span class="tag-exp">D02-EP03</span></td>
+          <td><b>B2</b>（创新版）<br/><b>B3</b>（优化版）</td>
+          <td>身份易重复 / 错归；分型边界不清</td>
+          <td>详情抽屉内「来源追溯」Tab 并列展示各来源观察、当前有效值与命中依据；类型用浅底深字标签，并标出"为什么归这一类"</td>
+          <td><span class="deriv">业务独立推导</span> 人工值优先级只在字段值上体现，不新增裁决界面</td>
+        </tr>
+        <tr>
+          <td>S2. 资产盘点与维护</td>
+          <td><span class="tag-exp">D02-EP01</span><br/><span class="tag-exp">D02-EP02</span><br/><span class="tag-exp">D09-EP01</span><br/><span class="tag-exp">D10-EP02</span></td>
+          <td><b>B4</b>（优化版）</td>
+          <td>字段不完整、与 WEB 口径不一致</td>
+          <td>常规表格 + 顶部 Tab（服务器 / 终端）+ 顶部四类统计卡；<code>IxProSearch</code> 复合检索；行内操作 + 顶部批量栏；新增 / 编辑 / 查看用抽屉；删除走阻断确认</td>
+          <td><span class="deriv">业务独立推导</span> 专属字段清单复用 WEB 应用资产口径</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>7. 核心页面线框示意与深度推导</h3>
+
+    <h4>7.1 Page-01：主机资产台账（主页面 · 服务器 / 终端资产）</h4>
+    <ul>
+      <li><b>页面定位与核心任务</b>：台账页只管"查 / 筛 / 看 / 维护 / 盘点"，不承担识别。</li>
+      <li><b>选用页面模板</b>：<code>page-table-overview</code></li>
+      <li><b>承接突破点</b>：B4（优化版）——"不用跨页拼"落在这里。</li>
+      <li><b>与草图的一致性</b>：对应草图 P1；主结构与分区完整继承。</li>
+    </ul>
+
+    <p><b>Page-01 设计经验与组件选型映射清单</b></p>
+    <table>
+      <thead>
+        <tr><th style="width:14%;">区域</th><th style="width:18%;">组件</th><th style="width:18%;">规范出处</th><th style="width:34%;">硬指标</th><th style="width:16%;">来源</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>顶部统计区</td><td><code>IxCard</code> × 4</td><td>comp-detail-card.md</td><td>服务器 / 终端 / 本月新增 / 待确认；卡片高 <code>72px</code></td><td><span class="tag-exp">D03-EP01</span></td></tr>
+        <tr><td>分类切换</td><td><code>IxTabs</code></td><td>01-page-types.md</td><td>两类，默认服务器</td><td><span class="tag-exp">D02-EP01</span></td></tr>
+        <tr><td>检索</td><td><code>IxProSearch</code></td><td>comp-basic-search.md</td><td>高 <code>32px</code>，支持 IP / 主机名 / Agent ID</td><td><span class="tag-exp">D09-EP01</span></td></tr>
+        <tr><td>主数据表</td><td><code>IxTable</code></td><td>02-table-patterns.md</td><td>行高 <code>40px</code>，首列冻结，操作列固定右侧</td><td><span class="tag-exp">D03-EP02</span></td></tr>
+        <tr><td>批量栏</td><td><code>IxButton</code> × 3</td><td>comp-button.md</td><td>未勾选置灰；主按钮 <code>h32</code></td><td><span class="tag-exp">D10-EP02</span></td></tr>
+        <tr><td>导入 / 导出入口</td><td><code>IxDropdown</code></td><td>04-interaction-patterns.md</td><td>顶部工具区下拉，二级项「导入」「导出」进弹窗</td><td><span class="tag-exp">D10-EP03</span></td></tr>
+        <tr><td>新增 / 编辑容器</td><td><code>IxDrawer</code></td><td>comp-drawer.md</td><td>宽 <code>800px</code>，字段多超一屏；提交后关闭并刷新</td><td><span class="tag-exp">D02-EP02</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 台账页界面结构线框示意图 (Table Overview)</div>
+      <div class="wf-shell">
+        <div class="wf-header"><span>主机资产台账</span><span>统一资产基础 / 主机资产</span></div>
+        <div class="wf-body">
+          <div class="wf-row">
+            <div class="wf-card" style="flex:1;text-align:center;"><b style="font-size:16px;">2,140</b><div style="color:#6F7785;">服务器</div></div>
+            <div class="wf-card" style="flex:1;text-align:center;"><b style="font-size:16px;">8,923</b><div style="color:#6F7785;">终端</div></div>
+            <div class="wf-card" style="flex:1;text-align:center;"><b style="font-size:16px;">312</b><div style="color:#6F7785;">本月新增</div></div>
+            <div class="wf-card" style="flex:1;text-align:center;"><b style="font-size:16px;color:#FA8C16;">27</b><div style="color:#6F7785;">待确认</div></div>
+          </div>
+          <div style="margin:10px 0;">
+            <span class="wf-btn-primary">服务器</span>
+            <span class="wf-btn" style="margin-left:6px;">终端</span>
+          </div>
+          <div class="wf-row" style="align-items:center;">
+            <div class="wf-card" style="flex:3;">🔍 按 IP / 主机名 / Agent ID 搜索</div>
+            <div class="wf-btn">导入 / 导出 ▾</div>
+            <div class="wf-btn-primary">新增资产</div>
+          </div>
+          <table class="wf-table">
+            <thead><tr><th>IP</th><th>主机名</th><th>Agent ID</th><th>资产类型</th><th>归属部门</th><th>最近发现</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>10.12.3.41</td><td>rd-build-01</td><td>agt-8f2c…</td><td>服务器</td><td>研发中心</td><td>2 小时前</td><td>查看 编辑</td></tr>
+              <tr><td>10.12.3.42</td><td>rd-build-02</td><td>agt-91de…</td><td>服务器</td><td>研发中心</td><td>2 小时前</td><td>查看 编辑</td></tr>
+              <tr><td>10.20.8.7</td><td>fin-lap-118</td><td>agt-3ac7…</td><td>终端</td><td>财务部</td><td>昨天</td><td>查看 编辑</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="wf-annotation">批注：① 本页同时承载「导入 / 导出」下拉入口与新增 / 编辑抽屉，弹窗本体见 Page-05 / Page-03；② 四类统计与 WEB 应用资产同口径，避免"同一概念两套数"；③ 分类只做 Tab 不做左树——需求没给出可切换的分类维度，加左树会多一层空洞层级；④ 批量按钮未勾选置灰，hover 给原因。</div>
+    </div>
+
+    <h4>7.2 Page-02：资产详情抽屉（右侧抽屉 · 身份核对与来源追溯）</h4>
+    <ul>
+      <li><b>页面定位与核心任务</b>：单资产的字段全景与"为什么是它"，就地闭环不跳页。</li>
+      <li><b>选用页面模板</b>：<code>page-detail-drawer</code>（800px）</li>
+      <li><b>承接突破点</b>：B2（<b>创新版</b>，信任两条记录是同一台）、B3（优化版，看出一台为什么归这类）。</li>
+      <li><b>与草图的一致性</b>：对应草图 P2；「来源追溯」为本方案新增分区。</li>
+    </ul>
+
+    <p><b>Page-02 设计经验与组件选型映射清单</b></p>
+    <table>
+      <thead>
+        <tr><th style="width:14%;">区域</th><th style="width:18%;">组件</th><th style="width:18%;">规范出处</th><th style="width:34%;">硬指标</th><th style="width:16%;">来源</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>抽屉容器</td><td><code>IxDrawer</code></td><td>comp-drawer.md</td><td>宽 <code>800px</code>，右侧滑出，保留列表筛选</td><td><span class="tag-exp">D02-EP03</span></td></tr>
+        <tr><td>来源追溯</td><td><code>IxTabs</code> + <code>IxTable</code></td><td>05-state-patterns.md</td><td>四来源并列，标出"当前有效值"与"命中依据"</td><td><span class="deriv">业务独立推导</span></td></tr>
+        <tr><td>类型标签</td><td><code>IxTag</code></td><td>comp-tag.md</td><td>浅底深字浅边框，附"归入理由"Popover</td><td><span class="tag-exp">D04-EP04</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="wf-container">
+      <div class="wf-label">📐 详情抽屉结构线框示意图 (Detail Drawer)</div>
+      <div class="wf-drawer-overlay">
+        <div class="wf-drawer-body" style="width:520px;">
+          <div class="wf-header" style="background:#FFFFFF;padding:0 0 10px 0;margin-bottom:12px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:13px;font-weight:600;color:#1E293B;">rd-build-01 · 10.12.3.41</span>
+            <span style="cursor:pointer;color:#94A3B8;">✕</span>
+          </div>
+          <div style="font-size:11px;color:#454C59;">
+            <div style="margin-bottom:10px;">
+              <span class="wf-btn">基本信息</span>
+              <span class="wf-btn-primary" style="margin-left:4px;">来源追溯</span>
+              <span class="wf-btn" style="margin-left:4px;">变更记录</span>
+            </div>
+            <div class="wf-card" style="margin-bottom:10px;">
+              <span class="wf-label" style="display:block;margin-bottom:6px;">身份判定</span>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;background:#F6FFED;border:1px solid #B7EB8F;border-radius:2px;padding:6px;text-align:center;">
+                  <div style="color:#12A679;font-weight:700;">已合并</div>
+                  <div style="color:#6F7785;">3 条来源记录 → 同一台</div>
+                </div>
+                <div style="flex:1;background:#FFFFFF;border:1px solid #E1E5EB;border-radius:2px;padding:6px;text-align:center;">
+                  <div style="font-weight:700;">依据</div>
+                  <div style="color:#6F7785;">Agent ID 一致</div>
+                </div>
+              </div>
+            </div>
+            <table class="wf-table">
+              <thead><tr><th>来源</th><th>IP</th><th>Agent ID</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>ESM 扫描</td><td>10.12.3.41</td><td>agt-8f2c…</td><td><b>当前有效</b></td></tr>
+                <tr><td>被动流量</td><td>10.12.3.41</td><td>agt-8f2c…</td><td>一致</td></tr>
+                <tr><td>端侧上报</td><td>10.12.9.88</td><td>agt-8f2c…</td><td>历史 IP</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="wf-annotation">批注：① 系统直接给"已合并 + 依据"，人只核对冲突项——这是 B2 从优化版走到创新版的关键；② 历史 IP 单独呈现，不覆盖当前值；③ 无 Agent 的机器退化为人工确认，走同一张表。</div>
+    </div>
+
+    <h3>7.4 页面体验与异常保护规则</h3>
+    <table>
+      <thead><tr><th style="width:22%;">场景</th><th style="width:32%;">异常</th><th style="width:46%;">处理</th></tr></thead>
+      <tbody>
+        <tr><td>导入文件</td><td>模板列缺失 / 值格式错误</td><td>弹窗内逐行标出错误位置，允许"只导入正确行"，不整单退回</td></tr>
+        <tr><td>身份归并</td><td>同一 Agent 出现两个不同 IP 且都在活跃</td><td>不自动合并，标"待确认"，进台账顶部统计卡的待确认数</td></tr>
+        <tr><td>台账查询</td><td>结果为空</td><td>区分"没有资产"与"筛选过窄"，后者给一键清空条件</td></tr>
+        <tr><td>删除资产</td><td>资产被下游策略引用</td><td>阻断弹窗列出引用位置，要求先解绑</td></tr>
+      </tbody>
+    </table>
+
+    <h3>8. 设计说明书准出门禁检视情况</h3>
+    
+    <div class="gate-pass">
+      <span class="gp-badge">✅ 11 / 11 全绿</span>
+      <span class="gp-text">其中 <b>2 项自适应跳过</b>（已注明原因），无未通过项。</span>
+    </div>
+    <details class="sketch-fold">
+      <summary>展开查看逐项检视明细</summary>
+      <div class="sketch-body">
+        <table>
+          <thead><tr><th style="width:6%;">#</th><th style="width:24%;">检查项</th><th style="width:14%;">结论</th><th style="width:56%;">说明</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>结构完整性</td><td>✅ 通过</td><td>Part1 / Part2 齐备，分页面小节存在</td></tr>
+            <tr><td>2</td><td>组件真实性</td><td>✅ 通过</td><td>全部 <code>Ix*</code> 组件已登记</td></tr>
+            <tr><td>3</td><td>模板真实性</td><td>✅ 通过</td><td>全部 <code>page-*</code> 模板 ID 真实存在</td></tr>
+            <tr><td>4</td><td>色值合规</td><td>✅ 通过</td><td>所有色值命中设计资产色板</td></tr>
+            <tr><td>5</td><td>按钮用色铁律</td><td>✅ 通过</td><td>无红色 / 危险型实心按钮</td></tr>
+            <tr><td>6</td><td>引用文件可解析</td><td>✅ 通过</td><td>引用的 <code>.md</code> 全部存在</td></tr>
+            <tr><td>7</td><td>经验落点</td><td>✅ 通过</td><td>引用的每条经验在页面小节均有承载</td></tr>
+            <tr><td>8</td><td>表单左右结构</td><td>✅ 通过</td><td>无上下堆叠反模式</td></tr>
+            <tr><td>9</td><td>标杆特征物保真度</td><td>⏭ 跳过</td><td>本需求类型未配置特征指纹契约，自适应放行</td></tr>
+            <tr><td>10</td><td>线框规范符合度</td><td>✅ 通过</td><td>按钮顺序 / 无图标 / 星号占位 / 宽度档位 / 容器一致 / 无编号泄漏</td></tr>
+            <tr><td>11</td><td>可视化件声明完整性</td><td>⏭ 跳过</td><td>本说明书未声明可视化件</td></tr>
+          </tbody>
+        </table>
+        <p class="note">🛑 <b>「跳过」不等于「通过」</b>：跳过项须注明原因；未通过项（如有）必须写处置结论。</p>
+      </div>
+    </details>
+
+    <div class="checkpoint">
+      <b>🚦 评审确认</b>
+      本说明书为方案共识依据，确认后进入前端 Demo 输出。
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

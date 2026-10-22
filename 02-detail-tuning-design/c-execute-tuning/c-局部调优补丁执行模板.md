@@ -54,7 +54,7 @@
 * 状态徽标与标签统一遵循柔和三元组：
   - 正常/良好：`bg-[#F6FFED] text-[#12A679] border border-[#B7EB8F]`；
   - 警告/中危：`bg-[#FFFBE6] text-[#FA8C16] border border-[#FFE58F]`；
-  - 异常/高危：`bg-[#FFF1F0] text-[#D9363E] border border-[#FFA39E]`。
+  - 异常/高危：`bg-[#FFFAF2] text-[#A35F40]`（告警提示条，无边框；红色 `#D9363E` 只用于文字级与 Tag，不得作整块底色）。
 
 ---
 

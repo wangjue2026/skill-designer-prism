@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>方案草图 · SASE 合规检测任务</title>
+<style>
+  :root{
+    --bg:#F7F9FC; --card:#FFFFFF; --border:#E1E5EB; --line:#EDF1F7;
+    --text:#2F3540; --sub:#6F7785; --mute:#A1A7B3;
+    --blue:#1C6EFF; --blue-l:#E8F4FF; --blue-bd:#BAE6FD;
+    --green:#12A679; --green-b:#F6FFED; --green-bd:#B7EB8F;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:13px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 90px;}
+
+  /* ===== 页面清单（开场一次讲清全貌） ===== */
+  .inv{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin-bottom:26px;}
+  .inv h2{font-size:15px;margin:0 0 4px;font-weight:700;}
+  .inv .sub{font-size:12px;color:var(--sub);margin-bottom:14px;}
+  table.b{border-collapse:collapse;width:100%;font-size:12.5px;}
+  table.b th{text-align:left;font-weight:600;color:#6F7785;font-size:11.5px;
+    padding:6px 8px;border-bottom:1px solid var(--border);background:#FAFBFD;}
+  table.b td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.b tr:last-child td{border-bottom:none;}
+  table.b .n{font-weight:700;color:var(--blue);white-space:nowrap;}
+  .diff{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:9px;white-space:nowrap;}
+  .diff.y{background:#F3E8FF;color:#7C3AED;}
+  .diff.n{background:#F1F5F9;color:#64748B;}
+
+  /* ===== 方案头：大字 ===== */
+  .plan{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:30px;overflow:hidden;}
+  .hd{padding:22px 24px 18px;border-bottom:1px solid var(--line);}
+  .hd h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.3;}
+  .hd h1 .rec{font-size:12px;font-weight:600;padding:2px 10px;border-radius:11px;
+    background:var(--green-b);color:var(--green);border:1px solid var(--green-bd);
+    vertical-align:6px;margin-left:10px;letter-spacing:0;}
+  .hd h1 .alt{font-size:12px;font-weight:600;padding:2px 10px;border-radius:11px;
+    background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;vertical-align:6px;margin-left:10px;letter-spacing:0;}
+  .hd .why{margin-top:12px;font-size:13px;color:#454C59;line-height:1.85;}
+  .bd{padding:20px 24px 26px;}
+
+  /* ===== 草图 ===== */
+  .pg{margin-bottom:18px;}
+  .pg-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+  .pg-hd .n{font-size:11px;font-weight:700;color:#fff;background:#8A92A1;padding:1px 7px;border-radius:3px;}
+  .pg-hd .t{font-size:13px;font-weight:700;}
+  .pg-hd .d{font-size:11.5px;color:var(--mute);}
+  .frame{border:1px solid var(--border);border-radius:5px;overflow:hidden;background:#fff;}
+  .bar{background:#F1F5F9;border-bottom:1px solid var(--border);padding:6px 12px;
+    font-size:11px;color:#6F7785;display:flex;justify-content:space-between;}
+  .canvas{display:flex;min-height:170px;}
+  .nav{width:100px;flex-shrink:0;background:#FAFBFD;border-right:1px dashed #CBD5E1;padding:9px 7px;}
+  .nav i{display:block;height:16px;border-radius:2px;background:#EDF1F7;margin-bottom:5px;}
+  .nav i.on{background:var(--blue-l);border-left:2px solid var(--blue);}
+  .main{flex:1;padding:11px;min-width:0;}
+  .row{display:flex;gap:9px;margin-bottom:9px;}
+  .blk{border:1px dashed #CBD5E1;border-radius:4px;background:#FCFDFE;padding:8px 10px;min-width:0;}
+
+  /* 内容示意：有字，但只写"这里是什么"，不写"为什么这么设计" */
+  .ttl{font-size:11.5px;font-weight:600;color:#454C59;margin-bottom:6px;}
+  .ln{height:7px;border-radius:2px;background:#E6EAF0;margin-bottom:5px;}
+  .ln.w90{width:90%;} .ln.w70{width:70%;} .ln.w50{width:50%;} .ln.w40{width:40%;}
+  .ln:last-child{margin-bottom:0;}
+  .box{height:28px;border-radius:3px;background:#EDF1F7;margin-bottom:5px;}
+  .item{font-size:11px;color:#454C59;padding:4px 8px;background:#F8FAFC;border-radius:3px;margin-bottom:4px;}
+  .item:last-child{margin-bottom:0;}
+  .num{font-size:20px;font-weight:700;line-height:1.15;color:#2F3540;}
+  .num.s{font-size:16px;}
+  .num small{display:block;font-size:10px;font-weight:400;color:#8A92A1;margin-top:2px;}
+  .grid3{display:flex;gap:8px;}
+  .grid3 > div{flex:1;text-align:center;padding:7px 4px;border-radius:3px;background:#F8FAFC;border:1px solid #EDF1F7;}
+  .grid3 .lb{font-size:10px;color:#8A92A1;margin-top:2px;}
+  .btn{display:inline-block;padding:3px 12px;border-radius:2px;font-size:11px;border:1px solid #D3D7DE;background:#fff;}
+  .btn.p{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .seg{display:inline-block;font-size:11px;padding:2px 10px;border-radius:2px;background:#EDF1F7;color:#6F7785;margin-right:5px;}
+  .seg.on{background:var(--blue-l);color:var(--blue);border:1px solid var(--blue-bd);}
+
+  /* 设计点：蓝框 + 编号；框里照常写内容 */
+  .pt-box{outline:2px solid var(--blue);outline-offset:2px;position:relative;background:#fff;}
+  .pt-n{position:absolute;top:-9px;left:9px;background:var(--blue);color:#fff;
+    font-size:10px;font-weight:700;padding:0 6px;border-radius:9px;line-height:16px;z-index:2;}
+  .rest{border:1px dashed #DDE3EA;background:#FCFDFE;border-radius:4px;padding:8px 10px;}
+  .rest .ln{background:#EFF2F6;}
+
+  .layer{background:#F4F6FA;position:relative;padding:10px;display:flex;justify-content:flex-end;}
+  .behind{position:absolute;left:12px;top:10px;right:44%;bottom:10px;opacity:.3;}
+  .panel{position:relative;width:72%;background:#fff;border-left:2px solid var(--blue);
+    border-radius:3px;padding:11px;box-shadow:-3px 0 10px rgba(15,23,42,.06);}
+  .foot{display:flex;justify-content:flex-start;gap:7px;border-top:1px solid var(--line);padding-top:9px;margin-top:10px;}
+
+  /* 共用页 */
+  .shared{background:#FAFBFD;border:1px dashed #CBD5E1;border-radius:6px;padding:12px 14px;
+    margin-bottom:18px;font-size:12.5px;color:#6F7785;}
+  .shared b{color:#454C59;}
+
+  /* 方案依据 */
+  .basis{margin-top:2px;padding-top:16px;border-top:1px dashed var(--border);}
+  .basis table{border-collapse:collapse;width:100%;font-size:12px;}
+  .basis td{padding:5px 0;vertical-align:top;border-bottom:1px solid #F5F7FA;}
+  .basis td:first-child{width:88px;color:var(--sub);white-space:nowrap;}
+  .basis tr:last-child td{border-bottom:none;}
+  .src{display:inline-block;font-size:10px;padding:0 5px;border-radius:2px;background:#F1F5F9;color:#64748B;margin-left:4px;}
+  .lv{color:var(--blue);font-weight:600;}
+
+  .gate{background:var(--blue-l);border:1px solid var(--blue-bd);border-radius:6px;padding:14px 18px;font-size:12.5px;color:#454C59;}
+  .gate b{color:var(--blue);}
+
+  /* 页头 */
+  .doc-hd{margin:0 0 20px;}
+  .doc-hd h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-.4px;}
+  .doc-hd p{margin:0;font-size:12px;color:var(--mute);line-height:1.7;}
+
+  /* 顶部选择区 */
+  .pick{margin:0 0 26px;}
+  .pick .lead-txt{font-size:12.5px;color:var(--sub);margin-bottom:10px;}
+  .pick .opts{display:flex;gap:12px;}
+  .pick .opt{flex:1;background:#fff;border:1px solid var(--border);border-radius:6px;
+    padding:12px 14px;font-size:12.5px;line-height:1.6;color:#454C59;}
+  .pick .opt .nm{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+  .pick .opt .nm .rec{font-size:10.5px;font-weight:600;padding:1px 8px;border-radius:9px;
+    background:var(--green-b);color:var(--green);border:1px solid var(--green-bd);
+    vertical-align:2px;margin-left:6px;}
+  .pick .opt .nm .alt{font-size:10.5px;font-weight:600;padding:1px 8px;border-radius:9px;
+    background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;vertical-align:2px;margin-left:6px;}
+  .pick .tips{font-size:11.5px;color:#6F7785;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ==================== 页头 ==================== -->
+  <div class="doc-hd">
+    <h1>需求草图示意</h1>
+    <p>基于需求理解之后进行的设计思考草图，仅用于思路对齐，不涉及详细设计。</p>
+  </div>
+
+  <!-- ==================== 请选择一个方案 ==================== -->
+  <section class="pick">
+    <div class="lead-txt">请选择一个方案，我将按选定的方案继续出正式说明书</div>
+    <div class="opts">
+      <div class="opt">
+        <div class="nm">方案一：系统出草案，人只改差异<span class="rec">推荐</span></div>
+        打开抽屉时规则已按资产画像填好，人只改不一样的那几项。
+      </div>
+      <div class="opt">
+        <div class="nm">方案二：分组预置，人自己选<span class="alt">次选</span></div>
+        常用检测项按防病毒 / 防泄密 / 防外联分组，勾一组填完一批。
+      </div>
+    </div>
+    <div class="tips">也可以说"选定但要改"或"都不满意"，我先改再确认。完整草图见下方。</div>
+  </section>
+
+  <!-- ==================== 一、页面全貌 ==================== -->
+  <section class="inv">
+    <h2>本次需求一共 5 个页面</h2>
+    <div class="sub">下面两个方案都基于这 5 个页面。有差异的页单独画；没差异的页只画一次，两个方案共用。</div>
+    <table class="b">
+      <thead>
+        <tr><th style="width:8%">页面</th><th style="width:24%">名称</th><th style="width:14%">形态</th><th style="width:32%">本页职责</th><th style="width:22%">两个方案的差异</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">P1</td><td>合规基线检测</td><td>列表主页</td><td>看任务与最近一轮结果，进新建</td><td><span class="diff y">有差异</span> 结论区</td></tr>
+        <tr><td class="n">P2</td><td>新建检测任务</td><td>右侧抽屉</td><td>配规则、看影响面、下发</td><td><span class="diff y">有差异</span> 主战场</td></tr>
+        <tr><td class="n">P3</td><td>任务执行与结果</td><td>详情页</td><td>看谁收到、谁违规、就地补发</td><td><span class="diff n">相同</span> 共用</td></tr>
+        <tr><td class="n">P4</td><td>未收到终端清单</td><td>抽屉</td><td>查为什么没收到，就地补发</td><td><span class="diff n">相同</span> 共用</td></tr>
+        <tr><td class="n">P5</td><td>规则模板库</td><td>抽屉</td><td>选一套现成规则、套用改差异</td><td><span class="diff y">有差异</span> 方案二不涉及</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ==================== 二、方案一 ==================== -->
+  <section class="plan">
+    <div class="hd">
+      <h1>方案一：系统出草案，人只改差异<span class="rec">推荐</span></h1>
+      <div class="why">
+        管理员新建检测任务时，既不知道该查什么，也估不准会打到多少台。所以打开抽屉，规则已经按这台机器的资产画像填好，人只改不一样的那几项；影响面摆在同一个抽屉里，配和看后果不分开。
+      </div>
+    </div>
+    <div class="bd">
+
+      <!-- P1 -->
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P1</span><span class="t">合规基线检测</span><span class="d">列表主页 · 改现有</span></div>
+        <div class="frame">
+          <div class="bar"><span>合规基线检测</span><span>终端管控 / 合规基线检测</span></div>
+          <div class="canvas">
+            <div class="nav"><i></i><i class="on"></i><i></i><i></i></div>
+            <div class="main">
+              <div class="row">
+                <div class="blk pt-box" style="flex:2.2;">
+                  <span class="pt-n">B4</span>
+                  <div class="num">37 台 <small>不合规 / 1,842 台已受检 · 40 台离线未检</small></div>
+                </div>
+                <div class="blk" style="flex:1;">
+                  <div class="btn p" style="margin-bottom:6px;">新建检测任务</div>
+                  <div class="btn">复用历史配置</div>
+                </div>
+              </div>
+              <div class="rest">
+                <div class="ttl">任务列表</div>
+                <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div><div class="ln w50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P2 -->
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P2</span><span class="t">新建检测任务</span><span class="d">右侧抽屉 · 主战场</span></div>
+        <div class="frame">
+          <div class="bar"><span>新建检测任务</span><span>800px 抽屉</span></div>
+          <div class="layer">
+            <div class="behind">
+              <div class="ttl">合规基线检测</div>
+              <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div>
+              <div class="ln w50"></div><div class="ln w70"></div><div class="ln w40"></div>
+            </div>
+            <div class="panel">
+
+              <div class="blk pt-box" style="margin-bottom:12px;">
+                <span class="pt-n">B1</span>
+                <div class="ttl">检测项 · 已按「研发机」预置 12 项</div>
+                <div class="item">未安装企业杀毒软件</div>
+                <div class="item">私装翻墙 / 代理工具</div>
+                <div class="item">外发敏感文件</div>
+                <div class="item" style="color:#8A92A1;">展开其余 9 项</div>
+              </div>
+
+              <div class="blk pt-box" style="margin-bottom:12px;">
+                <span class="pt-n">B2</span>
+                <div class="ttl">下发范围与影响</div>
+                <div class="grid3">
+                  <div><div class="num s">2,160</div><div class="lb">将受检</div></div>
+                  <div><div class="num s" style="color:#FA8C16;">40</div><div class="lb">离线跳过</div></div>
+                  <div><div class="num s" style="color:#12A679;">2,120</div><div class="lb">在线可检</div></div>
+                </div>
+              </div>
+
+              <div class="blk pt-box" style="margin-bottom:12px;">
+                <span class="pt-n">B3</span>
+                <div class="ttl">规则来源</div>
+                <div><span class="seg on">研发部基线 v3</span><span class="seg">本次调整 2 项</span></div>
+                <div style="font-size:11px;color:var(--blue);margin-top:6px;">保存为新模板</div>
+              </div>
+
+              <div class="rest" style="margin-bottom:2px;">
+                <div class="ttl">执行周期</div>
+                <div class="ln w40"></div>
+              </div>
+
+              <div class="foot"><span class="btn p">确定并下发</span><span class="btn">取消</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P3 -->
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P3</span><span class="t">任务执行与结果</span><span class="d">详情页 · 新建</span></div>
+        <div class="frame">
+          <div class="bar"><span>研发部基线检测 · 第 3 轮</span><span>任务详情</span></div>
+          <div class="canvas" style="min-height:0;">
+            <div class="main">
+              <div class="blk pt-box" style="margin-bottom:10px;">
+                <span class="pt-n">B4</span>
+                <div class="ttl">下发结果</div>
+                <div class="grid3">
+                  <div><div class="num s">2,120</div><div class="lb">已下发</div></div>
+                  <div><div class="num s" style="color:#D9363E;">37</div><div class="lb">违规</div></div>
+                  <div><div class="num s" style="color:#FA8C16;">40</div><div class="lb">未收到</div></div>
+                </div>
+                <div style="font-size:11px;color:var(--blue);margin-top:8px;">查看未收到清单 · 就地补发</div>
+              </div>
+              <div class="rest"><div class="ttl">违规终端明细</div><div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div></div>
+            </div>
+          </div>
+          <div class="foot"><span class="btn p">处置选中</span><span class="btn">导出</span></div>
+        </div>
+      </div>
+
+      <!-- P4 P5 共用 -->
+      <div class="shared">
+        <b>P4 未收到终端清单（抽屉）· P5 规则模板库（抽屉）</b> —— 与方案二完全相同，草图见下方「两方案共用的页面」，此处不重复。
+      </div>
+
+      <div class="basis">
+        <table>
+          <tr><td>为什么这么想</td><td>目标要求"0 基础管理员自己配得出敢下发的任务"。要"敢下发"，光把配置做顺不够，得让他<b>看见后果</b>，所以配和影响面合在一个抽屉里。</td></tr>
+          <tr><td>依据来源</td><td>目标（0 基础 / 敢下发）<span class="src">入口 1</span>　·　配置运维"改时少出错、改完敢信"<span class="src">入口 2 · ①原则3/4</span>　·　排障闭环"发到 ≠ 改好"<span class="src">入口 2 · ③原则4</span></td></tr>
+          <tr><td>档位</td><td>B1 <span class="lv">创新版</span>　B2 <span class="lv">创新版</span>　B3 <span class="lv">创新版</span>　B4 <span class="lv">优化版</span></td></tr>
+          <tr><td>代价</td><td>预置规则库要持续维护；资产画像不准时草案会跑偏，得留"全清重配"的口子。</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== 三、方案二 ==================== -->
+  <section class="plan">
+    <div class="hd">
+      <h1>方案二：分组预置，人自己选<span class="alt">次选</span></h1>
+      <div class="why">
+        同一个场景，换个思路：不猜管理员要查什么，而是把常用检测项按"防病毒 / 防泄密 / 防外联"分成几组，勾一组填完一批。省的是填参数的手，判断仍然留给人——适合对自动生成有顾虑、或资产画像还不准的时候。
+      </div>
+    </div>
+    <div class="bd">
+
+      <!-- P1 -->
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P1</span><span class="t">合规基线检测</span><span class="d">列表主页 · 改现有</span></div>
+        <div class="frame">
+          <div class="bar"><span>合规基线检测</span><span>终端管控 / 合规基线检测</span></div>
+          <div class="canvas">
+            <div class="nav"><i></i><i class="on"></i><i></i><i></i></div>
+            <div class="main">
+              <div class="row">
+                <div class="blk" style="flex:2.2;">
+                  <div class="ttl">最近一轮检测</div>
+                  <div class="ln w70" style="height:12px;background:#DCE3EC;"></div>
+                  <div class="ln w50" style="margin-top:8px;"></div>
+                </div>
+                <div class="blk" style="flex:1;">
+                  <div class="btn p" style="margin-bottom:6px;">新建检测任务</div>
+                  <div class="btn">复用历史配置</div>
+                </div>
+              </div>
+              <div class="rest">
+                <div class="ttl">任务列表</div>
+                <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div><div class="ln w50"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P2 -->
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P2</span><span class="t">新建检测任务</span><span class="d">右侧抽屉</span></div>
+        <div class="frame">
+          <div class="bar"><span>新建检测任务</span><span>800px 抽屉</span></div>
+          <div class="layer">
+            <div class="behind">
+              <div class="ttl">合规基线检测</div>
+              <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div>
+              <div class="ln w50"></div><div class="ln w70"></div><div class="ln w40"></div>
+            </div>
+            <div class="panel">
+
+              <div class="blk pt-box" style="margin-bottom:12px;">
+                <span class="pt-n">B1</span>
+                <div class="ttl">检测项 · 按类别勾选</div>
+                <div class="row" style="margin-bottom:6px;">
+                  <div class="box" style="flex:1;margin-bottom:0;"></div>
+                  <div class="box" style="flex:1;margin-bottom:0;"></div>
+                  <div class="box" style="flex:1;margin-bottom:0;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#6F7785;">
+                  <span>防病毒</span><span>防泄密</span><span>防外联</span>
+                </div>
+              </div>
+
+              <div class="blk pt-box" style="margin-bottom:12px;">
+                <span class="pt-n">B2</span>
+                <div class="ttl">预计受检终端</div>
+                <div class="num s">2,160</div>
+              </div>
+
+              <div class="rest" style="margin-bottom:2px;">
+                <div class="ttl">执行周期 / 通知</div>
+                <div class="ln w40"></div><div class="ln w70"></div>
+              </div>
+
+              <div class="foot"><span class="btn p">确定并下发</span><span class="btn">取消</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P3 P4 P5 -->
+      <div class="shared">
+        <b>P3 任务执行与结果 · P4 未收到终端清单 · P5 规则模板库</b> —— 与方案一（或彼此）无差异，见下方「两方案共用的页面」。
+      </div>
+
+      <div class="basis">
+        <table>
+          <tr><td>为什么这么想</td><td>目标里"0 基础"可以靠<b>少填</b>解决，不必靠<b>不填</b>。分组预置是行业常见做法，落地快、不依赖画像质量。</td></tr>
+          <tr><td>依据来源</td><td>目标（0 基础）<span class="src">入口 1</span>　·　配置运维"填得少"<span class="src">入口 2 · ①原则2</span></td></tr>
+          <tr><td>档位</td><td>B1 <span class="lv">优化版</span>　B2 <span class="lv">优化版</span>（到不了创新版：人仍要自己判断选哪组）</td></tr>
+          <tr><td>代价</td><td>组名起不好照样选错；B3、B4 在本方案里没有专门设计，退化为基线能力。</td></tr>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== 四、共用页面 ==================== -->
+  <section class="plan">
+    <div class="hd">
+      <h1>两方案共用的页面</h1>
+      <div class="why">下面 3 个页面两个方案完全一致，只画一次。</div>
+    </div>
+    <div class="bd">
+
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P3</span><span class="t">任务执行与结果</span><span class="d">详情页 · 共用</span></div>
+        <div class="frame">
+          <div class="bar"><span>研发部基线检测 · 第 3 轮</span><span>任务详情</span></div>
+          <div class="canvas" style="min-height:0;">
+            <div class="main">
+              <div class="blk" style="margin-bottom:10px;">
+                <div class="ttl">下发结果</div>
+                <div class="grid3">
+                  <div><div class="num s">2,120</div><div class="lb">已下发</div></div>
+                  <div><div class="num s" style="color:#D9363E;">37</div><div class="lb">违规</div></div>
+                  <div><div class="num s" style="color:#FA8C16;">40</div><div class="lb">未收到</div></div>
+                </div>
+                <div style="font-size:11px;color:var(--blue);margin-top:8px;">查看未收到清单 · 就地补发</div>
+              </div>
+              <div class="rest"><div class="ttl">违规终端明细</div><div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div></div>
+            </div>
+          </div>
+          <div class="foot"><span class="btn p">处置选中</span><span class="btn">导出</span></div>
+        </div>
+      </div>
+
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P4</span><span class="t">未收到终端清单</span><span class="d">抽屉 · 共用</span></div>
+        <div class="frame">
+          <div class="bar"><span>未收到终端</span><span>640px 抽屉</span></div>
+          <div class="layer">
+            <div class="behind">
+              <div class="ttl">研发部基线检测 · 第 3 轮</div>
+              <div class="ln w90"></div><div class="ln w70"></div>
+            </div>
+            <div class="panel">
+              <div class="ttl">40 台未收到，按原因分组</div>
+              <div class="item">离线 · 32 台</div>
+              <div class="item">客户端未安装 · 6 台</div>
+              <div class="item">系统版本不支持 · 2 台</div>
+              <div class="foot"><span class="btn p">就地补发</span><span class="btn">导出</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg">
+        <div class="pg-hd"><span class="n">P5</span><span class="t">规则模板库</span><span class="d">抽屉 · 共用</span></div>
+        <div class="frame">
+          <div class="bar"><span>规则模板库</span><span>800px 抽屉</span></div>
+          <div class="layer">
+            <div class="behind"><div class="ttl">新建检测任务</div><div class="ln w70"></div><div class="ln w50"></div></div>
+            <div class="panel">
+              <div class="row" style="margin-bottom:0;">
+                <div class="blk" style="flex:1;">
+                  <div class="ttl">模板列表</div>
+                  <div class="item">研发部基线 v3</div>
+                  <div class="item">财务部基线 v2</div>
+                  <div class="item">外包临时管控</div>
+                </div>
+                <div class="blk" style="flex:1.2;">
+                  <div class="ttl">模板详情</div>
+                  <div class="ln w90"></div><div class="ln w70"></div>
+                  <div class="btn p" style="margin-top:8px;">套用此模板</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="gate" style="text-align:center;color:#6F7785;">
+    以上为两个方案的完整草图。回到顶部选一个，或告诉我哪里要改。
+  </div>
+
+</div>
+</body>
+</html>
