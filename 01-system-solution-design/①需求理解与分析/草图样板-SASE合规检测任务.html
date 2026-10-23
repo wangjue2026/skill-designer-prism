@@ -1,484 +1,428 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>方案草图 · SASE 合规检测任务</title>
+<meta charset="UTF-8">
+<title>需求草图示意 · SASE 终端合规检测任务</title>
 <style>
-  :root{
-    --bg:#F7F9FC; --card:#FFFFFF; --border:#E1E5EB; --line:#EDF1F7;
-    --text:#2F3540; --sub:#6F7785; --mute:#A1A7B3;
-    --blue:#1C6EFF; --blue-l:#E8F4FF; --blue-bd:#BAE6FD;
-    --green:#12A679; --green-b:#F6FFED; --green-bd:#B7EB8F;
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 32px 60px;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #2F3540; background: #FFFFFF; line-height: 1.7; font-size: 14px;
   }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);
-    font:13px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
-  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 90px;}
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 6px; font-weight: 700; }
+  h2 { font-size: 14px; line-height: 1.4; margin: 24px 0 8px; padding-left: 9px; border-left: 3px solid #1C6EFF; font-weight: 600; }
+  h3 { font-size: 14px; margin: 0; font-weight: 600; }
+  .sub { color: #6F7785; font-size: 13px; margin-bottom: 4px; }
+  .hint { color: #8A92A1; font-size: 12px; }
 
-  /* ===== 页面清单（开场一次讲清全貌） ===== */
-  .inv{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px;margin-bottom:26px;}
-  .inv h2{font-size:15px;margin:0 0 4px;font-weight:700;}
-  .inv .sub{font-size:12px;color:var(--sub);margin-bottom:14px;}
-  table.b{border-collapse:collapse;width:100%;font-size:12.5px;}
-  table.b th{text-align:left;font-weight:600;color:#6F7785;font-size:11.5px;
-    padding:6px 8px;border-bottom:1px solid var(--border);background:#FAFBFD;}
-  table.b td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;}
-  table.b tr:last-child td{border-bottom:none;}
-  table.b .n{font-weight:700;color:var(--blue);white-space:nowrap;}
-  .diff{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:9px;white-space:nowrap;}
-  .diff.y{background:#F3E8FF;color:#7C3AED;}
-  .diff.n{background:#F1F5F9;color:#64748B;}
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #F4F6FA; text-align: left; padding: 8px 10px; font-weight: 600; color: #454C59; border: 1px solid #E5E9F0; }
+  td { padding: 8px 10px; border: 1px solid #E5E9F0; vertical-align: top; }
+  .cmp td:first-child { width: 120px; background: #FAFBFD; font-weight: 600; color: #454C59; }
+  .pt-tbl tbody tr { background: #fff; }
+  .pt-tbl tbody td { background: #fff; }
+  .pt-tbl tbody tr td:first-child:not(.plan),
+  .pt-tbl td.plan + td { width: 56px; color: #8A92A1; text-align: center; }
+  .pt-tbl .src { color: #5B6472; }
+  .pt-tbl td.plan { width: 74px; background: #F4F6FA; font-weight: 600; color: #2F3540; text-align: center; vertical-align: middle; }
 
-  /* ===== 方案头：大字 ===== */
-  .plan{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:30px;overflow:hidden;}
-  .hd{padding:22px 24px 18px;border-bottom:1px solid var(--line);}
-  .hd h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.3;}
-  .hd h1 .rec{font-size:12px;font-weight:600;padding:2px 10px;border-radius:11px;
-    background:var(--green-b);color:var(--green);border:1px solid var(--green-bd);
-    vertical-align:6px;margin-left:10px;letter-spacing:0;}
-  .hd h1 .alt{font-size:12px;font-weight:600;padding:2px 10px;border-radius:11px;
-    background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;vertical-align:6px;margin-left:10px;letter-spacing:0;}
-  .hd .why{margin-top:12px;font-size:13px;color:#454C59;line-height:1.85;}
-  .bd{padding:20px 24px 26px;}
+  .tabs { display: flex; gap: 8px; margin: 24px 0 0; padding: 8px; background: #F4F6FA; border: 1px solid #E8ECF3; border-radius: 6px; }
+  .tab { padding: 10px 32px; font-size: 15px; font-weight: 600; cursor: pointer; color: #5B6472; background: #fff; border: 1px solid #DDE3EC; border-radius: 4px; user-select: none; }
+  .tab:hover { color: #1C6EFF; border-color: #B9CCFF; }
+  .tab.on { color: #fff; background: #1C6EFF; border-color: #1C6EFF; box-shadow: 0 2px 6px rgba(28,110,255,.25); }
+  .panel { display: none; padding-top: 22px; }
+  .panel.on { display: block; }
 
-  /* ===== 草图 ===== */
-  .pg{margin-bottom:18px;}
-  .pg-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
-  .pg-hd .n{font-size:11px;font-weight:700;color:#fff;background:#8A92A1;padding:1px 7px;border-radius:3px;}
-  .pg-hd .t{font-size:13px;font-weight:700;}
-  .pg-hd .d{font-size:11.5px;color:var(--mute);}
-  .frame{border:1px solid var(--border);border-radius:5px;overflow:hidden;background:#fff;}
-  .bar{background:#F1F5F9;border-bottom:1px solid var(--border);padding:6px 12px;
-    font-size:11px;color:#6F7785;display:flex;justify-content:space-between;}
-  .canvas{display:flex;min-height:170px;}
-  .nav{width:100px;flex-shrink:0;background:#FAFBFD;border-right:1px dashed #CBD5E1;padding:9px 7px;}
-  .nav i{display:block;height:16px;border-radius:2px;background:#EDF1F7;margin-bottom:5px;}
-  .nav i.on{background:var(--blue-l);border-left:2px solid var(--blue);}
-  .main{flex:1;padding:11px;min-width:0;}
-  .row{display:flex;gap:9px;margin-bottom:9px;}
-  .blk{border:1px dashed #CBD5E1;border-radius:4px;background:#FCFDFE;padding:8px 10px;min-width:0;}
+  .page { border: 1px solid #E5E9F0; border-radius: 4px; padding: 16px 18px 18px; margin-bottom: 22px; background: #fff; }
+  .page-hd { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .pid { font-size: 12px; font-weight: 700; color: #fff; background: #2F3540; border-radius: 2px; padding: 1px 6px; }
+  .page-hd .form { font-size: 12px; color: #8A92A1; }
+  .page-hd .duty { font-size: 12px; color: #6F7785; margin-left: auto; }
 
-  /* 内容示意：有字，但只写"这里是什么"，不写"为什么这么设计" */
-  .ttl{font-size:11.5px;font-weight:600;color:#454C59;margin-bottom:6px;}
-  .ln{height:7px;border-radius:2px;background:#E6EAF0;margin-bottom:5px;}
-  .ln.w90{width:90%;} .ln.w70{width:70%;} .ln.w50{width:50%;} .ln.w40{width:40%;}
-  .ln:last-child{margin-bottom:0;}
-  .box{height:28px;border-radius:3px;background:#EDF1F7;margin-bottom:5px;}
-  .item{font-size:11px;color:#454C59;padding:4px 8px;background:#F8FAFC;border-radius:3px;margin-bottom:4px;}
-  .item:last-child{margin-bottom:0;}
-  .num{font-size:20px;font-weight:700;line-height:1.15;color:#2F3540;}
-  .num.s{font-size:16px;}
-  .num small{display:block;font-size:10px;font-weight:400;color:#8A92A1;margin-top:2px;}
-  .grid3{display:flex;gap:8px;}
-  .grid3 > div{flex:1;text-align:center;padding:7px 4px;border-radius:3px;background:#F8FAFC;border:1px solid #EDF1F7;}
-  .grid3 .lb{font-size:10px;color:#8A92A1;margin-top:2px;}
-  .btn{display:inline-block;padding:3px 12px;border-radius:2px;font-size:11px;border:1px solid #D3D7DE;background:#fff;}
-  .btn.p{background:var(--blue);border-color:var(--blue);color:#fff;}
-  .seg{display:inline-block;font-size:11px;padding:2px 10px;border-radius:2px;background:#EDF1F7;color:#6F7785;margin-right:5px;}
-  .seg.on{background:var(--blue-l);color:var(--blue);border:1px solid var(--blue-bd);}
+  .frame { border: 1px dashed #C3CBD8; background: #FBFCFE; padding: 10px; border-radius: 3px; }
+  .wf-bar { display: flex; justify-content: space-between; background: #fff; border-bottom: 1px solid #E5E9F0; padding: 5px 8px; font-size: 11px; color: #8A92A1; }
+  .wf-title { padding: 8px 0 6px; font-size: 12px; color: #454C59; font-weight: 600; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .kpi { background: #fff; border: 1px solid #DFE5EE; border-radius: 2px; padding: 6px 8px; }
+  .kpi .k { font-size: 11px; color: #6F7785; }
+  .kpi .v { font-size: 16px; font-weight: 700; color: #2F3540; }
+  .card { background: #fff; border: 1px solid #DFE5EE; border-radius: 2px; padding: 8px 10px; margin-top: 8px; }
+  .card.hl { border-color: #1C6EFF; }
+  .card-hd { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #454C59; }
+  .chip { display: inline-block; font-size: 11px; padding: 0 6px; border: 1px solid #D6DEEA; border-radius: 2px; color: #5B6472; background: #F7F9FC; }
+  .btn { display: inline-block; font-size: 11px; padding: 2px 9px; border: 1px solid #C9D2E0; border-radius: 2px; background: #fff; color: #3A4250; }
+  .btn.p { background: #1C6EFF; border-color: #1C6EFF; color: #fff; }
+  .lnk { color: #1C6EFF; font-size: 11px; }
+  .tag { display: inline-block; font-size: 10px; padding: 0 5px; border-radius: 2px; border: 1px solid; }
+  .t-bad { color: #C0392B; border-color: #F3C6C0; background: #FEF4F3; }
+  .t-warn { color: #B26A00; border-color: #F3D9B0; background: #FFFBF2; }
+  .t-mute { color: #5B6472; border-color: #DDE3EC; background: #F5F7FA; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+  .tbl th { background: #F4F6FA; padding: 5px 6px; color: #5B6472; font-weight: 600; border: none; border-bottom: 1px solid #E5E9F0; text-align: left; white-space: nowrap; }
+  .tbl td { padding: 5px 6px; border: none; border-bottom: 1px solid #F0F3F8; color: #3A4250; white-space: nowrap; }
+  .toolbar { display: flex; gap: 6px; align-items: center; margin-top: 8px; font-size: 11px; color: #6F7785; }
+  .inp { border: 1px solid #D6DEEA; border-radius: 2px; padding: 3px 8px; font-size: 11px; color: #8A92A1; background: #fff; }
 
-  /* 设计点：蓝框 + 编号；框里照常写内容 */
-  .pt-box{outline:2px solid var(--blue);outline-offset:2px;position:relative;background:#fff;}
-  .pt-n{position:absolute;top:-9px;left:9px;background:var(--blue);color:#fff;
-    font-size:10px;font-weight:700;padding:0 6px;border-radius:9px;line-height:16px;z-index:2;}
-  .rest{border:1px dashed #DDE3EA;background:#FCFDFE;border-radius:4px;padding:8px 10px;}
-  .rest .ln{background:#EFF2F6;}
+  .wf-drawer { width: 74%; margin-left: auto; background: #fff; border: 1px solid #C9D2E0; border-left: 3px solid #1C6EFF; border-radius: 2px; }
+  .wf-drawer-hd, .wf-modal-hd { padding: 7px 10px; border-bottom: 1px solid #E5E9F0; font-size: 12px; font-weight: 600; color: #454C59; display: flex; gap: 8px; align-items: center; }
+  .wf-drawer-body, .wf-modal-body { padding: 8px 10px; }
+  .wf-drawer-ft { padding: 7px 10px; border-top: 1px solid #E5E9F0; display: flex; gap: 6px; justify-content: flex-start; }
+  .wf-modal { width: 60%; margin: 0 auto; background: #fff; border: 1px solid #C9D2E0; border-radius: 2px; }
+  .wf-modal-ft { padding: 7px 10px; border-top: 1px solid #E5E9F0; display: flex; gap: 6px; justify-content: flex-end; }
+  .grp { border: 1px solid #E8ECF3; border-radius: 2px; padding: 5px 8px; margin-top: 6px; font-size: 11px; color: #5B6472; background: #FCFDFE; }
+  .grp .gt { color: #3A4250; font-weight: 600; }
 
-  .layer{background:#F4F6FA;position:relative;padding:10px;display:flex;justify-content:flex-end;}
-  .behind{position:absolute;left:12px;top:10px;right:44%;bottom:10px;opacity:.3;}
-  .panel{position:relative;width:72%;background:#fff;border-left:2px solid var(--blue);
-    border-radius:3px;padding:11px;box-shadow:-3px 0 10px rgba(15,23,42,.06);}
-  .foot{display:flex;justify-content:flex-start;gap:7px;border-top:1px solid var(--line);padding-top:9px;margin-top:10px;}
+  /* 标号：一律吸附在容器右上角，不占正文位置 */
+  .pt {
+    position: absolute; top: -9px; right: -9px; z-index: 3;
+    width: 17px; height: 17px; border-radius: 50%; background: #1C6EFF; color: #fff;
+    font-size: 10px; font-weight: 700; line-height: 17px; text-align: center;
+    font-style: normal; box-shadow: 0 0 0 2px #fff;
+  }
+  .box { position: relative; }
+  .group { position: relative; border: 1px dashed #1C6EFF; border-radius: 3px; padding: 9px; background: #fff; }
+  .group > .gh { position: absolute; top: -9px; left: 8px; background: #fff; padding: 0 5px; font-size: 10px; color: #1C6EFF; }
 
-  /* 共用页 */
-  .shared{background:#FAFBFD;border:1px dashed #CBD5E1;border-radius:6px;padding:12px 14px;
-    margin-bottom:18px;font-size:12.5px;color:#6F7785;}
-  .shared b{color:#454C59;}
-
-  /* 方案依据 */
-  .basis{margin-top:2px;padding-top:16px;border-top:1px dashed var(--border);}
-  .basis table{border-collapse:collapse;width:100%;font-size:12px;}
-  .basis td{padding:5px 0;vertical-align:top;border-bottom:1px solid #F5F7FA;}
-  .basis td:first-child{width:88px;color:var(--sub);white-space:nowrap;}
-  .basis tr:last-child td{border-bottom:none;}
-  .src{display:inline-block;font-size:10px;padding:0 5px;border-radius:2px;background:#F1F5F9;color:#64748B;margin-left:4px;}
-  .lv{color:var(--blue);font-weight:600;}
-
-  .gate{background:var(--blue-l);border:1px solid var(--blue-bd);border-radius:6px;padding:14px 18px;font-size:12.5px;color:#454C59;}
-  .gate b{color:var(--blue);}
-
-  /* 页头 */
-  .doc-hd{margin:0 0 20px;}
-  .doc-hd h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-.4px;}
-  .doc-hd p{margin:0;font-size:12px;color:var(--mute);line-height:1.7;}
-
-  /* 顶部选择区 */
-  .pick{margin:0 0 26px;}
-  .pick .lead-txt{font-size:12.5px;color:var(--sub);margin-bottom:10px;}
-  .pick .opts{display:flex;gap:12px;}
-  .pick .opt{flex:1;background:#fff;border:1px solid var(--border);border-radius:6px;
-    padding:12px 14px;font-size:12.5px;line-height:1.6;color:#454C59;}
-  .pick .opt .nm{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
-  .pick .opt .nm .rec{font-size:10.5px;font-weight:600;padding:1px 8px;border-radius:9px;
-    background:var(--green-b);color:var(--green);border:1px solid var(--green-bd);
-    vertical-align:2px;margin-left:6px;}
-  .pick .opt .nm .alt{font-size:10.5px;font-weight:600;padding:1px 8px;border-radius:9px;
-    background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;vertical-align:2px;margin-left:6px;}
-  .pick .tips{font-size:11.5px;color:#6F7785;margin-top:10px;}
+  .notes { list-style: none; margin: 14px 0 0; padding: 0; }
+  .notes li { display: flex; gap: 9px; padding: 9px 0; border-top: 1px dashed #EDF0F5; font-size: 13px; }
+  .notes .n {
+    flex: 0 0 17px; height: 17px; margin-top: 3px;
+    background: #1C6EFF; color: #fff; border-radius: 50%;
+    font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .notes .txt b { font-weight: 600; color: #2F3540; }
+  .notes .txt .why { color: #5B6472; }
+  .same { background: #FAFBFD; border: 1px dashed #DDE3EC; border-radius: 3px; padding: 10px 12px; font-size: 13px; color: #5B6472; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- ==================== 页头 ==================== -->
-  <div class="doc-hd">
-    <h1>需求草图示意</h1>
-    <p>基于需求理解之后进行的设计思考草图，仅用于思路对齐，不涉及详细设计。</p>
+  <h1>需求草图示意</h1>
+  <div class="sub">基于需求理解之后进行的设计思考草图，仅用于思路对齐，不涉及详细设计。数字待实测，草图中以 <code>__</code> 表示。</div>
+
+  <h2>本次需求一共 5 个页面</h2>
+  <table>
+    <thead>
+      <tr><th style="width:56px;">页面</th><th style="width:180px;">名称</th><th style="width:130px;">形式</th><th>这一页管什么</th><th style="width:130px;">两套方案</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P1</td><td>合规基线检测</td><td>列表主页</td><td>看现在有没有不合规，开新一轮检测</td><td><b>差异最大</b></td></tr>
+      <tr><td>P2</td><td>新建检测任务</td><td>右侧抽屉</td><td>定查什么、看会影响谁、确定下发</td><td><b>差异最大</b></td></tr>
+      <tr><td>P3</td><td>任务执行与结果</td><td>详情页</td><td>看谁收到、谁不合规、就地补发</td><td>两套相同</td></tr>
+      <tr><td>P4</td><td>未收到终端清单</td><td>抽屉</td><td>查为什么没收到，就地补发</td><td>两套相同</td></tr>
+      <tr><td>P5</td><td>规则模板库</td><td>抽屉</td><td>选一套现成规则、改差异后套用</td><td><b>有差异</b>：方案二不涉及</td></tr>
+    </tbody>
+  </table>
+
+  <h2>方案一和方案二的设计对比</h2>
+  <table class="cmp">
+    <thead>
+      <tr><th>对比项</th><th style="width:43%;">方案一</th><th>方案二</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>整体设计说明</td>
+        <td>把「先选范围、再一条条配规则」变成「系统按机器情况先配好一套，你只改不一样的地方」。打开就知道现在有几台不合规，提交前就知道会影响谁。<br><b>代价</b>：预置规则要有人维护；冷门项仍要手工展开。</td>
+        <td>把「人工逐条配规则」变成「按分组勾选，一次填完」。仍由人决定查什么范围、查哪几类，系统只提供现成的分组。<br><b>代价</b>：每轮仍要人自己圈范围，机器多的时候要多花时间。</td>
+      </tr>
+      <tr>
+        <td>一句话区别</td>
+        <td>先给建议，人只改差异；提交前能看到影响。</td>
+        <td>人自己选分组，系统不猜；提交前不预估影响。</td>
+      </tr>
+      <tr>
+        <td>本期不做</td>
+        <td>自动修复不合规项、定时循环检测、按部门下发策略</td>
+        <td>同方案一</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>两套方案各自的设计思考点（关注的问题不同，不逐条对齐）</h2>
+  <table class="pt-tbl">
+    <thead>
+      <tr><th>方案</th><th>编号</th><th style="width:44%;">思考点</th><th>为什么这么想（对应现状里的哪个卡点）</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="4" class="plan">方案一</td><td>1</td><td>打开先告诉你「现在有几台要处理」，不是先给任务列表</td><td class="src">用户打开这一页是问「现在有没有事」，翻历史任务只是顺带</td></tr>
+      <tr><td>2</td><td>系统按机器情况先配好一套检测项，人只改不一样的地方</td><td class="src">每台机器都要从头勾一遍规则，配完还要担心漏项</td></tr>
+      <tr><td>3</td><td>点「下发」之前，先告诉你会影响哪些机器</td><td class="src">点完才发现有一批离线机器，任务卡在那里没人管</td></tr>
+      <tr><td>4</td><td>结果页直接给「谁不合规」，并就地补发</td><td class="src">看结果要跳到另一页，补发再跳回来，中间容易漏人</td></tr>
+      <tr><td rowspan="4" class="plan">方案二</td><td>1</td><td>一张任务表看全部，结论放在表格最后一列</td><td class="src">需求原文要的就是任务列表加结果，先保证不漏任务</td></tr>
+      <tr><td>2</td><td>按「防病毒 / 防泄密 / 防外联」分组勾选，勾完即填好</td><td class="src">规则条目多、名字专业，逐条勾容易漏也容易勾错</td></tr>
+      <tr><td>3</td><td>结果页只给三个数字，未收到清单另开一页</td><td class="src">取舍：不在结果页里直接补发之外的改动，避免两个页面职责重叠</td></tr>
+      <tr><td>4</td><td>不提供模板保存，规则每轮现配</td><td class="src">取舍：没有模板就没有维护成本，但每轮要重新配一遍</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tabs">
+    <div class="tab on" data-tab="p1">方案一</div>
+    <div class="tab" data-tab="p2">方案二</div>
   </div>
 
-  <!-- ==================== 请选择一个方案 ==================== -->
-  <section class="pick">
-    <div class="lead-txt">请选择一个方案，我将按选定的方案继续出正式说明书</div>
-    <div class="opts">
-      <div class="opt">
-        <div class="nm">方案一：系统出草案，人只改差异<span class="rec">推荐</span></div>
-        打开抽屉时规则已按资产画像填好，人只改不一样的那几项。
+  <!-- ==================== 方案一 ==================== -->
+  <div class="panel on" id="p1">
+
+    <div class="page">
+      <div class="page-hd"><span class="pid">P1</span><h3>合规基线检测</h3><span class="form">列表主页</span><span class="duty">看现在有没有不合规，开新一轮检测</span></div>
+      <div class="frame">
+        <div class="wf-bar"><span>终端安全 / 合规检测</span><span>最近更新 __</span></div>
+
+        <div class="box" style="padding:10px 0 4px;">
+          <i class="pt">1</i>
+          <div style="font-size:13px;font-weight:600;">本轮有 __ 台机器需要处理</div>
+          <div class="hint">按最近一轮检测结果统计，只算还在线的机器</div>
+        </div>
+
+        <div class="group" style="margin-top:6px;">
+          <i class="pt">2</i>
+          <div class="kpis">
+            <div class="kpi"><div class="k">没装安全软件</div><div class="v">__</div></div>
+            <div class="kpi"><div class="k">版本太旧</div><div class="v">__</div></div>
+            <div class="kpi"><div class="k">长时间没上报</div><div class="v">__</div></div>
+          </div>
+        </div>
+
+        <div class="box" style="margin-top:12px;">
+          <i class="pt">3</i>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="btn p">开始新一轮检测</span>
+            <span class="btn">查看全部任务</span>
+            <span class="hint" style="margin-left:auto;">当前范围：最近一轮</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>任务</th><th>发起人</th><th>发起时间</th><th>已检</th><th>未收到</th><th>不合规</th></tr></thead>
+            <tbody>
+              <tr><td>全公司基线检查</td><td>王工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+              <tr><td>研发部专项检查</td><td>李工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="opt">
-        <div class="nm">方案二：分组预置，人自己选<span class="alt">次选</span></div>
-        常用检测项按防病毒 / 防泄密 / 防外联分组，勾一组填完一批。
-      </div>
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：首屏第一句是「本轮有多少台要处理」，不是任务总数。<br><span class="why"><b>为什么</b>：用户打开这一页是问「现在有没有事」，不是来翻历史；先给结论能省掉一次自己筛。</span></span></li>
+        <li><span class="n">2</span><span class="txt"><b>做法</b>：三种情况各占一格，名字直接写「没装 / 版本太旧 / 长时间没上报」。<br><span class="why"><b>为什么</b>：这三种情况处理方式完全不同，混在一个「不合规」里，派人去装软件时会发现其实是版本旧。</span></span></li>
+        <li><span class="n">3</span><span class="txt"><b>做法</b>：这一页只有一个主按钮「开始新一轮检测」，其余是次按钮。<br><span class="why"><b>为什么</b>：这一页真正要人做的只有一件事；主按钮多了，人反而不知道先点哪个。</span></span></li>
+      </ul>
     </div>
-    <div class="tips">也可以说"选定但要改"或"都不满意"，我先改再确认。完整草图见下方。</div>
-  </section>
 
-  <!-- ==================== 一、页面全貌 ==================== -->
-  <section class="inv">
-    <h2>本次需求一共 5 个页面</h2>
-    <div class="sub">下面两个方案都基于这 5 个页面。有差异的页单独画；没差异的页只画一次，两个方案共用。</div>
-    <table class="b">
-      <thead>
-        <tr><th style="width:8%">页面</th><th style="width:24%">名称</th><th style="width:14%">形态</th><th style="width:32%">本页职责</th><th style="width:22%">两个方案的差异</th></tr>
-      </thead>
-      <tbody>
-        <tr><td class="n">P1</td><td>合规基线检测</td><td>列表主页</td><td>看任务与最近一轮结果，进新建</td><td><span class="diff y">有差异</span> 结论区</td></tr>
-        <tr><td class="n">P2</td><td>新建检测任务</td><td>右侧抽屉</td><td>配规则、看影响面、下发</td><td><span class="diff y">有差异</span> 主战场</td></tr>
-        <tr><td class="n">P3</td><td>任务执行与结果</td><td>详情页</td><td>看谁收到、谁违规、就地补发</td><td><span class="diff n">相同</span> 共用</td></tr>
-        <tr><td class="n">P4</td><td>未收到终端清单</td><td>抽屉</td><td>查为什么没收到，就地补发</td><td><span class="diff n">相同</span> 共用</td></tr>
-        <tr><td class="n">P5</td><td>规则模板库</td><td>抽屉</td><td>选一套现成规则、套用改差异</td><td><span class="diff y">有差异</span> 方案二不涉及</td></tr>
-      </tbody>
-    </table>
-  </section>
+    <div class="page">
+      <div class="page-hd"><span class="pid">P2</span><h3>新建检测任务</h3><span class="form">右侧抽屉</span><span class="duty">定查什么、看会影响谁、确定下发</span></div>
+      <div class="frame">
+        <div class="wf-drawer">
+          <div class="wf-drawer-hd"><i class="pt">1</i>新建检测任务<span class="chip" style="margin-left:auto;">右侧抽屉</span></div>
+          <div class="wf-drawer-body">
+            <div class="box" style="padding-right:18px;">
+              <i class="pt">2</i>
+              <div class="grp" style="background:#fff;margin-top:0;">
+                <div class="gt">检测项 · 已按「研发机」预置 __ 项</div>
+                <div>是否安装企业安全软件</div>
+                <div>软件版本是否低于 __</div>
+                <div>最近 __ 小时是否上报过</div>
+                <div style="margin-top:4px;"><span class="lnk">展开全部检测项</span></div>
+              </div>
+            </div>
 
-  <!-- ==================== 二、方案一 ==================== -->
-  <section class="plan">
-    <div class="hd">
-      <h1>方案一：系统出草案，人只改差异<span class="rec">推荐</span></h1>
-      <div class="why">
-        管理员新建检测任务时，既不知道该查什么，也估不准会打到多少台。所以打开抽屉，规则已经按这台机器的资产画像填好，人只改不一样的那几项；影响面摆在同一个抽屉里，配和看后果不分开。
+            <div class="box" style="margin-top:12px;padding-right:18px;">
+              <i class="pt">3</i>
+              <div class="grp" style="background:#fff;margin-top:0;">
+                <div class="gt">下发范围与影响</div>
+                <div style="display:flex;gap:14px;margin-top:4px;">
+                  <span>将检查 __ 台</span><span>其中离线 __ 台</span><span>可立即检查 __ 台</span>
+                </div>
+                <div style="margin-top:4px;color:#B26A00;">离线机器会在下次上线时补查，不会漏</div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-drawer-ft">
+            <span class="btn p">确定并下发</span>
+            <span class="btn">取消</span>
+          </div>
+        </div>
       </div>
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：点主按钮后从右侧滑出，不跳页。<br><span class="why"><b>为什么</b>：配完还要回列表看结果，跳页会让人找不到刚才那一行。</span></span></li>
+        <li><span class="n">2</span><span class="txt"><b>做法</b>：检测项已经按这台机器的类型预先填好，只留「展开全部」给人改。<br><span class="why"><b>为什么</b>：规则名专业且条数多，每台都从头勾一遍既慢又容易漏；先给一套能用的，人只需要改不一样的地方。</span></span></li>
+        <li><span class="n">3</span><span class="txt"><b>做法</b>：按钮下方先说清「会检查多少台、多少台离线、多少台马上能查」。<br><span class="why"><b>为什么</b>：点完才发现一批机器离线，任务会长时间卡着；提前说清楚，人可以决定先等还是先发。</span></span></li>
+      </ul>
     </div>
-    <div class="bd">
 
-      <!-- P1 -->
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P1</span><span class="t">合规基线检测</span><span class="d">列表主页 · 改现有</span></div>
-        <div class="frame">
-          <div class="bar"><span>合规基线检测</span><span>终端管控 / 合规基线检测</span></div>
-          <div class="canvas">
-            <div class="nav"><i></i><i class="on"></i><i></i><i></i></div>
-            <div class="main">
-              <div class="row">
-                <div class="blk pt-box" style="flex:2.2;">
-                  <span class="pt-n">B4</span>
-                  <div class="num">37 台 <small>不合规 / 1,842 台已受检 · 40 台离线未检</small></div>
-                </div>
-                <div class="blk" style="flex:1;">
-                  <div class="btn p" style="margin-bottom:6px;">新建检测任务</div>
-                  <div class="btn">复用历史配置</div>
-                </div>
-              </div>
-              <div class="rest">
-                <div class="ttl">任务列表</div>
-                <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div><div class="ln w50"></div>
-              </div>
-            </div>
+    <div class="page">
+      <div class="page-hd"><span class="pid">P3</span><h3>任务执行与结果</h3><span class="form">详情页</span><span class="duty">看谁收到、谁不合规、就地补发</span></div>
+      <div class="frame">
+        <div class="wf-bar"><span>终端安全 / 合规检测 / 任务详情</span><span>发起时间 __</span></div>
+        <div class="box" style="padding:8px 0 6px;">
+          <i class="pt">1</i>
+          <div class="kpis" style="grid-template-columns:repeat(3,1fr);">
+            <div class="kpi"><div class="k">已检查</div><div class="v">__</div></div>
+            <div class="kpi"><div class="k">未收到</div><div class="v">__</div></div>
+            <div class="kpi"><div class="k">不合规</div><div class="v">__</div></div>
           </div>
         </div>
-      </div>
-
-      <!-- P2 -->
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P2</span><span class="t">新建检测任务</span><span class="d">右侧抽屉 · 主战场</span></div>
-        <div class="frame">
-          <div class="bar"><span>新建检测任务</span><span>800px 抽屉</span></div>
-          <div class="layer">
-            <div class="behind">
-              <div class="ttl">合规基线检测</div>
-              <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div>
-              <div class="ln w50"></div><div class="ln w70"></div><div class="ln w40"></div>
-            </div>
-            <div class="panel">
-
-              <div class="blk pt-box" style="margin-bottom:12px;">
-                <span class="pt-n">B1</span>
-                <div class="ttl">检测项 · 已按「研发机」预置 12 项</div>
-                <div class="item">未安装企业杀毒软件</div>
-                <div class="item">私装翻墙 / 代理工具</div>
-                <div class="item">外发敏感文件</div>
-                <div class="item" style="color:#8A92A1;">展开其余 9 项</div>
-              </div>
-
-              <div class="blk pt-box" style="margin-bottom:12px;">
-                <span class="pt-n">B2</span>
-                <div class="ttl">下发范围与影响</div>
-                <div class="grid3">
-                  <div><div class="num s">2,160</div><div class="lb">将受检</div></div>
-                  <div><div class="num s" style="color:#FA8C16;">40</div><div class="lb">离线跳过</div></div>
-                  <div><div class="num s" style="color:#12A679;">2,120</div><div class="lb">在线可检</div></div>
-                </div>
-              </div>
-
-              <div class="blk pt-box" style="margin-bottom:12px;">
-                <span class="pt-n">B3</span>
-                <div class="ttl">规则来源</div>
-                <div><span class="seg on">研发部基线 v3</span><span class="seg">本次调整 2 项</span></div>
-                <div style="font-size:11px;color:var(--blue);margin-top:6px;">保存为新模板</div>
-              </div>
-
-              <div class="rest" style="margin-bottom:2px;">
-                <div class="ttl">执行周期</div>
-                <div class="ln w40"></div>
-              </div>
-
-              <div class="foot"><span class="btn p">确定并下发</span><span class="btn">取消</span></div>
-            </div>
-          </div>
+        <div class="box" style="margin-top:10px;">
+          <i class="pt">2</i>
+          <table class="tbl">
+            <thead><tr><th>终端</th><th>使用人</th><th>检查项</th><th>结果</th><th style="text-align:right;">可以做什么</th></tr></thead>
+            <tbody>
+              <tr><td>研发终端-01</td><td>员工A</td><td>是否安装安全软件</td><td><span class="tag t-bad">不合规</span></td><td style="text-align:right;"><span class="lnk">就地补发</span></td></tr>
+              <tr><td>研发终端-07</td><td>员工B</td><td>软件版本</td><td><span class="tag t-warn">版本太低</span></td><td style="text-align:right;"><span class="lnk">就地补发</span></td></tr>
+            </tbody>
+          </table>
+          <div class="hint" style="margin-top:6px;">未收到的 __ 台单独看待，见右侧「未收到终端清单」</div>
         </div>
       </div>
-
-      <!-- P3 -->
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P3</span><span class="t">任务执行与结果</span><span class="d">详情页 · 新建</span></div>
-        <div class="frame">
-          <div class="bar"><span>研发部基线检测 · 第 3 轮</span><span>任务详情</span></div>
-          <div class="canvas" style="min-height:0;">
-            <div class="main">
-              <div class="blk pt-box" style="margin-bottom:10px;">
-                <span class="pt-n">B4</span>
-                <div class="ttl">下发结果</div>
-                <div class="grid3">
-                  <div><div class="num s">2,120</div><div class="lb">已下发</div></div>
-                  <div><div class="num s" style="color:#D9363E;">37</div><div class="lb">违规</div></div>
-                  <div><div class="num s" style="color:#FA8C16;">40</div><div class="lb">未收到</div></div>
-                </div>
-                <div style="font-size:11px;color:var(--blue);margin-top:8px;">查看未收到清单 · 就地补发</div>
-              </div>
-              <div class="rest"><div class="ttl">违规终端明细</div><div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div></div>
-            </div>
-          </div>
-          <div class="foot"><span class="btn p">处置选中</span><span class="btn">导出</span></div>
-        </div>
-      </div>
-
-      <!-- P4 P5 共用 -->
-      <div class="shared">
-        <b>P4 未收到终端清单（抽屉）· P5 规则模板库（抽屉）</b> —— 与方案二完全相同，草图见下方「两方案共用的页面」，此处不重复。
-      </div>
-
-      <div class="basis">
-        <table>
-          <tr><td>为什么这么想</td><td>目标要求"0 基础管理员自己配得出敢下发的任务"。要"敢下发"，光把配置做顺不够，得让他<b>看见后果</b>，所以配和影响面合在一个抽屉里。</td></tr>
-          <tr><td>依据来源</td><td>目标（0 基础 / 敢下发）<span class="src">入口 1</span>　·　配置运维"改时少出错、改完敢信"<span class="src">入口 2 · ①原则3/4</span>　·　排障闭环"发到 ≠ 改好"<span class="src">入口 2 · ③原则4</span></td></tr>
-          <tr><td>档位</td><td>B1 <span class="lv">创新版</span>　B2 <span class="lv">创新版</span>　B3 <span class="lv">创新版</span>　B4 <span class="lv">优化版</span></td></tr>
-          <tr><td>代价</td><td>预置规则库要持续维护；资产画像不准时草案会跑偏，得留"全清重配"的口子。</td></tr>
-        </table>
-      </div>
-
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：顶部三个数字并排：已检查、未收到、不合规。<br><span class="why"><b>为什么</b>：「没收到结果」和「收到但不合规」是两件事，合成一个「完成率」会看不出问题在哪。</span></span></li>
+        <li><span class="n">2</span><span class="txt"><b>做法</b>：不合规的行后面直接给「就地补发」，不跳页。<br><span class="why"><b>为什么</b>：看到问题的地方就是能动手的地方；跳出去再回来，人容易漏掉后面几条。</span></span></li>
+      </ul>
     </div>
-  </section>
 
-  <!-- ==================== 三、方案二 ==================== -->
-  <section class="plan">
-    <div class="hd">
-      <h1>方案二：分组预置，人自己选<span class="alt">次选</span></h1>
-      <div class="why">
-        同一个场景，换个思路：不猜管理员要查什么，而是把常用检测项按"防病毒 / 防泄密 / 防外联"分成几组，勾一组填完一批。省的是填参数的手，判断仍然留给人——适合对自动生成有顾虑、或资产画像还不准的时候。
+    <div class="page">
+      <div class="page-hd"><span class="pid">P4</span><h3>未收到终端清单</h3><span class="form">抽屉</span><span class="duty">查为什么没收到，就地补发</span></div>
+      <div class="frame">
+        <div class="wf-drawer">
+          <div class="wf-drawer-hd">未收到终端清单<span class="chip" style="margin-left:auto;">抽屉</span></div>
+          <div class="wf-drawer-body">
+            <div class="box" style="padding-right:18px;">
+              <i class="pt">1</i>
+              <div class="hint">__ 台机器没有回传结果，逐条写清原因</div>
+              <table class="tbl">
+                <thead><tr><th style="width:20px;"></th><th>终端</th><th>使用人</th><th>没收到原因</th><th style="text-align:right;">可以做什么</th></tr></thead>
+                <tbody>
+                  <tr><td>☐</td><td>研发终端-11</td><td>员工C</td><td>终端离线 __ 天</td><td style="text-align:right;"><span class="lnk">就地补发</span></td></tr>
+                  <tr><td>☑</td><td>财务终端-03</td><td>员工D</td><td>客户端版本太低</td><td style="text-align:right;"><span class="lnk">就地补发</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="wf-drawer-ft" style="position:relative;">
+            <i class="pt">2</i>
+            <span class="btn p">补发选中</span>
+            <span class="btn">关闭</span>
+          </div>
+        </div>
       </div>
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：每条都写清没收到的具体原因，不只写「未收到」。<br><span class="why"><b>为什么</b>：不写原因，人还得一台台去查；写清是离线还是版本旧，可以直接分流给不同的人处理。</span></span></li>
+        <li><span class="n">2</span><span class="txt"><b>做法</b>：勾选后在这一页直接补发。<br><span class="why"><b>为什么</b>：查原因和补发是同一个动作的两步，分到两个页面就要来回跳。</span></span></li>
+      </ul>
     </div>
-    <div class="bd">
 
-      <!-- P1 -->
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P1</span><span class="t">合规基线检测</span><span class="d">列表主页 · 改现有</span></div>
-        <div class="frame">
-          <div class="bar"><span>合规基线检测</span><span>终端管控 / 合规基线检测</span></div>
-          <div class="canvas">
-            <div class="nav"><i></i><i class="on"></i><i></i><i></i></div>
-            <div class="main">
-              <div class="row">
-                <div class="blk" style="flex:2.2;">
-                  <div class="ttl">最近一轮检测</div>
-                  <div class="ln w70" style="height:12px;background:#DCE3EC;"></div>
-                  <div class="ln w50" style="margin-top:8px;"></div>
-                </div>
-                <div class="blk" style="flex:1;">
-                  <div class="btn p" style="margin-bottom:6px;">新建检测任务</div>
-                  <div class="btn">复用历史配置</div>
-                </div>
-              </div>
-              <div class="rest">
-                <div class="ttl">任务列表</div>
-                <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div><div class="ln w50"></div>
+    <div class="page">
+      <div class="page-hd"><span class="pid">P5</span><h3>规则模板库</h3><span class="form">抽屉</span><span class="duty">选一套现成规则、改差异后套用</span></div>
+      <div class="frame">
+        <div class="wf-drawer">
+          <div class="wf-drawer-hd">规则模板库<span class="chip" style="margin-left:auto;">抽屉</span></div>
+          <div class="wf-drawer-body">
+            <div class="box" style="padding-right:18px;">
+              <i class="pt">1</i>
+              <div class="hint">选一套模板，勾选项会带进新建任务，差异部分可以再改</div>
+              <table class="tbl">
+                <thead><tr><th>模板名</th><th>包含分组</th><th>最近使用</th><th style="text-align:right;">操作</th></tr></thead>
+                <tbody>
+                  <tr><td>研发机基线</td><td>防病毒 + 防泄密</td><td>__</td><td style="text-align:right;"><span class="lnk">套用此模板</span></td></tr>
+                  <tr><td>财务机基线</td><td>防病毒 + 防泄密 + 防外联</td><td>__</td><td style="text-align:right;"><span class="lnk">套用此模板</span></td></tr>
+                </tbody>
+              </table>
+              <div class="box" style="margin-top:8px;display:inline-block;padding-right:8px;">
+                <i class="pt">2</i>
+                <span class="btn">把当前配置存为新模板</span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- P2 -->
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P2</span><span class="t">新建检测任务</span><span class="d">右侧抽屉</span></div>
-        <div class="frame">
-          <div class="bar"><span>新建检测任务</span><span>800px 抽屉</span></div>
-          <div class="layer">
-            <div class="behind">
-              <div class="ttl">合规基线检测</div>
-              <div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div>
-              <div class="ln w50"></div><div class="ln w70"></div><div class="ln w40"></div>
-            </div>
-            <div class="panel">
-
-              <div class="blk pt-box" style="margin-bottom:12px;">
-                <span class="pt-n">B1</span>
-                <div class="ttl">检测项 · 按类别勾选</div>
-                <div class="row" style="margin-bottom:6px;">
-                  <div class="box" style="flex:1;margin-bottom:0;"></div>
-                  <div class="box" style="flex:1;margin-bottom:0;"></div>
-                  <div class="box" style="flex:1;margin-bottom:0;"></div>
-                </div>
-                <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#6F7785;">
-                  <span>防病毒</span><span>防泄密</span><span>防外联</span>
-                </div>
-              </div>
-
-              <div class="blk pt-box" style="margin-bottom:12px;">
-                <span class="pt-n">B2</span>
-                <div class="ttl">预计受检终端</div>
-                <div class="num s">2,160</div>
-              </div>
-
-              <div class="rest" style="margin-bottom:2px;">
-                <div class="ttl">执行周期 / 通知</div>
-                <div class="ln w40"></div><div class="ln w70"></div>
-              </div>
-
-              <div class="foot"><span class="btn p">确定并下发</span><span class="btn">取消</span></div>
-            </div>
+          <div class="wf-drawer-ft">
+            <span class="btn p">套用选中</span>
+            <span class="btn">关闭</span>
           </div>
         </div>
       </div>
-
-      <!-- P3 P4 P5 -->
-      <div class="shared">
-        <b>P3 任务执行与结果 · P4 未收到终端清单 · P5 规则模板库</b> —— 与方案一（或彼此）无差异，见下方「两方案共用的页面」。
-      </div>
-
-      <div class="basis">
-        <table>
-          <tr><td>为什么这么想</td><td>目标里"0 基础"可以靠<b>少填</b>解决，不必靠<b>不填</b>。分组预置是行业常见做法，落地快、不依赖画像质量。</td></tr>
-          <tr><td>依据来源</td><td>目标（0 基础）<span class="src">入口 1</span>　·　配置运维"填得少"<span class="src">入口 2 · ①原则2</span></td></tr>
-          <tr><td>档位</td><td>B1 <span class="lv">优化版</span>　B2 <span class="lv">优化版</span>（到不了创新版：人仍要自己判断选哪组）</td></tr>
-          <tr><td>代价</td><td>组名起不好照样选错；B3、B4 在本方案里没有专门设计，退化为基线能力。</td></tr>
-        </table>
-      </div>
-
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：模板只带「分组与检测项」，仍要在新建任务里确认范围。<br><span class="why"><b>为什么</b>：模板解决"查什么"，范围每轮都在变；两件事都塞进模板，套用后还要回头改，反而更慢。</span></span></li>
+        <li><span class="n">2</span><span class="txt"><b>做法</b>：配置好的任务可以「存为新模板」。<br><span class="why"><b>为什么</b>：同类机器每轮配的东西几乎一样，存下来下次直接套，省掉重复劳动。</span></span></li>
+      </ul>
     </div>
-  </section>
 
-  <!-- ==================== 四、共用页面 ==================== -->
-  <section class="plan">
-    <div class="hd">
-      <h1>两方案共用的页面</h1>
-      <div class="why">下面 3 个页面两个方案完全一致，只画一次。</div>
+  </div>
+
+  <!-- ==================== 方案二 ==================== -->
+  <div class="panel" id="p2">
+
+    <div class="page">
+      <div class="page-hd"><span class="pid">P1</span><h3>合规基线检测</h3><span class="form">列表主页</span><span class="duty">看全部任务与最近一轮结果</span></div>
+      <div class="frame">
+        <div class="wf-bar"><span>终端安全 / 合规检测</span><span>最近更新 __</span></div>
+        <div class="box" style="padding:8px 0 6px;">
+          <i class="pt">1</i>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="btn p">新建检测任务</span>
+            <span class="inp">搜任务名</span>
+            <span class="hint" style="margin-left:auto;">共 __ 个任务</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>任务</th><th>发起人</th><th>发起时间</th><th>已检</th><th>未收到</th><th>不合规</th></tr></thead>
+            <tbody>
+              <tr><td>全公司基线检查</td><td>王工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+              <tr><td>研发部专项检查</td><td>李工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：首屏就是任务列表，结论放在每行的后三列。<br><span class="why"><b>为什么</b>：需求要的是「任务 + 结果」在一张表里；先给任务，才能按时间脉络看每一轮。</span></span></li>
+      </ul>
     </div>
-    <div class="bd">
 
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P3</span><span class="t">任务执行与结果</span><span class="d">详情页 · 共用</span></div>
-        <div class="frame">
-          <div class="bar"><span>研发部基线检测 · 第 3 轮</span><span>任务详情</span></div>
-          <div class="canvas" style="min-height:0;">
-            <div class="main">
-              <div class="blk" style="margin-bottom:10px;">
-                <div class="ttl">下发结果</div>
-                <div class="grid3">
-                  <div><div class="num s">2,120</div><div class="lb">已下发</div></div>
-                  <div><div class="num s" style="color:#D9363E;">37</div><div class="lb">违规</div></div>
-                  <div><div class="num s" style="color:#FA8C16;">40</div><div class="lb">未收到</div></div>
-                </div>
-                <div style="font-size:11px;color:var(--blue);margin-top:8px;">查看未收到清单 · 就地补发</div>
-              </div>
-              <div class="rest"><div class="ttl">违规终端明细</div><div class="ln w90"></div><div class="ln w70"></div><div class="ln w90"></div></div>
-            </div>
-          </div>
-          <div class="foot"><span class="btn p">处置选中</span><span class="btn">导出</span></div>
-        </div>
-      </div>
-
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P4</span><span class="t">未收到终端清单</span><span class="d">抽屉 · 共用</span></div>
-        <div class="frame">
-          <div class="bar"><span>未收到终端</span><span>640px 抽屉</span></div>
-          <div class="layer">
-            <div class="behind">
-              <div class="ttl">研发部基线检测 · 第 3 轮</div>
-              <div class="ln w90"></div><div class="ln w70"></div>
-            </div>
-            <div class="panel">
-              <div class="ttl">40 台未收到，按原因分组</div>
-              <div class="item">离线 · 32 台</div>
-              <div class="item">客户端未安装 · 6 台</div>
-              <div class="item">系统版本不支持 · 2 台</div>
-              <div class="foot"><span class="btn p">就地补发</span><span class="btn">导出</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pg">
-        <div class="pg-hd"><span class="n">P5</span><span class="t">规则模板库</span><span class="d">抽屉 · 共用</span></div>
-        <div class="frame">
-          <div class="bar"><span>规则模板库</span><span>800px 抽屉</span></div>
-          <div class="layer">
-            <div class="behind"><div class="ttl">新建检测任务</div><div class="ln w70"></div><div class="ln w50"></div></div>
-            <div class="panel">
-              <div class="row" style="margin-bottom:0;">
-                <div class="blk" style="flex:1;">
-                  <div class="ttl">模板列表</div>
-                  <div class="item">研发部基线 v3</div>
-                  <div class="item">财务部基线 v2</div>
-                  <div class="item">外包临时管控</div>
-                </div>
-                <div class="blk" style="flex:1.2;">
-                  <div class="ttl">模板详情</div>
-                  <div class="ln w90"></div><div class="ln w70"></div>
-                  <div class="btn p" style="margin-top:8px;">套用此模板</div>
-                </div>
+    <div class="page">
+      <div class="page-hd"><span class="pid">P2</span><h3>新建检测任务</h3><span class="form">右侧抽屉</span><span class="duty">选分组、圈范围、确定下发</span></div>
+      <div class="frame">
+        <div class="wf-drawer">
+          <div class="wf-drawer-hd">新建检测任务<span class="chip" style="margin-left:auto;">右侧抽屉</span></div>
+          <div class="wf-drawer-body">
+            <div class="box" style="padding-right:18px;">
+              <i class="pt">1</i>
+              <div class="group" style="margin-top:0;">
+                <i class="pt">2</i><span class="gh">勾选分组，勾完即填好</span>
+                <div class="grp" style="background:#fff;margin-top:0;">防病毒：是否安装、病毒库是否最新</div>
+                <div class="grp" style="background:#fff;">防泄密：是否开启外发管控、是否安装加密客户端</div>
+                <div class="grp" style="background:#fff;">防外联：是否允许访问外部存储</div>
               </div>
             </div>
+            <div class="grp" style="background:#fff;margin-top:10px;">
+              <div class="gt">检查范围</div>
+              <div>按部门选择（研发部 / 财务部 / 全公司）· 当前：研发部</div>
+            </div>
+          </div>
+          <div class="wf-drawer-ft">
+            <span class="btn p">确定并下发</span>
+            <span class="btn">取消</span>
           </div>
         </div>
       </div>
-
+      <ul class="notes">
+        <li><span class="n">1</span><span class="txt"><b>做法</b>：先选部门范围，再选检测分组，两步配完。<br><span class="why"><b>为什么</b>：范围是每次都要重新定的，放在最前面，人才不会漏。</span></span></li>
+        <li><span class="n">2</span><span class="txt"><b>做法</b>：检测项按「防病毒 / 防泄密 / 防外联」分成三组，勾一组就填一组。<br><span class="why"><b>为什么</b>：逐条勾容易漏也容易勾错，按组勾能让人先想清楚「这轮要查什么方向」。</span></span></li>
+      </ul>
     </div>
-  </section>
 
-  <div class="gate" style="text-align:center;color:#6F7785;">
-    以上为两个方案的完整草图。回到顶部选一个，或告诉我哪里要改。
+
+    <div class="same"><b>P3 任务执行与结果</b>、<b>P4 未收到终端清单</b>：与方案一相同，此处不重复画。<br><b>P5 规则模板库</b>：方案二不涉及（规则每轮现配，不保存模板）。</div>
+
   </div>
 
 </div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); });
+      document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('on'); });
+      t.classList.add('on');
+      document.getElementById(t.dataset.tab).classList.add('on');
+    });
+  });
+</script>
 </body>
 </html>

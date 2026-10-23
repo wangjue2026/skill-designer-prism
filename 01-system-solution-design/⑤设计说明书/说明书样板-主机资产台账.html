@@ -72,9 +72,22 @@
     .wf-form-label { width: 110px; flex-shrink: 0; color: #6F7785; font-size: 11px; padding-top: 4px; text-align: left; }
     .wf-form-control { flex: 1; min-width: 0; }
 
-    /* 底部评审共识关卡浮层 */
-    .checkpoint { background: var(--blue-l); border: 1px solid #BAE6FD; border-radius: 4px; padding: 16px 20px; margin-top: 36px; font-size: 12px; color: #1C6EFF; line-height: 1.8; }
-    .checkpoint b { display: block; margin-bottom: 6px; font-size: 13px; color: #1C6EFF; }
+    /* ========== Part1 / Part2 双 Tab（默认选 Part2） ========== */
+    .doc-tabs { position: sticky; top: 0; z-index: 20; display: flex; gap: 2px;
+      background: rgba(255,255,255,.97); backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border); margin: 4px 0 18px; }
+    .doc-tabs button { appearance: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      background: transparent; padding: 11px 16px 10px; font-family: inherit;
+      font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer;
+      display: flex; align-items: center; gap: 8px; }
+    .doc-tabs button:hover { color: var(--blue); }
+    .doc-tabs button.on { color: var(--blue); border-bottom-color: var(--blue); }
+    .doc-tabs .idx { font-size: 11px; font-weight: 700; line-height: 17px; padding: 0 5px; border-radius: 2px;
+      background: #EDF1F7; color: #64748B; }
+    .doc-tabs button.on .idx { background: var(--blue); color: #FFFFFF; }
+    .doc-tabs .hint { font-size: 10.5px; font-weight: 500; color: var(--text-mute); }
+    .tab-pane { display: none; }
+    .tab-pane.on { display: block; }
 
     /* ========== 角色卡片 (Role Cards) ========== */
     .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin: 14px 0 6px; }
@@ -97,8 +110,14 @@
     .role-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
     .role-tag { font-size: 10.5px; padding: 1px 8px; border-radius: 9px; background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
 
-    h2.part { font-size: 19px; font-weight: 800; letter-spacing: -.3px; color: #2F3540;
-      margin: 34px 0 14px; padding: 10px 0 8px; border-top: 2px solid #1C6EFF; border-bottom: 1px solid #E1E5EB; }
+    /* Part 分隔标题由顶部 Tab 承担；h2.part 仅作结构与打印锚点 */
+    h2.part { display: none; }
+    @media print {
+      .doc-tabs { display: none; }
+      .tab-pane { display: block !important; }
+      h2.part { display: block; font-size: 19px; font-weight: 800; letter-spacing: -.3px; color: #2F3540;
+        margin: 34px 0 14px; padding: 10px 0 8px; border-top: 2px solid #1C6EFF; border-bottom: 1px solid #E1E5EB; }
+    }
     details.sketch-fold { border: 1px solid #E1E5EB; border-radius: 6px; background: #FFFFFF; margin: 12px 0; }
     details.sketch-fold > summary { cursor: pointer; padding: 9px 14px; font-size: 12px; font-weight: 600;
       color: #1C6EFF; background: #F7F9FC; border-radius: 6px; list-style: none; }
@@ -107,9 +126,6 @@
     details.sketch-fold[open] > summary::before { content: "▾ "; }
     details.sketch-fold[open] > summary { border-bottom: 1px solid #E1E5EB; border-radius: 6px 6px 0 0; }
     details.sketch-fold .sketch-body { padding: 12px 14px; }
-    .gate-pass { display: flex; align-items: center; gap: 10px; background: #F6FFED;
-      border: 1px solid #B7EB8F; border-radius: 4px; padding: 10px 14px; font-size: 12px; color: #454C59; }
-    .gp-badge { font-weight: 700; color: #12A679; white-space: nowrap; }
   </style></head>
 <body>
 <div class="wrap">
@@ -121,6 +137,17 @@
       <b>需求定性</b>：<code>配置运维 | 资产管理台账</code><br/>
       <b>需求输入</b>：<a href="#">DSP 主机资产发现与识别_小需求用户需求说明_评审版</a>
     </div>
+
+    <div class="doc-tabs" role="tablist">
+      <button type="button" role="tab" aria-controls="pane-part1" data-pane="pane-part1">
+        <span class="idx">Part1</span>需求分析与思考<span class="hint">草图阶段已确认</span>
+      </button>
+      <button type="button" role="tab" aria-controls="pane-part2" data-pane="pane-part2" class="on" aria-selected="true">
+        <span class="idx">Part2</span>需求解决方案全景
+      </button>
+    </div>
+
+    <section class="tab-pane" id="pane-part1" role="tabpanel">
 
     <h2 class="part">Part1　需求分析与思考</h2>
 
@@ -295,11 +322,16 @@
       </div>
     </details>
 
+    </section>
+
+    <section class="tab-pane on" id="pane-part2" role="tabpanel">
+
     <h2 class="part">Part2　需求解决方案全景</h2>
 
     <h3>6. 设计决策经验匹配与采纳</h3>
 
     <h4>6.1 需求类型分析</h4>
+    <p class="note">🛑 方案来源：<b>用户选定 方案一（稳水位 · 台账聚焦版）</b>。</p>
     <ul>
       <li><b>需求定性</b>：配置运维 | 资产管理台账（Type-01）。判据：主键是实体，对象长期存在并带台账属性，需按类型批量维护且有生命周期。</li>
       <li><b>业务属性与严肃度</b>：企业统一资产治理，<b>中等严肃度</b>。资产是下游安全运营的引用基础，字段口径要求稳定准确，但单条操作多为可逆维护。</li>
@@ -471,41 +503,35 @@
       </tbody>
     </table>
 
-    <h3>8. 设计说明书准出门禁检视情况</h3>
-    
-    <div class="gate-pass">
-      <span class="gp-badge">✅ 11 / 11 全绿</span>
-      <span class="gp-text">其中 <b>2 项自适应跳过</b>（已注明原因），无未通过项。</span>
-    </div>
-    <details class="sketch-fold">
-      <summary>展开查看逐项检视明细</summary>
-      <div class="sketch-body">
-        <table>
-          <thead><tr><th style="width:6%;">#</th><th style="width:24%;">检查项</th><th style="width:14%;">结论</th><th style="width:56%;">说明</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>结构完整性</td><td>✅ 通过</td><td>Part1 / Part2 齐备，分页面小节存在</td></tr>
-            <tr><td>2</td><td>组件真实性</td><td>✅ 通过</td><td>全部 <code>Ix*</code> 组件已登记</td></tr>
-            <tr><td>3</td><td>模板真实性</td><td>✅ 通过</td><td>全部 <code>page-*</code> 模板 ID 真实存在</td></tr>
-            <tr><td>4</td><td>色值合规</td><td>✅ 通过</td><td>所有色值命中设计资产色板</td></tr>
-            <tr><td>5</td><td>按钮用色铁律</td><td>✅ 通过</td><td>无红色 / 危险型实心按钮</td></tr>
-            <tr><td>6</td><td>引用文件可解析</td><td>✅ 通过</td><td>引用的 <code>.md</code> 全部存在</td></tr>
-            <tr><td>7</td><td>经验落点</td><td>✅ 通过</td><td>引用的每条经验在页面小节均有承载</td></tr>
-            <tr><td>8</td><td>表单左右结构</td><td>✅ 通过</td><td>无上下堆叠反模式</td></tr>
-            <tr><td>9</td><td>标杆特征物保真度</td><td>⏭ 跳过</td><td>本需求类型未配置特征指纹契约，自适应放行</td></tr>
-            <tr><td>10</td><td>线框规范符合度</td><td>✅ 通过</td><td>按钮顺序 / 无图标 / 星号占位 / 宽度档位 / 容器一致 / 无编号泄漏</td></tr>
-            <tr><td>11</td><td>可视化件声明完整性</td><td>⏭ 跳过</td><td>本说明书未声明可视化件</td></tr>
-          </tbody>
-        </table>
-        <p class="note">🛑 <b>「跳过」不等于「通过」</b>：跳过项须注明原因；未通过项（如有）必须写处置结论。</p>
-      </div>
-    </details>
-
-    <div class="checkpoint">
-      <b>🚦 评审确认</b>
-      本说明书为方案共识依据，确认后进入前端 Demo 输出。
-    </div>
+    </section>
 
   </div>
 </div>
+
+<script>
+  // Part1 / Part2 双 Tab：默认选 Part2（Part1 已在草图阶段确认）；支持 #part1 / #part2 直达
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.doc-tabs button[data-pane]'));
+    var panes = Array.prototype.slice.call(document.querySelectorAll('.tab-pane'));
+    function activate(id) {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-pane') === id;
+        t.classList.toggle('on', on);
+        t.setAttribute('aria-selected', String(on));
+      });
+      panes.forEach(function (p) { p.classList.toggle('on', p.id === id); });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        var id = t.getAttribute('data-pane');
+        activate(id);
+        history.replaceState(null, '', '#' + id.replace('pane-', ''));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+    var hash = (location.hash || '').replace('#', '');
+    activate(hash === 'part1' ? 'pane-part1' : 'pane-part2');
+  })();
+</script>
 </body>
 </html>

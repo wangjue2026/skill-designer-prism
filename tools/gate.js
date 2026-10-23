@@ -22,8 +22,19 @@ const bad = (id, m) => { console.log('  ❌ ' + id + '  ' + m); fail++; };
 const wr = (id, m) => { console.log('  ⚠️ ' + id + '  ' + m); warn++; };
 const head = (m) => console.log('\n🔎 ' + m);
 
-const UI_WORDS = /(弹窗|抽屉|标签页|按钮|下拉框|复选框|搜索框|筛选栏|一屏|跳转|往返|点击|悬浮|Tab|页签|卡片|列设置)/;
-const EMPTY_WORDS = /(大幅|极致|更加|显著|全新|赋能|体验升级|明显提升)/;
+// EX-1.2-03：界面痕迹 = 名词控件 + 动词路径 + 通知渠道（名词词表抓不到后两类）
+const UI_WORDS = /(弹窗|抽屉|标签页|按钮|下拉框|复选框|搜索框|筛选栏|一屏|跳转|往返|点击|悬浮|Tab|页签|卡片|列设置|点开|点进|打开|进去|上来一趟|切到|排在前|发到|收到|滑出|弹出|手机|短信|邮件)/;
+// EX-1.2-04：虚词 + 绝对词（绝对词不可验收，也不会让句子更高）
+const EMPTY_WORDS = /(大幅|极致|更加|显著|全新|赋能|体验升级|明显提升|任何时刻|全过程|一次说清|百分之百)/;
+// EX-1.2-04：脚手架开头（判档判据被抄进句子）
+const SCAFFOLD_WORDS = /^[^，。；]{0,12}(不用|不再|无需|不必)/;
+// EX-1.2-05：门槛跃迁必含词
+const GATEKEEP_WORDS = /(0\s*基础|零基础|无需经验|不需经验|一线|不出二线|普通用户|新同事|非专家|新手)/;
+// EX-1.2-06：可测锚必含词
+const ANCHOR_WORDS = /(\d+|一位|一名|一台|一个时间点|三个|三样|两项|一次|一条|一件|五段|十分钟|一刻钟)/;
+// EX-1.2-07：幼稚化（语域）计数
+const PRONOUN_WORDS = /(这一次|那一个|这一段|这一条|同一条|某个人|某个应用|这一个)/g;
+const VERB_COMP_WORDS = /(调回|找回|查回|说清|讲清|交出去|发出去|关上|接上|排在前|上来一趟|捞出来|落下来|接住)/g;
 const STAGE_WORDS = /(追踪|结果|查看|定位|详情|下发|提交|编辑|导入|导出|新建)/;
 const ABSTRACT_TITLES = /^(说得清|看不全|敢信|敢信状态|看得清|追得下去|分得清|分得清看不见|不用自己拼|更快|更准|更省)$/;
 
@@ -100,13 +111,21 @@ function runEX() {
       if (seen[t.title]) bad('EX-1.2-01', '场景「' + t.title + '」出现多条目标');
       seen[t.title] = 1;
       const ui = t.body.match(UI_WORDS);
-      if (ui) bad('EX-1.2-03', '第 ' + (i + 1) + ' 条出现界面控件词「' + ui[0] + '」');
+      if (ui) bad('EX-1.2-03', '第 ' + (i + 1) + ' 条出现界面痕迹「' + ui[0] + '」（控件/交互路径/通知渠道）');
       const emp = t.body.match(EMPTY_WORDS);
-      if (emp) bad('EX-1.2-04', '第 ' + (i + 1) + ' 条出现虚词「' + emp[0] + '」');
-      if (!/(不再|不必|无需|不用)/.test(t.body)) wr('EX-1.2-04', '第 ' + (i + 1) + ' 条读不出"谁因此不必再做什么"');
+      if (emp) bad('EX-1.2-04', '第 ' + (i + 1) + ' 条出现虚词或绝对词「' + emp[0] + '」');
+      const sc = t.body.match(SCAFFOLD_WORDS);
+      if (sc) bad('EX-1.2-04', '第 ' + (i + 1) + ' 条以「' + sc[1] + '」作句首骨架（判据不得抄进句子，须写能力陈述句）');
+      else if (!/(不再|不必|无需|不用)/.test(t.body)) wr('EX-1.2-04', '第 ' + (i + 1) + ' 条读不出"谁因此不必再做什么"');
       if (t.body.length < 25) wr('EX-1.2-04', '第 ' + (i + 1) + ' 条偏短，可能是口号');
+      if (!GATEKEEP_WORDS.test(t.body)) bad('EX-1.2-05', '第 ' + (i + 1) + ' 条缺门槛跃迁（原角色→新角色：0 基础/无需经验/一线/不出二线/新同事/非专家）');
+      if (!ANCHOR_WORDS.test(t.body)) bad('EX-1.2-06', '第 ' + (i + 1) + ' 条缺可测锚（一位/三个/一次/五段/一条策略/十分钟…）');
+      const pr = (t.body.match(PRONOUN_WORDS) || []).length;
+      const vc = (t.body.match(VERB_COMP_WORDS) || []).length;
+      if (pr > 2) bad('EX-1.2-07', '第 ' + (i + 1) + ' 条指示代词 ' + pr + ' 个（≤2），须换成业务名词');
+      if (vc > 2) bad('EX-1.2-07', '第 ' + (i + 1) + ' 条动补短语 ' + vc + ' 个（≤2），口语化，非承诺书语域');
     });
-    if (targets.length && !fail) ok('EX-1.2-02/03', '标题均为场景名、无界面控件词');
+    if (targets.length && !fail) ok('EX-1.2-02/03/04/05/06/07', '标题为场景名、无界面痕迹、无虚词、无脚手架开头、门槛与锚齐全、语域达标');
   }
 
   if (stage === '1.3') {
@@ -117,31 +136,90 @@ function runEX() {
     else ok('EX-1.3-01', '突破点 ' + ids.length + ' 处：' + ids.join(' / '));
     const lines = md.split(/\r?\n/);
     ids.forEach((b) => {
-      const line = lines.find((l) => l.indexOf(b) !== -1);
-      if (!line) return;
-      if (!/(目标|入口\s*[12]|D\d\d-EP|EP-)/.test(line)) bad('EX-1.3-02', b + ' 没有标来源（目标 / 入口 1 / 入口 2）');
-      if (!/(场景|S[1-9])/.test(line) && !/场景/.test(md)) bad('EX-1.3-03', b + ' 落不到具体场景');
+      const idx = lines.findIndex((l) => l.indexOf(b) !== -1);
+      if (idx < 0) return;
+      // 突破点与设计点子 1 对 1 合并后，来源可能写在紧随其后的一行，按块取
+      const block = lines.slice(idx, idx + 6).join("\n");
+      if (!/(目标|入口\s*[12]|D\d\d-EP|EP-)/.test(block)) bad("EX-1.3-02", b + " 没有标来源（目标 / 入口 1 / 入口 2）");
+      if (!/(场景|S[1-9])/.test(block) && !/场景/.test(md)) bad("EX-1.3-03", b + " 落不到具体场景");
     });
-    if (!/档/.test(md)) wr('EX-1.3-04', '未见四档点子（基线/优化/创新/变革），人检是否想透');
+    if (!/档/.test(md)) wr('EX-1.3-04', '未见三档点子（常规/优化/创新），人检是否真拉开');
     if (!fail) ok('EX-1.3-02/03', '每条有来源且可落场景');
   }
 
   if (stage === '1.4') {
     const html = readOrDie(file, 'node tools/gate.js ex 1.4 <草图-x.html>');
     head('EX-1.4 草图与方向闸门');
-    if (!/高水位/.test(html) || !/稳水位/.test(html) || !/方案一/.test(html) || !/方案二/.test(html)) {
-      bad('EX-1.4-01', '未识别出"方案一·高水位 + 方案二·稳水位"两套');
-    } else ok('EX-1.4-01', '两套方案齐（高水位 / 稳水位）');
+    // 01 两套方案（名称只叫方案一 / 方案二）
+    const a1 = (html.match(/方案一/g) || []).length;
+    const a2 = (html.match(/方案二/g) || []).length;
+    if (a1 < 2 || a2 < 2) bad('EX-1.4-01', '未识别出两套方案（方案一 / 方案二 各需出现 ≥2 次）');
+    else ok('EX-1.4-01', '两套方案齐（方案一 ' + a1 + ' 处 / 方案二 ' + a2 + ' 处）');
     if (/基线版/.test(html)) bad('EX-1.4-01', '出现基线版（不该被摆出来选）');
-    const same = (html.match(/两方案相同/g) || []).length;
-    if (same < 1) bad('EX-1.4-03', '未见"两方案相同"标注，共性页可能被省略');
-    else ok('EX-1.4-03', '共性页已标"两方案相同" ' + same + ' 处');
+    // 02 对比表（整体设计说明 + 设计思考点）
+    if (!/整体设计说明/.test(html)) bad('EX-1.4-02', '顶部缺「整体设计说明」对比表');
+    if (!/思考点/.test(html)) bad('EX-1.4-02', '缺「设计思考点」对比表（两套各列各的，条数可不等）');
+    if (/整体设计说明/.test(html) && /思考点/.test(html)) ok('EX-1.4-02', '对比表齐（整体说明 + 思考点）');
+    // 03 相同页交代（占位条），不许跳转
+    const same = (html.match(/两方案相同|与方案一相同|不重复画/g) || []).length;
+    if (same < 1) wr('EX-1.4-03', '未见相同页的占位交代（如"P4 ×××：与方案一相同"）');
+    else ok('EX-1.4-03', '相同页已有占位交代 ' + same + ' 处');
     if (/见共用页面|见下方共用/.test(html)) bad('EX-1.4-03', '出现"见共用页面"跳转，链路断裂');
-    const diffs = (html.match(/与另一方案的\s*3\s*条差异/g) || []).length;
-    if (diffs < 2) bad('EX-1.4-02', '每个 tab 顶部应有"与另一方案的 3 条差异"，实得 ' + diffs + ' 处');
-    else wr('EX-1.4-02', '两套各有 3 条差异摘要；档位差与"人少干了哪件事"需人检');
-    if (!/请选择一个方案/.test(html)) wr('EX-1.4-05', '未见"请选择一个方案"选择区');
-    wr('EX-1.4-05', '人检：用户是否明确选定一套？选定结果要写进下游「方案来源：」，否则不得进 Part2');
+    // 04 图下标号说明
+    const notes = (html.match(/做法/g) || []).length;
+    if (notes < 3) bad('EX-1.4-04', '图下标号说明不足（"做法"实得 ' + notes + ' 处）');
+    else ok('EX-1.4-04', '图下标号说明 ' + notes + ' 段');
+    // 05 禁用内部词（先剥掉 style/script，避免色值误判）
+    const plain = html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+    const banned = ['采信', '回执', '留痕', '处置', '裁决', '认领'];
+    const hit = banned.filter(function (w) { return plain.indexOf(w) >= 0; });
+    const bx = plain.match(/\bB[1-5]\b/g) || [];
+    if (bx.length) hit.push(bx.join('、'));
+    if (hit.length) bad('EX-1.4-05', '出现内部词 / 经验编号：' + hit.join('、'));
+    else ok('EX-1.4-05', '无内部词与经验编号');
+    // 06 页面规模置顶 + 用户选定（人检）
+    if (!/本次需求一共\s*N?\s*[\d一二三四五六七八九十]+\s*个页面/.test(html)) wr('EX-1.4-06', '未见"本次需求一共 N 个页面"置顶');
+    wr('EX-1.4-06', '人检：用户是否明确选定一套？选定结果要写进下游「方案来源：」，否则不得进 Part2');
+
+    // 07 文案表达（用户视角，机检可判的部分）
+    var blocks = html.split(/<div class="page"/).slice(1);
+    var noWhy = [], noPair = [], tooLong = [], badgeMiss = [];
+    blocks.forEach(function (blk, idx) {
+      var head0 = (blk.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid = (head0.match(/class="pid">([^<]+)</) || [, '第' + (idx + 1) + '块'])[1];
+      var notes = (blk.match(/<ul class="notes">[\s\S]*?<\/ul>/g) || []).join('');
+      if (!notes) { noWhy.push(pid); return; }
+      // 只数"做法/为什么"这两个标签，避免正文里引用「为什么」造成误判
+      var how = (notes.match(/<b>做法<\/b>/g) || []).length;
+      var why = (notes.match(/<b>为什么<\/b>/g) || []).length;
+      if (why === 0) noWhy.push(pid);
+      else if (how !== why) noPair.push(pid + '(' + how + '/' + why + ')');
+      // 图上标号 vs 图下说明编号
+      var pts = {}, ns = {};
+      (blk.match(/<i class="pt">(\d+)<\/i>/g) || []).forEach(function (s) { pts[(s.match(/(\d+)/) || [])[1]] = 1; });
+      (blk.match(/<span class="n">(\d+)<\/span>/g) || []).forEach(function (s) { ns[(s.match(/(\d+)/) || [])[1]] = 1; });
+      var pk = Object.keys(pts).sort().join(','), nk = Object.keys(ns).sort().join(',');
+      if (pk !== nk) badgeMiss.push(pid + '（图上 ' + (pk || '无') + ' / 图下 ' + (nk || '无') + '）');
+      // 单条说明过长（一段超过 160 字，说明没想清）
+      (notes.match(/<li>[\s\S]*?<\/li>/g) || []).forEach(function (li) {
+        var t = li.replace(/<[^>]*>/g, '').replace(/\s+/g, '');
+        if (t.length > 200) tooLong.push(pid);
+      });
+    });
+    if (noWhy.length) bad('EX-1.4-07', '这些页面没有图下"为什么"说明：' + noWhy.join('、'));
+    if (noPair.length) bad('EX-1.4-07', '「做法」与「为什么」条数不配对：' + noPair.join('、'));
+    if (badgeMiss.length) bad('EX-1.4-07', '图上标号与图下说明编号不一致：' + badgeMiss.join('；'));
+    if (tooLong.length) wr('EX-1.4-07', '这些页面的单条说明过长（>200 字），拆成两句：' + Array.from(new Set(tooLong)).join('、'));
+    // 空洞词 / 营销词
+    var hollow = ['提升体验', '优化体验', '更清晰', '更高效', '更智能', '更省心', '大幅提升', '赋能', '极致', '闭环', '收口', '影响面', '态势'];
+    var hollowHit = hollow.filter(function (w) { return plain.indexOf(w) >= 0; });
+    if (hollowHit.length) bad('EX-1.4-07', '出现空洞词 / 营销词：' + hollowHit.join('、') + '（换成"能看见什么、能做什么"）');
+    // 主按钮文案必须说明做什么，不许只写"确定/提交/保存"
+    var dumbBtn = plain.match(/>(确定|提交|保存|是|否)</g) || [];
+    if (dumbBtn.length) wr('EX-1.4-07', '有按钮只写"' + dumbBtn[0].replace(/[><]/g, '') + '"，应写明做什么（如"确定并下发"）');
+    if (!noWhy.length && !noPair.length && !badgeMiss.length && !hollowHit.length) {
+      ok('EX-1.4-07', '文案：每页有做法+为什么、标号与说明一一对应、无空洞词');
+    }
   }
 
   if (stage === '4.1') {
@@ -206,8 +284,16 @@ function runSP() {
   /* SP-S */
   head('SP-S 结构与规模');
   const parts = (html.match(/<h2[^>]*class="part"/g) || []).length;
-  if (parts === 2) ok('SP-S-01', '两段式 Part1 / Part2');
-  else bad('SP-S-01', 'part 标题 ' + parts + ' 个，应为 2（或旧五章）');
+  if (parts === 2) {
+    const hasTabs = /class="doc-tabs"/.test(html);
+    const p2Default = /<section[^>]*id="pane-part2"[^>]*class="tab-pane on"|<section[^>]*class="tab-pane on"[^>]*id="pane-part2"/.test(html);
+    if (!hasTabs || !p2Default) bad('SP-S-01', '缺少 Part1 / Part2 双 Tab，或默认未选中 Part2（应为 .doc-tabs + 段落 section#pane-part2 带 class on）');
+    else ok('SP-S-01', '两段式 Part1 / Part2 · 双 Tab 默认选中 Part2');
+  } else bad('SP-S-01', 'part 标题 ' + parts + ' 个，应为 2（或旧五章）');
+  // 门禁结论与确认话术只在对话里给，不进交付文档
+  if (/class="checkpoint"|<h3[^>]*>\s*8\.\s*设计说明书准出门禁检视/.test(html)) {
+    bad('SP-S-01', '说明书内仍有第 8 节门禁检视 / 末尾 checkpoint 浮层——这两块只在对话里说，不进交付文档');
+  }
   const scenes = [];
   let m;
   const sRe = /<td><b>(S\d+)\.\s*([^<]+)<\/b><\/td>/g;
