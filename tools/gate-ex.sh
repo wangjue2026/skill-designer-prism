@@ -4,8 +4,8 @@
 # 口径唯一来源：04-workflows-and-cases/准出门禁总表.md
 #
 # 用法:
-#   bash tools/gate-ex.sh 1.1 _output/<业务名>/01-场景与Job-<业务名>.md
-#   bash tools/gate-ex.sh 1.2 _output/<业务名>/02-体验目标-<业务名>.md _output/<业务名>/01-场景与Job-<业务名>.md
+#   bash tools/gate-ex.sh 1.1 _output/<业务名>/01-主场景-<业务名>.md
+#   bash tools/gate-ex.sh 1.2 _output/<业务名>/02-体验目标-<业务名>.md _output/<业务名>/01-主场景-<业务名>.md
 #   bash tools/gate-ex.sh 1.3 _output/<业务名>/03-突破点-<业务名>.md
 #   bash tools/gate-ex.sh 1.4 _output/<业务名>/草图-<业务名>.html
 #   bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html     # 定稿页面清单前（EX-4.1-01/02，静默执行）

@@ -6,8 +6,8 @@
  * 本脚本只做机检（M）项；人检（H）项在输出里以 ⚠️ 提示，由交付时人工核对。
  *
  * 用法:
- *   node tools/gate.js ex 1.1 _output/<业务名>/01-场景与Job-x.md
- *   node tools/gate.js ex 1.2 _output/<业务名>/02-体验目标-x.md _output/<业务名>/01-场景与Job-x.md
+ *   node tools/gate.js ex 1.1 _output/<业务名>/01-主场景-x.md
+ *   node tools/gate.js ex 1.2 _output/<业务名>/02-体验目标-x.md _output/<业务名>/01-主场景-x.md
  *   node tools/gate.js ex 1.3 _output/<业务名>/03-突破点-x.md
  *   node tools/gate.js ex 1.4 _output/<业务名>/草图-x.html
  *   node tools/gate.js sp _output/<业务名>/design-spec-x.html
@@ -36,6 +36,8 @@ const ANCHOR_WORDS = /(\d+|一位|一名|一台|一个时间点|三个|三样|�
 const PRONOUN_WORDS = /(这一次|那一个|这一段|这一条|同一条|某个人|某个应用|这一个)/g;
 const VERB_COMP_WORDS = /(调回|找回|查回|说清|讲清|交出去|发出去|关上|接上|排在前|上来一趟|捞出来|落下来|接住)/g;
 const STAGE_WORDS = /(追踪|结果|查看|定位|详情|下发|提交|编辑|导入|导出|新建)/;
+// EX-1.1-02：主场景名必须命中职责词（面状命名），否则还是"点"
+const DUTY_WORDS = /(运营|运维|管理|治理|盘点|交付|上架|值守|复核|审计|维护)/;
 const ABSTRACT_TITLES = /^(说得清|看不全|敢信|敢信状态|看得清|追得下去|分得清|分得清看不见|不用自己拼|更快|更准|更省)$/;
 
 function readOrDie(p, usage) {
@@ -54,8 +56,8 @@ function runEX() {
   console.log('============================================================');
 
   if (stage === '1.1') {
-    const md = readOrDie(file, 'node tools/gate.js ex 1.1 <01-场景与Job.md>');
-    head('EX-1.1 场景与 Job');
+    const md = readOrDie(file, 'node tools/gate.js ex 1.1 <01-主场景.md>');
+    head('EX-1.1 主场景拆解');
     const nameRe = /^\|\s*\*{0,2}(S\d+)\.\s*([^|*]+)/gm;
     const scenes = [];
     let m;
@@ -63,29 +65,37 @@ function runEX() {
     if (scenes.length < 2 || scenes.length > 5) bad('EX-1.1-01', '主场景 ' + scenes.length + ' 条，应为 2~5 条');
     else ok('EX-1.1-01', '主场景 ' + scenes.length + ' 条');
     const badName = scenes.filter((s) => STAGE_WORDS.test(s.name));
+    const noDuty = scenes.filter((s) => !DUTY_WORDS.test(s.name));
     if (badName.length) bad('EX-1.1-02', '场景名含阶段词：' + badName.map((s) => s.name).join('、'));
-    else ok('EX-1.1-02', '场景名无阶段/操作词');
-    // 逐行取单元格：cells[0]=场景 cells[1]=角色 cells[2]=Job cells[3]=痛点
+    else if (noDuty.length) bad('EX-1.1-02', '场景名缺职责词（运营/运维/管理/治理/盘点/交付/上架/值守/复核/审计/维护），仍是"点"：' + noDuty.map((s) => s.name).join('、'));
+    else ok('EX-1.1-02', '场景名为职责级命名（含职责词、无阶段词）');
+    // 逐行取单元格：cells[0]=场景 cells[1]=角色 cells[2]=主场景 cells[3]=痛点
     const sRows = md.split(/\r?\n/).filter((l) => /^\|\s*\*{0,2}S\d+\./.test(l));
-    const jobBad = [], painBad = [];
+    const dutyBad = [], painBad = [], thinDuty = [];
     sRows.forEach((l) => {
       const cells = l.replace(/^\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.replace(/\*\*/g, '').trim());
       const id = (cells[0] || '').split('.')[0];
-      const job = cells[2] || '';
-      const pain = cells[3] || '';
-      if (job.length < 10 || !/(维护|交付|把|一份|台账|清单|建立|取证|交代|形成一个)/.test(job)) jobBad.push(id);
+      // 4 列交付表：场景 / 角色 / 要办成的事 / 痛点；6~7 列内部底稿多「触发情境」与「痛点概括」，列位后移
+      const wide = cells.length >= 6;
+      const duty = wide ? cells[3] || '' : cells[2] || '';
+      const pain = wide ? cells[4] || '' : cells[3] || '';
+      if (duty.length < 10 || !/(维护|交付|把|一份|台账|清单|建立|取证|交代|形成一个)/.test(duty)) dutyBad.push(id);
+      const items = duty.split(/[、；;，,/]/).map((x) => x.trim()).filter((x) => x.length >= 2);
+      if (items.length < 3) thinDuty.push(id);
       if (pain.length < 6) painBad.push(id);
     });
-    if (jobBad.length) bad('EX-1.1-03', 'Job 不像"一份要交付的东西 + 覆盖工作"：' + jobBad.join('、'));
-    else ok('EX-1.1-03', '每个场景的 Job 均成形（一份东西 + 工作内容）');
+    if (dutyBad.length) bad('EX-1.1-03', '主场景内容不像"一份要交付的东西 + 覆盖工作"：' + dutyBad.join('、'));
+    else ok('EX-1.1-03', '每条主场景均成形（一份东西 + 工作内容）');
     if (painBad.length) wr('EX-1.1-04', '这些场景的痛点为空或过短（人检补齐 + 标"用户困在"）：' + painBad.join('、'));
-    else wr('EX-1.1-04', '痛点已填，仍需人检：每条标出"用户困在"（烦/看不全/不敢信/说不清）');
+    else wr('EX-1.1-04', '痛点已填，仍需人检：每条标出"用户困在"（烦/看不全/不敢信/说不清）；场景须落在本次业务域内，域外职责只记一行');
+    if (thinDuty.length) wr('EX-1.1-06', '这些场景的"要办成的事"子事项少于 3 项（还停在点上，回 Step 1 换职责）：' + thinDuty.join('、'));
+    else ok('EX-1.1-06', '每条主场景覆盖 ≥3 个子事项');
     if (/REQ-\d|S\d+-P\d/.test(md)) bad('EX-1.1-05', '编号外泄（REQ-xxx / Sx-Py）');
     else ok('EX-1.1-05', '无编号外泄');
   }
 
   if (stage === '1.2') {
-    const md = readOrDie(file, 'node tools/gate.js ex 1.2 <02-体验目标.md> [01-场景与Job.md]');
+    const md = readOrDie(file, 'node tools/gate.js ex 1.2 <02-体验目标.md> [01-主场景.md]');
     head('EX-1.2 体验目标');
     const lineRe = /^\s*[-*]?\s*\*\*([^*]+)\*\*\s*[：:]\s*(.+)$/gm;
     const targets = [];

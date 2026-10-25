@@ -15,8 +15,8 @@
 **A 类 · 执行环节准出（每环做完立刻跑，不过不进下一环）**
 
 ```bash
-bash tools/gate-ex.sh 1.1 _output/<业务名>/01-场景与Job-<业务名>.md
-bash tools/gate-ex.sh 1.2 _output/<业务名>/02-体验目标-<业务名>.md _output/<业务名>/01-场景与Job-<业务名>.md
+bash tools/gate-ex.sh 1.1 _output/<业务名>/01-主场景-<业务名>.md
+bash tools/gate-ex.sh 1.2 _output/<业务名>/02-体验目标-<业务名>.md _output/<业务名>/01-主场景-<业务名>.md
 bash tools/gate-ex.sh 1.3 _output/<业务名>/03-突破点-<业务名>.md
 bash tools/gate-ex.sh 1.4 _output/<业务名>/草图-<业务名>.html   # 额外调 sketch-selfcheck（结构级 5 条）
 bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html   # 定稿页面清单前：覆盖率 + 继承对账（静默）
@@ -27,7 +27,7 @@ bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html   # 定稿
 
 | 环节 | 拦什么 |
 | :--- | :--- |
-| EX-1.1 | 场景切碎 / 名称带阶段词 / Job 写成一次操作 / 编号外泄 |
+| EX-1.1 | 场景切碎 / 名称带阶段词或缺职责词 / 主场景写成一次操作 / 子事项少于 3 项 / 编号外泄 |
 | EX-1.2 | 条数 ≠ 场景数 / 标题自造短语（"说得清""敢信"）/ 界面痕迹（控件·交互路径·渠道）/ 虚词与绝对词 / "不用…"脚手架开头 / 缺门槛跃迁 / 缺可测锚 / 语域幼稚（代词与动补超量）/ 缺三件证据 |
 | EX-1.3 | 突破点超 5 处、无来源、落不到场景 |
 | EX-1.4 | 单套方案 / 共性页被省 / 无"两方案相同"标注 / 结构级 5 条 / 选定未留档 |
