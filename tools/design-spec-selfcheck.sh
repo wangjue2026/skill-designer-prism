@@ -48,8 +48,13 @@ echo "============================================================"
 head_ "1/11 结构完整性（五章 或 Part1/Part2 两段式 + 分页面小节）"
 H2=$(grep -c '<h2' "$SPEC" || true)
 PART=$(grep -c '<h2[^>]*class="part"' "$SPEC" || true)
-# 分页面小节：旧结构 h3 4.x；新结构 h4 7.x（第7节下的页面小节）
-H3P=$(grep -oE '<h[34][^>]*>\s*(4|7)\.[0-9]' "$SPEC" | wc -l | tr -d ' ')
+# 分页面小节：新结构 h5 Page-0x（第 7 节按功能域分组后，组内页面）；旧结构 h3 4.x / h4 7.x Page-
+H5P=$(grep -oE '<h5[^>]*>[[:space:]]*Page-[0-9]+' "$SPEC" | wc -l | tr -d ' ')
+H3P=$(grep -oE '<h[34][^>]*>[[:space:]]*(4|7)\.[0-9]+[^<]*Page-' "$SPEC" | wc -l | tr -d ' ')
+if [ "$H5P" -eq 0 ] && [ "$H3P" -eq 0 ]; then
+  H3P=$(grep -oE '<h[34][^>]*>\s*(4|7)\.[0-9]' "$SPEC" | wc -l | tr -d ' ')
+fi
+PAGES=$((H5P + H3P))
 if [ "$H2" -eq 5 ]; then
   echo "  ✅ 五章齐备 (h2 = $H2)"
 elif [ "$H2" -eq 2 ] && [ "$PART" -eq 2 ]; then
@@ -57,7 +62,14 @@ elif [ "$H2" -eq 2 ] && [ "$PART" -eq 2 ]; then
 else
   echo "  ❌ 章节数异常: h2 = ${H2}、part 标题 = ${PART}（应为 5，或 2 个 part 标题）"; is_bad
 fi
-if [ "$H3P" -ge 1 ]; then echo "  ✅ 分页面小节 $H3P 个"; else echo "  ❌ 未找到分页面小节 (h3 4.x 或 h4 7.x)"; is_bad; fi
+if [ "$PAGES" -ge 1 ]; then
+  echo "  ✅ 分页面小节 $PAGES 个（新结构 h5 Page-0x $H5P / 旧结构 $H3P）"
+  if grep -q '所属功能域' "$SPEC" && ! grep -qE '<h4[^>]*class="[^"]*domain' "$SPEC"; then
+    echo "  ⚠️ 第 7 节未按功能域分组：建议 <h4 class=\"domain\">7.x 功能域名</h4> + 组内 <h5>Page-0x</h5>（与 5.1 所属功能域逐字一致）"
+  fi
+else
+  echo "  ❌ 未找到分页面小节（<h5>Page-0x 或旧结构 h4 7.x Page-0x）"; is_bad
+fi
 
 # 场景切分（1.1 判据：数量 2~5 条；名字里不得带阶段/操作词，串行旅程必须合并）
 SCN=$(grep -oE '<td><b>S[0-9]+\.' "$SPEC" | wc -l | tr -d ' ')
