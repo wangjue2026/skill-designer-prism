@@ -25,13 +25,13 @@ SPEC="${1:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ASSETS="$ROOT/03-design-assets"
 MAP="$ASSETS/components/idux-component-map.md"
-PAGES="$ASSETS/page-templates/01-page-types.md"
+PAGETYPES="$ASSETS/page-templates/01-page-types.md"
 
 if [ -z "$SPEC" ] || [ ! -f "$SPEC" ]; then
   echo "用法: bash tools/design-spec-selfcheck.sh <design-spec-xxx.html>"
   exit 2
 fi
-for f in "$MAP" "$PAGES"; do
+for f in "$MAP" "$PAGETYPES"; do
   [ -f "$f" ] || { echo "缺少设计资产文件: $f"; exit 2; }
 done
 
@@ -63,7 +63,7 @@ else
   echo "  ❌ 章节数异常: h2 = ${H2}、part 标题 = ${PART}（应为 5，或 2 个 part 标题）"; is_bad
 fi
 if [ "$PAGES" -ge 1 ]; then
-  echo "  ✅ 分页面小节 $PAGES 个（新结构 h5 Page-0x $H5P / 旧结构 $H3P）"
+  echo "  ✅ 分页面小节 $PAGES 个（新结构 h5 Page-0x ${H5P} / 旧结构 ${H3P}）"
   if grep -q '所属功能域' "$SPEC" && ! grep -qE '<h4[^>]*class="[^"]*domain' "$SPEC"; then
     echo "  ⚠️ 第 7 节未按功能域分组：建议 <h4 class=\"domain\">7.x 功能域名</h4> + 组内 <h5>Page-0x</h5>（与 5.1 所属功能域逐字一致）"
   fi
@@ -76,11 +76,11 @@ SCN=$(grep -oE '<td><b>S[0-9]+\.' "$SPEC" | wc -l | tr -d ' ')
 if [ "$SCN" -gt 0 ]; then
   SCN_MSG=""
   if [ "$SCN" -lt 2 ] || [ "$SCN" -gt 5 ]; then
-    SCN_MSG="$SCN_MSG【场景数量】主场景 $SCN 条，应为 2~5 条（不足=拆碎，过多=没收敛）；"
+    SCN_MSG="${SCN_MSG}【场景数量】主场景 $SCN 条，应为 2~5 条（不足=拆碎，过多=没收敛）；"
   fi
   BADNAME=$(grep -oE '<td><b>S[0-9]+\. [^<]*' "$SPEC" | sed 's|<td><b>||' | grep -E '(追踪|结果|查看|定位|详情|下发|提交|编辑|导入|导出|新建)' || true)
   if [ -n "$BADNAME" ]; then
-    SCN_MSG="$SCN_MSG【场景串行】场景名含阶段/操作词（$(printf '%s' "$BADNAME" | tr '\n' ' ')），疑似把一段串行旅程拆成两个场景；A 的终态若是 B 的触发情境必须合并；"
+    SCN_MSG="${SCN_MSG}【场景串行】场景名含阶段/操作词（$(printf '%s' "$BADNAME" | tr '\n' ' ')），疑似把一段串行旅程拆成两个场景；A 的终态若是 B 的触发情境必须合并；"
   fi
   if [ -z "$SCN_MSG" ]; then
     echo "  ✅ 场景切分合规（$SCN 条 · 名称不含阶段词）"
@@ -114,7 +114,7 @@ fi
 
 # ---------- 3. 模板真实性 ----------
 head_ "3/11 页面模板真实性（资产库存在 或 已显式声明）"
-REALTPL=$(grep -oE 'page-[a-z]+-[a-z]+' "$PAGES" | sort -u)
+REALTPL=$(grep -oE 'page-[a-z]+-[a-z]+' "$PAGETYPES" | sort -u)
 TPL_DECL_RE='无对应模板|套头借|模板库|自定义|产线|已声明'
 BADTPL=""
 for t in $(grep -oE 'page-[a-z]+-[a-z]+' "$SPEC" | sort -u); do

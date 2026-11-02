@@ -576,7 +576,8 @@ function runSP() {
     if (!wf) { capLack.push(pid + '（未找到线框容器）'); return; }
     if (/page-(table|dashboard|list)/.test(body)) {
       const miss = [];
-      if (!/(筛选|时间范围|日期范围|时间窗)/.test(wf)) miss.push('筛选/时间范围');
+      // 筛选能力可按控件结构判定：不要求界面文案出现「筛选」字样（否则会逼人把说明文字塞进 UI）
+      if (!/(筛选|时间范围|日期范围|时间窗|wf-datefilter|wf-prosearch|wf-select)/.test(wf)) miss.push('筛选/时间范围');
       if (!/(排序|↑|↓)/.test(wf)) miss.push('排序');
       if (!/(分页|共\s*\d+\s*条|第\s*\d+\s*\/\s*\d+\s*页|每页)/.test(wf)) miss.push('分页');
       if (miss.length) capLack.push(pid + '（缺 ' + miss.join(' / ') + '）');
@@ -634,6 +635,48 @@ function runSP() {
       else ok('SP-W-07', '占位能力逐条落地：' + caps.length + ' 组 CAP 能力清单均已在对应页映射清单中出现');
     }
   }
+  /* SP-W-08 控件形态未照抄草图：时间筛选必须是复合日期筛选器 / 复合搜索框；表单分区标题不许用序号 */
+  const wf08 = [];
+  noStyle.split(/<h5[^>]*id="page-/).slice(1).forEach((s) => {
+    const body = s.split(/<h5[^>]*id="page-/)[0];
+    const idM = body.match(/(Page-\d+)/);
+    const pid = idM ? idM[1] : '某页';
+    const i = body.indexOf('<div class="wf-container">');
+    const j = body.indexOf('<div class="wf-annotation">', i);
+    const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
+    if (!wf) return;
+    // 抓「用一排时间快捷项分段按钮冒充时间筛选」这一具体形态；不再按文本关键词判，避免把说明文字算成控件
+    if (/wf-seg[\s\S]{0,700}?(今日|今天)[\s\S]{0,300}?(昨日|昨天|近\s*[0-9]+\s*天|近\s*[0-9]+\s*个月)/.test(wf)) {
+      wf08.push(pid + ' 用一排时间快捷项的分段按钮当时间筛选：应换 comp-date-picker 复合日期筛选器（左快捷区 88px + 右日期区 340px 共享外边框、高 32px、最小宽 428px）');
+    }
+    if (/[①②③④⑤⑥⑦⑧⑨]/.test(wf)) {
+      wf08.push(pid + ' 线框里出现 ①②③ 序号：区块 / 表单分区标题须用 design-form §5.4 蓝色竖条标题（wf-form-title），不许用序号充当分组');
+    }
+  });
+  if (wf08.length) bad('SP-W-08', '控件形态仍照抄草图：' + wf08.join('；'));
+  else ok('SP-W-08', '控件形态合规：时间筛选为复合日期筛选器 / 复合搜索框，分区标题无序号');
+
+  /* SP-W-09 多视图页面：页内 Tab / 分段切换的每个面板都要有线框内容（不许只画默认面板） */
+  const tabLack = [];
+  noStyle.split(/<h5[^>]*id="page-/).slice(1).forEach((s) => {
+    const body = s.split(/<h5[^>]*id="page-/)[0];
+    const idM = body.match(/(Page-\d+)/);
+    const pid = idM ? idM[1] : '某页';
+    const i = body.indexOf('<div class="wf-container">');
+    const j = body.indexOf('<div class="wf-annotation">', i);
+    const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
+    if (!wf) return;
+    const tabsBlock = (wf.match(/<div class="wf-tabs">[\s\S]*?<\/div>/) || [''])[0];
+    if (!tabsBlock) return;
+    const tabNames = (tabsBlock.match(/<span[^>]*>([^<]*)<\/span>/g) || []).map((x) => x.replace(/<[^>]+>/g, '').trim());
+    const paneCount = (wf.match(/wf-pane-label/g) || []).length;
+    if (paneCount < tabNames.length) {
+      tabLack.push(pid + '：' + tabNames.length + ' 个页内 Tab（' + tabNames.join(' / ') + '），线框只画了 ' + paneCount + ' 个面板内容');
+    }
+  });
+  if (tabLack.length) bad('SP-W-09', '多视图页面面板缺失：' + tabLack.join('；') + '（每个 Tab 面板都要有线框内容并挂 wf-pane-label，缺一个就会在 Demo 里变成空白页）');
+  else ok('SP-W-09', '多视图页面面板齐：所有页内 Tab 均有对应线框面板');
+
   wr('SP-W-01~05', '表单结构 / 线框规范 / 可视化件 / UI 文案 由 selfcheck 机检');
 
   /* SP-C */
