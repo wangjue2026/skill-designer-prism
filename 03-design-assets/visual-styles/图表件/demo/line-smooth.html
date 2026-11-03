@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+  CHART-折线图·平滑
+  看整体趋势且波动大 → 平滑；要读准确值则用基础折线
+  改这里：DATA / 标题
+  不要改：颜色、圆角、阴影、间距（都是 token 落点，见 ../../token/图表-tokens.json）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-折线图·平滑</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC; font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .chart { width: 100%; height: 320px; }
+
+</style>
+</head>
+<body>
+
+<script>
+const GRID = '#E1E5EB', LABEL = '#6F7785', TEXT = '#2F3540';
+const gradV = (a, b) => ({ type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const gradH = (a, b) => ({ type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const axis = {
+  axisLine: { lineStyle: { color: GRID } },
+  axisTick: { show: false },
+  axisLabel: { color: LABEL, fontSize: 12, fontFamily: 'PingFang SC' },
+  splitLine: { lineStyle: { color: GRID } },
+};
+const tip = { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+              textStyle: { color: TEXT, fontSize: 12 } };
+const SHADOW = (rgb) => 'rgba(' + rgb + ',0.16)';
+
+const CATS = ['10-01','10-05','10-09','10-13','10-17','10-21','10-25','10-29'];
+const DATA = [120, 132, 128, 145, 160, 152, 138, 126];
+
+echarts.init(document.getElementById('chart')).setOption({
+  grid: { left: 8, right: 24, top: 24, bottom: 8, containLabel: true },
+  tooltip: { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE', textStyle: { color: TEXT, fontSize: 12 } },
+  xAxis: { type: 'category', boundaryGap: false, data: CATS, ...axis, splitLine: { show: false } },
+  yAxis: { type: 'value', name: '次', nameTextStyle: { color: LABEL, fontSize: 12 }, ...axis },
+  series: [{
+    type: 'line', name: '违规次数', data: DATA, showSymbol: false,
+    smooth: true,
+    lineStyle: {
+      width: 2,
+      color: { type: 'linear', x: 1, y: 0, x2: 0, y2: 0,
+               colorStops: [{ offset: 0, color: '#458fff1a' }, { offset: 0.27, color: '#458fff' }, { offset: 0.99, color: '#458fff1a' }] },
+      shadowColor: SHADOW('69,143,255'), shadowBlur: 10, shadowOffsetY: -4,
+    },
+  }],
+});
+</script>
+</body>
+</html>

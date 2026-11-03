@@ -20,8 +20,10 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const CHARTS = path.join(ROOT, "03-design-assets/visual-styles/charts");
-const JSON_PATH = path.join(CHARTS, "tokens/charts.json");
+const VS = path.join(ROOT, "03-design-assets/visual-styles");
+const CHARTS = path.join(VS, "图表件"); // 图表分区（图表件/）
+const TOKENS = path.join(VS, "token"); // 值层（token/）
+const JSON_PATH = path.join(TOKENS, "图表-tokens.json");
 const LEDGER = path.join(CHARTS, "裁决台账.md");
 
 // 允许在 md 出现、但不要求在 json 登记的色值（工具色/中性色等）
@@ -58,13 +60,19 @@ try {
   process.exit(1);
 }
 
-const mdFiles = fs.readdirSync(CHARTS).filter((f) => f.endsWith(".md"));
-if (mdFiles.length === 0) {
-  console.error("✗ charts 目录下没有 md 资产");
+// 参与校验的 md：图表分区全部 md ＋ 值层里图表专用的 token 文档
+const mdPaths = fs
+  .readdirSync(CHARTS)
+  .filter((f) => f.endsWith(".md"))
+  .map((f) => path.join(CHARTS, f))
+  .concat(fs.readdirSync(TOKENS).filter((f) => f.startsWith("图表-") && f.endsWith(".md")).map((f) => path.join(TOKENS, f)));
+if (mdPaths.length === 0) {
+  console.error("✗ 图表件 目录下没有 md 资产");
   process.exit(1);
 }
-const mdText = {};
-for (const f of mdFiles) mdText[f] = fs.readFileSync(path.join(CHARTS, f), "utf8");
+const mdText = {}; // key：相对 visual-styles 的路径
+for (const p of mdPaths) mdText[path.relative(VS, p)] = fs.readFileSync(p, "utf8");
+const mdFiles = Object.keys(mdText);
 const allMd = Object.values(mdText).join("\n");
 
 // ---------- C1 键一致 ----------
@@ -87,12 +95,12 @@ for (const f of mdFiles) {
   }
 }
 
-// ---------- C4 链接可解析 ----------
+// ---------- C4 链接可解析（相对各自 md 所在目录） ----------
 for (const f of mdFiles) {
   const re = /\]\(([^)#]+\.(?:md|json))/g;
   let m;
   while ((m = re.exec(mdText[f])) !== null) {
-    const target = path.resolve(CHARTS, m[1]);
+    const target = path.resolve(path.dirname(path.join(VS, f)), m[1]);
     if (!fs.existsSync(target)) err("C4", f + " 链接失效：" + m[1]);
   }
 }

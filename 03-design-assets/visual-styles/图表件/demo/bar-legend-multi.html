@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+  CHART-柱状图·图例多列
+  多分类时图例横向排布、按容器宽度自动换行；行数超出容器高度才翻页（覆盖 iDux 两行死规则）
+  改这里：DATA / 标题
+  不要改：颜色、圆角、阴影、间距（都是 token 落点，见 ../../token/图表-tokens.json）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-柱状图·图例多列</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC; font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .chart { width: 100%; height: 340px; }
+
+</style>
+</head>
+<body>
+
+<script>
+const GRID = '#E1E5EB', LABEL = '#6F7785', TEXT = '#2F3540';
+const gradV = (a, b) => ({ type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const gradH = (a, b) => ({ type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const axis = {
+  axisLine: { lineStyle: { color: GRID } },
+  axisTick: { show: false },
+  axisLabel: { color: LABEL, fontSize: 12, fontFamily: 'PingFang SC' },
+  splitLine: { lineStyle: { color: GRID } },
+};
+const tip = { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+              textStyle: { color: TEXT, fontSize: 12 } };
+const SHADOW = (rgb) => 'rgba(' + rgb + ',0.16)';
+
+const CATS = ['11-01','11-02','11-03','11-04','11-05','11-06','11-07'];
+const NAMES = ['服务器', '终端', '分支', 'IoT', '云主机', '容器'];
+const PALETTE = [['#458FFF','#8FBFFF'],['#20CC94','#6EE6B6'],['#FFC145','#FFE396'],
+                 ['#6A6AFD','#9B9BFF'],['#F5654F','#FF957B'],['#6ED1FF','#9EE0FF']];
+
+echarts.init(document.getElementById('chart')).setOption({
+  grid: { left: 8, right: 16, top: 24, bottom: 56, containLabel: true },
+  tooltip: tip,
+  legend: { bottom: 0, left: 'center', itemWidth: 8, itemHeight: 8, itemGap: 16,
+            textStyle: { color: LABEL, fontSize: 12 } },
+  xAxis: { type: 'category', data: CATS, ...axis, splitLine: { show: false } },
+  yAxis: { type: 'value', name: '次', nameTextStyle: { color: LABEL, fontSize: 12 }, ...axis },
+  series: NAMES.map((n, i) => ({
+    name: n, type: 'bar', barWidth: 6, stack: 'Total',
+    data: CATS.map((_, k) => 20 + ((i + 1) * (k + 3) * 7) % 60),
+    itemStyle: { color: gradV(PALETTE[i][0], PALETTE[i][1]),
+                 borderRadius: i === NAMES.length - 1 ? [1, 1, 0, 0] : 0 },
+  })),
+});
+</script>
+</body>
+</html>

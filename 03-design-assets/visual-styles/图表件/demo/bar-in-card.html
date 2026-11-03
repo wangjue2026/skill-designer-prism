@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+  CHART-柱状图·卡片化
+  外层卡片容器承载图表；卡片底与描边取 token，图表 100% 自适应
+  改这里：DATA / 标题
+  不要改：颜色、圆角、阴影、间距（都是 token 落点，见 ../../token/图表-tokens.json）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-柱状图·卡片化</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC; font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .chart { width: 100%; height: 320px; }
+  .card { background: #FFFFFF; border: 1px solid #E1E5EB; border-radius: 2px; padding: 16px 16px 8px;
+          box-shadow: 0 2px 10px rgba(101,119,155,0.16); }
+  .card h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #2F3540; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h3>恶意文件拦截（近 7 日）</h3>
+  <div id="chart" class="chart" style="height:260px"></div>
+</div>
+<script>
+const GRID = '#E1E5EB', LABEL = '#6F7785', TEXT = '#2F3540';
+const gradV = (a, b) => ({ type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const gradH = (a, b) => ({ type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const axis = {
+  axisLine: { lineStyle: { color: GRID } },
+  axisTick: { show: false },
+  axisLabel: { color: LABEL, fontSize: 12, fontFamily: 'PingFang SC' },
+  splitLine: { lineStyle: { color: GRID } },
+};
+const tip = { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+              textStyle: { color: TEXT, fontSize: 12 } };
+const SHADOW = (rgb) => 'rgba(' + rgb + ',0.16)';
+
+const CATS = ['11-01','11-02','11-03','11-04','11-05','11-06','11-07'];
+const DATA = [186, 240, 218, 302, 275, 190, 236];
+
+echarts.init(document.getElementById('chart')).setOption({
+  grid: { left: 8, right: 16, top: 16, bottom: 8, containLabel: true },
+  tooltip: tip,
+  xAxis: { type: 'category', data: CATS, ...axis, splitLine: { show: false } },
+  yAxis: { type: 'value', name: '次', nameTextStyle: { color: LABEL, fontSize: 12 }, ...axis },
+  series: [{
+    type: 'bar', name: '拦截次数', barWidth: 10, data: DATA,
+    itemStyle: { color: gradV('#458FFF', '#8FBFFF'), borderRadius: [1, 1, 0, 0],
+                 shadowColor: SHADOW('69,143,255'), shadowBlur: 10, shadowOffsetY: -4 },
+  }],
+});
+</script>
+</body>
+</html>

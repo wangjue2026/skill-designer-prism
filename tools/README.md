@@ -161,7 +161,7 @@ TARGET=<内网地址> PORT=<独占端口> node tools/internal-reverse-proxy.js
 | 用法 | `node tools/check-charts.js` |
 | 校验 | **C1 键一致**（`charts.json` 的 chartKey 必须在文档出现）／**C2 色值覆盖**（json 的 hex 必须被文档说明）／**C3 游离色值**（文档 hex 必须在 json 登记，allowlist 除外）／**C4 相对链接可解析**／**C5 裁决台账**有带日期的行 |
 | 退出码 | `0` 通过（可有警告）；`1` 有错误 |
-| 何时跑 | **任何 `03-design-assets/visual-styles/charts/**` 改动之后**；也可作为提交前置 |
+| 何时跑 | **任何 `03-design-assets/visual-styles/图表件/**` 改动之后**；也可作为提交前置 |
 | 边界 | 只读不改文件；**不校验 HTML 交付物**（那是 `gate.js` / `gate-sp.sh` 的职责） |
 
 ### `design-spec-selfcheck.sh` —— SP-A / SP-W 机检载体（gate-sp.sh 的一段）

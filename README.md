@@ -103,7 +103,7 @@ skill-designer-prism/
 │   ├── page-templates/                              # 页面类型与骨架选型 (01-page-types.md)
 │   ├── patterns/                                    # 通用设计范式库 01~06 (导航/表格/表单/交互/状态/文案术语)
 │   ├── product-lines-knowledge/                     # 产线导航知识库 (SASE / XDR / aES 分目录纳管菜单层级与业务归属)
-│   ├── visual-styles/                               # 可视化件风格规范 (供说明书「可视化件声明」引用)
+│   ├── visual-styles/                               # 可视化样式：内容件 VIZ-* / 图表件 CHART-* / token 值层 (供说明书「可视化件声明」引用)
 │   ├── global-styles/                               # 全局原子规范 (色彩、网格、字阶、栅格)
 │   └── tokens-cheatsheet.md                         # 高频 Tokens 速查手册
 │
