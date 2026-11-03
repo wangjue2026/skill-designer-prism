@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--
+  CHART-折线图·多Y轴
+  三个以上量纲；y 轴只保留最左一条网格，其余不画分隔线
+  改这里：DATA / 标题
+  不要改：颜色、圆角、阴影、间距（都是 token 落点，见 tokens/charts.json）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-折线图·多Y轴</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC; font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .chart { width: 100%; height: 320px; }
+
+</style>
+</head>
+<body>
+
+<script>
+const GRID = '#E1E5EB', LABEL = '#6F7785', TEXT = '#2F3540';
+const gradV = (a, b) => ({ type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const gradH = (a, b) => ({ type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const axis = {
+  axisLine: { lineStyle: { color: GRID } },
+  axisTick: { show: false },
+  axisLabel: { color: LABEL, fontSize: 12, fontFamily: 'PingFang SC' },
+  splitLine: { lineStyle: { color: GRID } },
+};
+const tip = { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+              textStyle: { color: TEXT, fontSize: 12 } };
+const SHADOW = (rgb) => 'rgba(' + rgb + ',0.16)';
+
+const CATS = ['10-01','10-05','10-09','10-13','10-17','10-21','10-25','10-29'];
+const SERIES = [
+  { name: '会话数', data: [320,340,310,380,420,400,360,330], color: '#458FFF', axis: 0 },
+  { name: '连接数', data: [820,880,760,910,1020,980,860,790], color: '#20CC94', axis: 1 },
+  { name: '新建速率', data: [64,72,60,80,88,84,70,66], color: '#6A6AFD', axis: 2 },
+];
+
+echarts.init(document.getElementById('chart')).setOption({
+  grid: { left: 8, right: 48, top: 24, bottom: 32, containLabel: true },
+  tooltip: { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE', textStyle: { color: TEXT, fontSize: 12 } },
+  legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { color: LABEL, fontSize: 12 } },
+  xAxis: { type: 'category', boundaryGap: false, data: CATS, ...axis, splitLine: { show: false } },
+  yAxis: [
+    { type: 'value', name: '会话', position: 'left', nameTextStyle: { color: LABEL, fontSize: 12 }, ...axis },
+    { type: 'value', name: '连接', position: 'right', nameTextStyle: { color: LABEL, fontSize: 12 }, ...axis, splitLine: { show: false } },
+    { type: 'value', name: '速率', position: 'right', offset: 44, nameTextStyle: { color: LABEL, fontSize: 12 }, ...axis, splitLine: { show: false } },
+  ],
+  series: SERIES.map((s) => ({
+    name: s.name, type: 'line', yAxisIndex: s.axis, data: s.data, showSymbol: false,
+    lineStyle: { width: 2, color: s.color },
+  })),
+});
+</script>
+</body>
+</html>

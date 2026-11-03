@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!--
+  CHART-饼图·玫瑰
+  要点：roseType:'area' + radius:'80%'；**总数放图例上方且加粗**（不要放圆心）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-饼图·玫瑰（带总数）</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC;
+         font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .pie-wrap { display: flex; align-items: center; gap: clamp(24px, 4vw, 64px); }
+  .pie-wrap .chart { width: 260px; height: 260px; flex: 0 0 260px; }
+  .side { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+  /* 总数：图例上方，加粗 */
+  .side .total b { display: block; font: 600 24px/24px "ALIBABA Font", "PingFang SC"; color: #2F3540; }
+  .side .total span { display: block; margin-top: 2px; font-size: 12px; line-height: 1; color: #6F7785; }
+  .pie-legend { display: grid; grid-template-columns: repeat(2, 112px);
+                column-gap: 16px; row-gap: 12px; }
+  .pie-legend .li { display: flex; align-items: center; gap: 6px;
+                    font-size: 12px; line-height: 1; color: #6F7785; }
+  .pie-legend .dot { width: 8px; height: 8px; flex: 0 0 8px; }
+  .pie-legend .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pie-legend .vl { margin-left: auto; min-width: 32px; text-align: right;
+                    color: #2F3540; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="pie-wrap">
+  <div id="chart" class="chart"></div>
+  <div class="side">
+    <div class="total"><b id="total"></b><span>攻击事件总数</span></div>
+    <div id="legend" class="pie-legend"></div>
+  </div>
+</div>
+<script>
+/* ===== 业务数据 ===== */
+const DATA = [
+  { value: 320, name: 'SQL 注入' },
+  { value: 268, name: 'XSS' },
+  { value: 214, name: '弱口令爆破' },
+  { value: 186, name: '文件上传' },
+  { value: 142, name: '命令注入' },
+  { value: 96,  name: '目录遍历' },
+  { value: 64,  name: '反序列化' },
+];
+
+const COLORS = ['#458FFF', '#20CC94', '#FFC145', '#F5654F', '#6A6AFD', '#6ED1FF'];
+const LIGHTER = { '#458FFF': '#8FBFFF', '#20CC94': '#6EE6B6', '#FFC145': '#FFE396',
+                  '#F5654F': '#FF957B', '#6A6AFD': '#9B9BFF', '#6ED1FF': '#9EE0FF' };
+const fx = function (a, b) {
+  return { type: 'linear', x: 1, y: 0, x2: 0, y2: 0,
+           colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] };
+};
+
+const total = DATA.reduce(function (s, d) { return s + d.value; }, 0);
+document.getElementById('total').textContent = total;
+
+echarts.init(document.getElementById('chart')).setOption({
+  color: DATA.map(function (d, i) { var c = COLORS[i % COLORS.length]; return fx(c, LIGHTER[c]); }),
+  tooltip: { trigger: 'item', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+             textStyle: { color: '#2F3540', fontSize: 12 } },
+  series: [{
+    type: 'pie', name: '攻击类型',
+    roseType: 'area', radius: '80%', center: ['50%', '50%'],
+    label: { show: false }, labelLine: { show: false },
+    itemStyle: { borderColor: '#FFFFFF', borderWidth: 1 },
+    data: DATA,
+  }],
+});
+
+/* 图例：两列，数字右对齐 */
+document.getElementById('legend').innerHTML = DATA.map(function (d, i) {
+  var c = COLORS[i % COLORS.length];
+  var g = 'linear-gradient(270deg,' + c + ',' + LIGHTER[c] + ')';
+  return '<div class="li">' +
+    '<span class="dot" style="background:' + g + '"></span>' +
+    '<span class="nm">' + d.name + '</span>' +
+    '<span class="vl">' + d.value + '</span>' +
+    '</div>';
+}).join('');
+</script>
+</body>
+</html>

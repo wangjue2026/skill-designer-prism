@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+  CHART-柱状图·分组-横向
+  轴互换 + 多 series；右端圆角；分类名可完整展示
+  改这里：DATA / 标题
+  不要改：颜色、圆角、阴影、间距（都是 token 落点，见 tokens/charts.json）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-柱状图·分组-横向</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC; font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .chart { width: 100%; height: 360px; }
+
+</style>
+</head>
+<body>
+
+<script>
+const GRID = '#E1E5EB', LABEL = '#6F7785', TEXT = '#2F3540';
+const gradV = (a, b) => ({ type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const gradH = (a, b) => ({ type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] });
+const axis = {
+  axisLine: { lineStyle: { color: GRID } },
+  axisTick: { show: false },
+  axisLabel: { color: LABEL, fontSize: 12, fontFamily: 'PingFang SC' },
+  splitLine: { lineStyle: { color: GRID } },
+};
+const tip = { trigger: 'axis', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+              textStyle: { color: TEXT, fontSize: 12 } };
+const SHADOW = (rgb) => 'rgba(' + rgb + ',0.16)';
+
+const CATS = ['终端 A（192.168.10.11）','终端 B（192.168.10.12）','终端 C（192.168.10.13）','终端 D（192.168.10.14）'];
+const SERIES = [
+  { name: '冗余事件',   data: [320, 268, 214, 186], color: ['#458FFF', '#8FBFFF'], rgb: '69,143,255' },
+  { name: '未处理事件', data: [210, 180, 150, 120], color: ['#FFC145', '#FFE396'], rgb: '255,193,69' },
+];
+
+echarts.init(document.getElementById('chart')).setOption({
+  grid: { left: 8, right: 24, top: 16, bottom: 32, containLabel: true },
+  tooltip: tip,
+  legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { color: LABEL, fontSize: 12 } },
+  xAxis: { type: 'value', name: '条', nameGap: 20,
+           nameTextStyle: { color: LABEL, fontSize: 12, verticalAlign: 'top', lineHeight: 26 }, ...axis },
+  yAxis: { type: 'category', data: CATS, inverse: true, ...axis, splitLine: { show: false } },
+  series: SERIES.map((s) => ({
+    name: s.name, type: 'bar', barWidth: 10, data: s.data,
+    itemStyle: { color: gradH(s.color[0], s.color[1]), borderRadius: [0, 1, 1, 0],
+                 shadowColor: SHADOW(s.rgb), shadowBlur: 10, shadowOffsetY: -4 },
+  })),
+});
+</script>
+</body>
+</html>

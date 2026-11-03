@@ -1,0 +1,285 @@
+# CHART-渐变与投影 · 设计源 Token（A 级）
+
+> **定位**：图表配色的**取值真源**。柱状体、折线、饼块、底盘、网格线的渐变与投影，一律以本文件为准。
+> **来源**：设计源文件导出的 CSS 原文（规划人员 2026-11-03 提供），非截图取色、非推断。
+> **与另两份的关系**：`CHART-柱状图-亚型规范` / `CHART-折线图与饼图-亚型规范` 指到本文件取色；`CHART-语义色板` 管"等级类分类用哪一档"，本文件管"那一档具体是什么渐变"。
+
+---
+
+## 一、系列色阶（横 / 竖两套）
+
+设计源的系列色是**成对的渐变**：同一个色系有"横"与"竖"两个方向，端点色值相同，只是方向差 90°。
+
+| 命名样式 | 方向 | CSS 原文 | 暗端 → 亮端（明亮端） |
+| :--- | :---: | :--- | :--- |
+| `渐变色/黄-横` | 270deg | `linear-gradient(270deg, #ffc145 0%, #ffe396 100%)` | `#FFC145` → `#FFE396` |
+| `渐变色/蓝-横` | 270deg | `linear-gradient(270deg, #458fff 0%, #8fbfff 100%)` | `#458FFF` → `#8FBFFF` |
+| `渐变色/绿-横` | 270deg | `linear-gradient(270deg, #20cc94 0%, #6ee6b6 100%)` | `#20CC94` → `#6EE6B6` |
+| `渐变色/钴蓝-横` | 270deg | `linear-gradient(270deg, #6a6afd 0%, #9b9bff 100%)` | `#6A6AFD` → `#9B9BFF` |
+| `渐变色/红-横` | 270deg | `linear-gradient(270deg, #f5654f 0%, #ff957b 100%)` | `#F5654F` → `#FF957B` |
+| `渐变色/湖蓝-横` | 270deg | `linear-gradient(270deg, #6ed1ff 0%, #9ee0ff 100%)` | `#6ED1FF` → `#9EE0FF` |
+| `渐变色/灰-竖` | 180deg | `linear-gradient(180deg, #65779b 0%, #99acd1 100%)` | `#65779B` → `#99ACD1` |
+| `渐变色/蓝-竖` | 180deg | 🚧 未直接取到 | 基色 `#458FFF` → 明亮端**推定为 `#8FBFFF`**（与横版同源） |
+| `渐变色/绿-竖` | 180deg | 🚧 未直接取到 | 基色 `#20CC94` → 明亮端**推定为 `#6EE6B6`** |
+
+> 📌 **术语对齐**：本文的「**明亮端**」＝渐变第二个色标（offset 100% 那一端，颜色更浅）；「**暗端**」＝第一个色标（基色）。
+> 📌 **方向语义**：`270deg` = 从右到左（**横向**图形用）；`180deg` = 从上到下（**竖向**图形用）。
+
+---
+
+## 二、柱体圆角（按方向分）
+
+| 形态 | 圆角 CSS | ECharts 写法 |
+| :--- | :--- | :--- |
+| **竖向柱** | `border-radius: 1px 1px 0px 0px` | `borderRadius: [1,1,0,0]` |
+| **横向柱** | `border-radius: 0px 1px 1px 0px` | `borderRadius: [0,1,1,0]` |
+
+> ⚠️ 圆角必须跟着方向走：横向柱的**右侧两端**（数据末端）圆角，左端贴轴不圆。
+
+### 2.1 无轴排行条（`CHART-柱状图·基础-横向上方`）的几何
+
+| 项 | 值 | 依据 |
+| :--- | :--- | :--- |
+| 柱体高度 | **10px** | 设计源 CSS `height: 10px` |
+| 轨道底（全宽） | **`#EDF1F7`**（`灰阶色/二级背景颜色` / `--color-graphite-l40`） | 设计源 CSS ② |
+| 填充条 | `渐变色/黄-横` + 圆角 `0 1px 1px 0` + `投影/黄` | 设计源 CSS ③ |
+| 对象名 | 柱体**上方**，12px / 苹方 / `#6F7785` / 行高 12px | 设计源 CSS ① |
+| 名称与柱体间隔 | **5px** | 设计源 CSS ④ |
+| 坐标轴 / 刻度 / 数值标签 | **一律不出现** | 设计源截图 |
+
+> 该亚型**不是 ECharts 轴线图**，是「名称 + 轨道 + 渐变条」的 DOM 结构；用 `IxBarChart` 无法把分类名放到柱体上方。
+
+---
+
+## 三、投影（统一 `0 -4px 10px`，只换颜色与透明度）
+
+| 命名样式 | CSS 原文 | 用在哪 |
+| :--- | :--- | :--- |
+| `投影/黄` | `0px -4px 10px 0px rgba(255, 193, 69, 0.16)` | 黄系列柱体 |
+| `投影/蓝` | `0px -4px 10px 0px rgba(69, 143, 255, 0.16)` | 蓝系列柱体 / 蓝色折线 |
+| `投影/绿` | `0px -4px 10px 0px rgba(32, 204, 148, 0.16)` | 绿系列柱体 / 绿色折线 |
+| `投影/灰` | `0px -4px 10px 0px rgba(101, 119, 155, 0.16)` | 灰系列柱体 |
+
+**规律**：投影颜色 = 该系列基色的同色，透明度统一 **16%**，偏移 **`0 -4px`**、模糊 **`10px`**、无扩展。
+
+---
+
+## 四、折线渐变（两端透明、中段实色）
+
+| 命名样式 | CSS 原文 |
+| :--- | :--- |
+| `折线-渐变/蓝` | `border: 2px solid;`<br>`border-image: linear-gradient(270deg, #458fff1a 0%, #458fff 27%, #458fff1a 99%)`<br>`box-shadow: 0px -4px 10px 0px rgba(69, 143, 255, 0.16)`（= `投影/蓝`） |
+| `折线-渐变/绿` | `border: 2px solid;`<br>`border-image: linear-gradient(270deg, #20cc941a 0%, #20cc94 27%, #20cc941a 99%)`<br>`box-shadow: 0px -4px 10px 0px rgba(32, 204, 148, 0.16)`（= `投影/绿`） |
+
+**解读**：
+- `1a` = 十六进制透明度 ≈ **10%**；中段 `27%` 起为**全实色**，两端回落到 10%；
+- 线宽 **2px**（`border: 2px solid`）——这就是我此前缺的"折线线宽"；
+- 折线同样带上投影 `0 -4 10 @16%`。
+- 这正是 iDux 源码里 `useLineStyleColor`（"线条两边透明、中间不透明"）的实现目标。
+
+---
+
+## 五、饼图配色
+
+### 5.1 双层圆底（所有饼图都有）
+
+饼图背后是**两层同心圆**，不是一层。两者都**始终与环形同心**，且外圆**比环形自身稍大一点**。
+
+| 层 | 尺寸 / 位置 | CSS 原文 | 说明 |
+| :--- | :--- | :--- | :--- |
+| **外圆底色** | `144×144`，`left:0 / top:0` | `background: linear-gradient(180deg, #458fff14 0%, #458fff02 100%)` | 最大范围光晕；比圆环略大，包住整个环 |
+| **内圆底色** | `80×80`，`left:32 / top:32` | `background: linear-gradient(180deg, #458fff1a 0%, #458fff00 100%)`<br>`box-sizing:border-box`<br>`border:1px solid`<br>`border-image: linear-gradient(180deg, #458fff29 0%, #458fff00)` | 中心区底色 + **渐隐描边**（上实下虚） |
+
+```css
+/* 外圆 */
+.ring-outer{ position:absolute; left:0; top:0; width:144px; height:144px;
+  background:linear-gradient(180deg,#458fff14 0%,#458fff02 100%); }
+
+/* 内圆（居中于 144 圆内：32 + 80 + 32 = 144） */
+.ring-inner{ position:absolute; left:32px; top:32px; width:80px; height:80px;
+  box-sizing:border-box;
+  background:linear-gradient(180deg,#458fff1a 0%,#458fff00 100%);
+  border:1px solid; border-image:linear-gradient(180deg,#458fff29 0%,#458fff00) 1; }
+```
+
+> 📌 `14 / 02 / 1a / 29` 分别约等于 8% / 1% / 10% / 16% 的蓝；两层叠加形成“由外向内渐亮”的柔光。
+
+**缩放规则：等比缩放（已确认 2026-11-03）**
+
+两层圆**不是固定像素**，而是随图表容器等比缩放。以设计源 144 基准换算比例：
+
+| 层 | 基准尺寸 | 占容器比例 | 落地写法 |
+| :--- | :--- | :--- | :--- |
+| 外圆直径 | 144 | **100%**（= min(容器宽, 容器高)） | `r = min(w,h) / 2` |
+| 内圆直径 | 80 | **55.6%**（80/144） | `r = min(w,h) / 2 × 0.5556` |
+| 内圆边距 | 32 | **22.2%**（32/144） | 居中定位，无需单独设边距 |
+
+> 环半径仍按 `radius: ['70%','80%']`（ECharts 内置百分比），因此三者的相对关系在任意尺寸下都保持不变。
+
+### 5.2 中心统计数字（总数居中）
+
+| 项 | 值 | 依据 |
+| :--- | :--- | :--- |
+| 字体 | **ALIBABA Font** | CSS 原文 |
+| 字号 / 行高 | **24px / 24px** | CSS 原文（此前误用 20px，已纠正） |
+| 字重 | normal | CSS 原文 |
+| 对齐 | `text-align:center`，**与圆心正中重合** | CSS + 设计源批注 |
+| 颜色 | `#2F3540`（`灰色/正文&标题`） | CSS 原文 |
+| 位置 | `left:41.5 / top:38`（相对 144 圆的 80 中心区） | CSS 原文 |
+
+```css
+.ring-total{ position:absolute; left:41.5px; top:38px; width:38px; height:24px;
+  font-family:'ALIBABA Font','PingFang SC'; font-size:24px; font-weight:normal;
+  line-height:24px; text-align:center; color:#2F3540; }
+```
+
+> ⚠️ **数字必须与圆环正居中**——设计源批注原话：「资产总数要居中，与圆环正居中」。
+
+### 5.3 扇形块（横向渐变 + 白描边 1px）
+
+| 命名样式 | CSS 原文 | 端点 |
+| :--- | :--- | :--- |
+| `渐变色/绿-横` | `linear-gradient(270deg, #20cc94 0%, #6ee6b6 100%)` + `border: 1px solid #FFFFFF` | `#20CC94` → `#6EE6B6` |
+| `渐变色/蓝-横` | `linear-gradient(270deg, #458fff 0%, #8fbfff 100%)` + `border: 1px solid #FFFFFF` | `#458FFF` → `#8FBFFF` |
+| `渐变色/钴蓝-横` | `linear-gradient(270deg, #6a6afd 0%, #9b9bff 100%)` + `border: 1px solid #FFFFFF` | `#6A6AFD` → `#9B9BFF` |
+| `渐变色/黄-横` | `linear-gradient(270deg, #ffc145 0%, #ffe396 100%)` + `border: 1px solid #FFFFFF` | `#FFC145` → `#FFE396` |
+| `渐变色/红-横` | `linear-gradient(270deg, #f5654f 0%, #ff957b 100%)` + `border: 1px solid #FFFFFF` | `#F5654F` → `#FF957B` |
+| `渐变色/湖蓝-横` | `linear-gradient(270deg, #6ed1ff 0%, #9ee0ff 100%)` + `border: 1px solid #FFFFFF` | `#6ED1FF` → `#9EE0FF` |
+
+> **铁律**：饼图每个扇形块**必须有 1px 白色描边**（`border: 1px solid #FFFFFF`），这是分隔相邻扇形的唯一手段；块本身是 270deg 横向渐变，不是纯色。
+
+---
+
+### 5.4 图例规格（环形带总数 · 实测补充）
+
+> 来源：设计源批注原文（2026-11-03）。此前回归页把数值用 `margin-right:auto` 推到单元格最右——**错误**，数值必须紧跟名称。
+
+| 项 | 规格 | 说明 |
+| :--- | :--- | :--- |
+| 图例项构成 | **图标 + 对象名 + 数字** | 三段紧邻，中间不拉通 |
+| 列数 | **两列** | 左列排满再排右列 |
+| **组内上下间距** | **12px** | 行与行之间 |
+| **组内左右间距** | **16px** | 两列之间 |
+| **图例与饼图主体间距** | **24~64px（自适应）** | 按可用空间在区间内取值，不写死 |
+| **数字对齐** | **右对齐**（同一列的数字右边缘对齐） | 设计源批注：「数字要右对齐」 |
+| **名称↔数字间距** | **8~48px**（不得小于 8、不得大于 48） | 设计源批注 |
+| 图标 | 方形色块，取该系列的 **270deg 横向渐变** | 不是纯色块 |
+| 溢出 | **优先用满可用空间**（2 列 × N 行，N 由容器高度决定）；**仅当行数超出容器高度时才翻页** | 已裁决：**覆盖 iDux「超过两行必须翻页」的死规则**——下方有空间就该排出 3 行，不强制分页 |
+| 文字 | `#6F7785` 12px（对象名）/ `#2F3540`（数字） | 与轴标签同族 |
+
+```css
+/* 主体与图例的间距：24~64px 自适应 */
+.pie-wrap { display:flex; align-items:center; gap:clamp(24px, 4vw, 64px); }
+
+/* 图例列宽：按内容定宽，保证「名称↔数字」落在 8~48px 区间
+   —— 绝不能用 flex:1 铺满，否则间距会被拉到几百 px（回归页踩过这个坑） */
+/* 行数：由容器可用高度决定 floor((H+gap)/(行高+gap))，不要写死 2 行 */
+
+/* 图例：两列定宽（不是 flex:1），列距 16、行距 12 */
+.pie-legend {
+  display:grid; grid-template-columns:repeat(2, 112px);
+  column-gap:16px; row-gap:12px;
+}
+
+/* 单项：图标 + 名称 + 数字；数字右对齐 */
+.pie-legend .li { display:flex; align-items:center; gap:6px;
+  font-size:12px; color:#6F7785; line-height:1; }
+.pie-legend .dot { width:8px; height:8px; flex:0 0 8px; }
+.pie-legend .nm { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pie-legend .vl { margin-left:auto; min-width:32px; text-align:right;
+  color:#2F3540; font-variant-numeric:tabular-nums; }
+```
+
+### 5.5 柱顶数值标签（已确认 2026-11-03）
+
+| 项 | 值 |
+| :--- | :--- |
+| 颜色 | `#2F3540`（`灰色/正文&标题`，与正文同色） |
+| 字号 | 12px（与轴标签同档） |
+| 位置 | 竖向柱标柱顶；横向柱标柱端上方 |
+
+## 六、网格线
+
+**所有网格线统一 `#E1E5EB`**（即设计源 `灰阶色/一级分割线`）。横向网格、纵向网格、坐标轴线一律同色，不再区分。
+
+---
+
+## 七、落地：ECharts / 组件写法
+
+### 7.1 竖向柱
+
+```js
+itemStyle: {
+  color: { type:'linear', x:0, y:0, x2:0, y2:1,      // 180deg = 上→下
+           colorStops:[{offset:0,color:'#65779B'},{offset:1,color:'#99ACD1'}] },
+  borderRadius: [1,1,0,0],
+  shadowColor: 'rgba(101,119,155,0.16)', shadowBlur:10, shadowOffsetY:-4,
+}
+```
+
+### 7.2 横向柱
+
+```js
+itemStyle: {
+  color: { type:'linear', x:1, y:0, x2:0, y2:0,      // 270deg = 右→左
+           colorStops:[{offset:0,color:'#FFC145'},{offset:1,color:'#FFE396'}] },
+  borderRadius: [0,1,1,0],                           // 右端圆角
+  shadowColor: 'rgba(255,193,69,0.16)', shadowBlur:10, shadowOffsetY:-4,
+}
+```
+
+### 7.3 折线（两端透明中段实色）
+
+```js
+lineStyle: {
+  width: 2,
+  color: { type:'linear', x:1, y:0, x2:0, y2:0,
+           colorStops:[{offset:0,color:'#458fff1a'},{offset:0.27,color:'#458fff'},{offset:0.99,color:'#458fff1a'}] },
+  shadowColor:'rgba(69,143,255,0.16)', shadowBlur:10, shadowOffsetY:-4,
+}
+```
+
+### 7.4 饼图块 + 底盘
+
+```js
+// 块
+data: [{ value, name,
+  itemStyle: {
+    color: { type:'linear', x:1, y:0, x2:0, y2:0,
+             colorStops:[{offset:0,color:'#458FFF'},{offset:1,color:'#8FBFFF'}] },  // 渐变色/蓝-横
+    borderColor:'#FFFFFF', borderWidth:1,
+  }}]
+
+// 底盘（饼图背后光晕，所有饼图都有）
+graphic: [{ type:'circle', left:'center', top:'middle',
+  shape:{ r:72 },
+  style:{ fill:{ type:'linear', x:0,y:0,x2:0,y2:1,
+                 colorStops:[{offset:0,color:'#458fff14'},{offset:1,color:'#458fff02'}] } } }]
+```
+
+### 7.4b 无轴排行条（DOM）
+
+```css
+.rank-name{ font:12px/12px 'PingFang SC'; color:#6F7785; margin-bottom:5px; }
+.rank-track{ position:relative; height:10px; background:#EDF1F7; }
+.rank-fill{ position:absolute; left:0; top:0; height:10px; border-radius:0 1px 1px 0;
+  background:linear-gradient(270deg,#ffc145 0%,#ffe396 100%);
+  box-shadow:0 -4px 10px rgba(255,193,69,.16); }
+```
+
+### 7.5 网格线
+
+```js
+splitLine:{ lineStyle:{ color:'#E1E5EB' } }
+axisLine: { lineStyle:{ color:'#E1E5EB' } }
+```
+
+---
+
+## 八、待核
+
+| 项 | 说明 |
+| :--- | :--- |
+| `渐变色/蓝-竖`、`渐变色/绿-竖` 的明亮端 | 现按横版同源推定（`#8FBFFF` / `#6EE6B6`），建议在设计源里核一次 |
+| ~~底盘尺寸是否随饼图缩放~~ | ✅ **已确认：等比缩放**（外圆 100%、内圆 55.6%，见 §5.1 缩放规则） |
+| `1a / 14 / 02` 的精确百分比 | 按十六进制折算约 10% / 8% / 1%，若设计源有精确值以源为准 |

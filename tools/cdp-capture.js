@@ -19,6 +19,12 @@
  *   node tools/cdp-capture.js eval <URL或标题关键字> "<JS表达式>"
  *       在页面上下文求值（只读用途）
  *   node tools/cdp-capture.js open <URL或标题关键字>
+ *   node tools/cdp-capture.js pick <关键字> "x,y;x,y"
+ *       依次点击坐标并 dump 右侧属性面板（innerText + 输入框值）——读设计稿图层用
+ *   node tools/cdp-capture.js demo <关键字> <页面名> [页签名]
+ *       切页面 → 展开全部示例源码（<> 按钮）→ 输出源码块（学组件库文档用）
+ *   node tools/cdp-capture.js panel <关键字>
+ *       按坐标导出右侧面板全部输入框（面板滚动错位时救场）
  *       将该标签置前（便于人工核对）
  *
  * 取证素材请存到仓库外（如 /tmp），避免内网截图与地址入库。
@@ -358,6 +364,88 @@ async function cmdSetValue(keyword, selector, value) {
   console.log(`✅ 已设值并失焦 → ${selector}`);
 }
 
+const PANEL_DUMP_EXPR = `(function(){
+  var cands = Array.from(document.querySelectorAll('div')).filter(function(e){
+    var r = e.getBoundingClientRect();
+    return r.x > 1150 && r.width > 200 && r.height > 400;
+  });
+  cands.sort(function(a,b){ return b.getBoundingClientRect().height - a.getBoundingClientRect().height; });
+  var p = cands[0];
+  if (!p) return 'no-panel';
+  var txt = p.innerText.replace(/\\n+/g, ' | ');
+  var vals = Array.from(document.querySelectorAll('input'))
+    .filter(function(i){ return i.getBoundingClientRect().x > 1150 && i.value !== ''; })
+    .map(function(i){ return i.value; });
+  return JSON.stringify({ txt: txt.slice(0, 900), vals: vals });
+})()`;
+
+async function cmdPick(keyword, points) {
+  if (!keyword || !points) throw new Error('用法：pick <关键字> "x,y;x,y"');
+  const target = await resolveOne(keyword);
+  const pts = String(points).split(';').filter(Boolean).map(function (s) {
+    return s.split(',').map(Number);
+  });
+  await withTarget(target, async function (send) {
+    for (let i = 0; i < pts.length; i++) {
+      const x = pts[i][0], y = pts[i][1];
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x, y: y });
+      await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: x, y: y, button: 'left', clickCount: 1 });
+      await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: x, y: y, button: 'left', clickCount: 1 });
+      await sleep(450);
+      const r = await send('Runtime.evaluate', { expression: PANEL_DUMP_EXPR, returnByValue: true });
+      console.log('@(' + x + ',' + y + ') ' + r.result.value);
+    }
+  });
+}
+
+function clickLeafExpr(label, last) {
+  const pick = last ? "els[els.length-1]" : "els[0]";
+  return "(function(){var els=Array.from(document.querySelectorAll('*')).filter(function(e){" +
+    "return e.children.length===0 && (e.textContent||'').trim()===" + JSON.stringify(label) + ";});" +
+    "if(!els.length) return 'NOT_FOUND';" + pick + ".click(); return 'CLICKED';})()";
+}
+
+async function cmdDemo(keyword, pageLabel, tabLabel) {
+  if (!keyword || !pageLabel) throw new Error('用法：demo <关键字> <页面名> [页签名 默认示例]');
+  const target = await resolveOne(keyword);
+  const tab = tabLabel || '示例';
+  await withTarget(target, async function (send) {
+    const read = async function (expr) {
+      return (await send('Runtime.evaluate', { expression: expr, returnByValue: true })).result.value;
+    };
+    const r1 = await read(clickLeafExpr(pageLabel, false));
+    if (r1 !== 'CLICKED') throw new Error('页面「' + pageLabel + '」未找到');
+    await sleep(1600);
+    const r2 = await read(clickLeafExpr(tab, true));
+    if (r2 !== 'CLICKED') throw new Error('页签「' + tab + '」未找到');
+    await sleep(1000);
+    await read("Array.from(document.querySelectorAll('.archive-app-demo__tool')).forEach(function(t){t.click();})");
+    await sleep(1200);
+    const r3 = await send('Runtime.evaluate', {
+      expression: "JSON.stringify(Array.from(document.querySelectorAll('pre')).map(function(p){return p.innerText.trim();}))",
+      returnByValue: true,
+    });
+    const pres = JSON.parse(r3.result.value || '[]');
+    console.log('共 ' + pres.length + ' 段源码（' + pageLabel + ' / ' + tab + '）');
+    pres.forEach(function (code, i) {
+      console.log('\n===== #' + (i + 1) + '（' + code.length + ' 字符）=====');
+      console.log(code.slice(0, 1600));
+    });
+  });
+}
+
+async function cmdPanel(keyword) {
+  if (!keyword) throw new Error('用法：panel <关键字>');
+  const target = await resolveOne(keyword);
+  await withTarget(target, async function (send) {
+    const expr = "JSON.stringify(Array.from(document.querySelectorAll('input'))" +
+      ".filter(function(i){ return i.getBoundingClientRect().x > 1150; })" +
+      ".map(function(i){ var r=i.getBoundingClientRect(); return {x:Math.round(r.x),y:Math.round(r.y),v:i.value}; })" +
+      ".sort(function(a,b){ return a.y-b.y || a.x-b.x; }))";
+    const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true });
+    console.log(r.result.value);
+  });
+}
 async function main() {
   const [cmd, ...args] = process.argv.slice(2);
   switch (cmd) {
@@ -400,6 +488,15 @@ async function main() {
     case "setvalue":
       await cmdSetValue(args[0], args[1], args[2]);
       break;
+    case "pick":
+      await cmdPick(args[0], args[1]);
+      break;
+    case "demo":
+      await cmdDemo(args[0], args[1], args[2]);
+      break;
+    case "panel":
+      await cmdPanel(args[0]);
+      break;
     default:
       console.log(
         [
@@ -411,6 +508,9 @@ async function main() {
           "  node tools/cdp-capture.js open <关键字>",
           "  node tools/cdp-capture.js click <关键字> <要点击的文本>",
           "  node tools/cdp-capture.js hover <关键字> <要悬浮的文本>",
+          "  node tools/cdp-capture.js pick <关键字> \"x,y;x,y\"",
+          "  node tools/cdp-capture.js demo <关键字> <页面名> [页签名]",
+          "  node tools/cdp-capture.js panel <关键字>",
         ].join("\n")
       );
   }

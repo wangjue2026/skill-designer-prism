@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!--
+  CHART-饼图·环形带总数
+  结构：外圆底色(144 等比=容器短边 100%) → 环形(70%~80%) → 内圆(55.6%) → 中心 24px 数字
+       图例在右侧：两列，列距 16 / 行距 12，数字右对齐，与主体 24~64 自适应
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-饼图·环形带总数</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC;
+         font-family: "PingFang SC", "苹方-简", sans-serif; }
+  /* 与主体 24~64px 自适应 */
+  .pie-wrap { display: flex; align-items: center; gap: clamp(24px, 4vw, 64px); }
+  .pie-wrap .chart { width: 280px; height: 280px; flex: 0 0 280px; }
+  /* 两列定宽（禁止 flex:1 铺满），列距 16 / 行距 12 */
+  .pie-legend { display: grid; grid-template-columns: repeat(2, 112px);
+                column-gap: 16px; row-gap: 12px; }
+  .pie-legend .li { display: flex; align-items: center; gap: 6px;
+                    font-size: 12px; line-height: 1; color: #6F7785; }
+  .pie-legend .dot { width: 8px; height: 8px; flex: 0 0 8px; }
+  .pie-legend .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pie-legend .vl { margin-left: auto; min-width: 32px; text-align: right;
+                    color: #2F3540; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="pie-wrap">
+  <div id="chart" class="chart"></div>
+  <div id="legend" class="pie-legend"></div>
+</div>
+<script>
+/* ===== 业务数据 ===== */
+const DATA = [
+  { value: 30,  name: '严重' },
+  { value: 60,  name: '高危' },
+  { value: 120, name: '中危' },
+  { value: 150, name: '低危' },
+  { value: 50,  name: '信息' },
+  { value: 40,  name: '未定级' },
+];
+const TOTAL_LABEL = '风险资产总数';
+
+/* ===== token ===== */
+const COLORS = ['#F5654F', '#FFC145', '#458FFF', '#6A6AFD', '#6ED1FF', '#20CC94'];
+const LIGHTER = { '#F5654F': '#FF957B', '#FFC145': '#FFE396', '#458FFF': '#8FBFFF',
+                  '#6A6AFD': '#9B9BFF', '#6ED1FF': '#9EE0FF', '#20CC94': '#6EE6B6' };
+const grad = function (a, b, vertical) {
+  return vertical
+    ? { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] }
+    : { type: 'linear', x: 1, y: 0, x2: 0, y2: 0, colorStops: [{ offset: 0, color: a }, { offset: 1, color: b }] };
+};
+
+const el = document.getElementById('chart');
+const inst = echarts.init(el);
+const total = DATA.reduce(function (s, d) { return s + d.value; }, 0);
+
+function render() {
+  const size = Math.min(el.clientWidth || 280, el.clientHeight || 280);
+  const rOut = size / 2;                 // 外圆 = 容器短边 100%
+  const rIn = size / 2 * (80 / 144);     // 内圆 = 短边 55.6%
+  inst.setOption({
+    color: DATA.map(function (d, i) { return grad(COLORS[i % COLORS.length], LIGHTER[COLORS[i % COLORS.length]], false); }),
+    tooltip: { trigger: 'item', backgroundColor: '#FBFDFF', borderColor: '#D3D7DE',
+               textStyle: { color: '#2F3540', fontSize: 12 } },
+    graphic: [
+      /* 外圆底色 */
+      { type: 'circle', left: 'center', top: 'middle', shape: { r: rOut }, z: -2,
+        style: { fill: grad('#458fff14', '#458fff02', true) } },
+      /* 内圆底色 + 渐隐描边 */
+      { type: 'circle', left: 'center', top: 'middle', shape: { r: rIn }, z: -1,
+        style: { fill: grad('#458fff1a', '#458fff00', true),
+                 stroke: grad('#458fff29', '#458fff00', true), lineWidth: 1 } },
+      /* 中心数字 24px ALIBABA Font，与圆心正居中 */
+      { type: 'text', left: 'center', top: '44%',
+        style: { text: String(total), fill: '#2F3540',
+                 font: '24px "ALIBABA Font","PingFang SC"', lineHeight: 24, textAlign: 'center' } },
+      { type: 'text', left: 'center', top: '55%',
+        style: { text: TOTAL_LABEL, fill: '#6F7785', font: '12px "PingFang SC"', textAlign: 'center' } },
+    ],
+    series: [{
+      type: 'pie', radius: ['70%', '80%'], center: ['50%', '50%'],
+      label: { show: false }, labelLine: { show: false },
+      itemStyle: { borderColor: '#FFFFFF', borderWidth: 1 },   // 扇形白描边 1px
+      data: DATA,
+    }],
+  }, true);
+}
+
+/* 图例：两列，数字右对齐 */
+document.getElementById('legend').innerHTML = DATA.map(function (d, i) {
+  var c = COLORS[i % COLORS.length];
+  var g = 'linear-gradient(270deg,' + c + ',' + LIGHTER[c] + ')';
+  return '<div class="li">' +
+    '<span class="dot" style="background:' + g + '"></span>' +
+    '<span class="nm">' + d.name + '</span>' +
+    '<span class="vl">' + d.value + '</span>' +
+    '</div>';
+}).join('');
+
+render();
+window.addEventListener('resize', function () { inst.resize(); render(); });
+</script>
+</body>
+</html>

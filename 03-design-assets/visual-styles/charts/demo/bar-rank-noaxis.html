@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!--
+  CHART-柱状图·基础-横向上方  —— 注意：这是「无轴排行条」，不是带坐标轴的横向柱状图
+  结构：对象名（12px #6F7785）→ 间隔 5px → 轨道（#EDF1F7，全宽 10px 高）→ 渐变填充条
+  无坐标轴、无刻度、无数值标签；纯 DOM/CSS，不用 ECharts
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>CHART-柱状图·基础-横向上方（无轴排行条）</title>
+<style>
+  body { margin: 0; padding: 16px; background: #F7F9FC;
+         font-family: "PingFang SC", "苹方-简", sans-serif; }
+  .rank-list { display: flex; flex-direction: column; gap: 10px; }
+  .rank-name { font: 12px/12px "PingFang SC"; color: #6F7785; margin-bottom: 5px; }
+  .rank-track { position: relative; height: 10px; background: #EDF1F7; }
+  .rank-fill {
+    position: absolute; left: 0; top: 0; height: 10px; border-radius: 0 1px 1px 0;
+    background: linear-gradient(270deg, #FFC145 0%, #FFE396 100%);   /* 渐变色/黄-横：右→左 */
+    box-shadow: 0 -4px 10px rgba(255,193,69,0.16);                    /* 投影/黄 16% */
+  }
+</style>
+</head>
+<body>
+<div id="list" class="rank-list"></div>
+<script>
+/* ===== 业务数据（唯一需要改的地方） ===== */
+const RANK = [
+  { name: '企业微信（外部转发）', v: 1284 },
+  { name: '私人网盘（含 WebDAV）', v: 962 },
+  { name: 'AI 助手（含插件）', v: 735 },
+  { name: '远程桌面工具', v: 510 },
+  { name: '浏览器扩展商店', v: 286 },
+];
+
+const max = Math.max.apply(null, RANK.map(function (d) { return d.v; }));
+document.getElementById('list').innerHTML = RANK.map(function (d) {
+  var pct = (d.v / max * 100).toFixed(1);
+  return '<div class="rank-row">' +
+    '<div class="rank-name">' + d.name + '</div>' +
+    '<div class="rank-track"><div class="rank-fill" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+}).join('');
+</script>
+</body>
+</html>
