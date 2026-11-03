@@ -14,7 +14,7 @@
 #   ④ 线框规范符合度: 弹窗/抽屉页脚主按钮在左；操作按钮不带前置图标；
 #                     表单 Label 非必填项须留星号占位；弹窗/抽屉宽度须命中允许档位；
 #                     页面模板与线框容器原语一致（drawer ↔ modal 不得跨用）；UI 文案不泄漏 EP 编号
-#   ⑤ 可视化件完整性: 含可视化件的页面，其《可视化件声明》(class="viz-decl") 五字段须齐全
+#   ⑤ 可视化件完整性: 含可视化件的页面，其《可视化件声明》(class="viz-decl") 七字段须齐全（含件型键与线框引用）
 #                     （件型 / 图形编码规则 / 风格规范 / 交互与退化 / 可替代性）
 #
 # 退出码: 0 = 全部通过（可进入共识确认闸门）；1 = 存在未通过项（必须先修）
@@ -396,23 +396,25 @@ else
 fi
 
 # ---------- 11. 可视化件声明完整性 ----------
-head_ "11/11 可视化件声明完整性（含可视化件的页面须五字段齐全）"
+head_ "11/11 可视化件声明完整性（含可视化件的页面须七字段齐全，且落到件型键与线框）"
 VIZ_SIG="$ROOT/01-system-solution-design/②设计思考与决策/需求大类设计决策/signatures/viz-signatures.json"
 VIZ_RESULT=$(node -e '
   const fs = require("fs");
   const spec = fs.readFileSync(process.argv[1], "utf-8");
   let reg = null;
   try { reg = JSON.parse(fs.readFileSync(process.argv[2], "utf-8")); } catch (e) { reg = null; }
-  const required = (reg && reg.required_fields) || ["件型","图形编码规则","风格规范","交互与退化","可替代性"];
+  const required = (reg && reg.required_fields) || ["件型","件型键","线框与几何","图形编码规则","风格规范","交互与退化","可替代性"];
   const blocks = [...spec.matchAll(/<div class="viz-decl">([\s\S]*?)<\/div>/g)].map(m => m[1]);
   if (blocks.length === 0) { console.log("PASS|本说明书未声明可视化件，本项自适应跳过"); process.exit(0); }
   const errors = [];
   blocks.forEach((body, i) => {
     const missing = required.filter(f => body.indexOf(f) === -1);
     if (missing.length) errors.push("第 " + (i + 1) + " 个《可视化件声明》缺字段：" + missing.join("、"));
+    if (!/VIZ-\d{2}[-A-Z0-9]*|CHART-/.test(body)) errors.push("第 " + (i + 1) + " 个《可视化件声明》未落件型键（须 VIZ-xx-<形态> 或 CHART-*）");
+    if (!/件型线框\.md/.test(body)) errors.push("第 " + (i + 1) + " 个《可视化件声明》未引用件型线框.md（线框与几何无出处）");
   });
   if (errors.length) console.log("FAIL|" + errors.join("；"));
-  else console.log("PASS|已核验 " + blocks.length + " 个《可视化件声明》，五字段齐全");
+  else console.log("PASS|已核验 " + blocks.length + " 个《可视化件声明》，七字段齐全且均落到件型键与线框");
 ' "$SPEC" "$VIZ_SIG")
 VIZ_STATUS=$(echo "$VIZ_RESULT" | cut -d'|' -f1)
 VIZ_MSG=$(echo "$VIZ_RESULT" | cut -d'|' -f2-)
