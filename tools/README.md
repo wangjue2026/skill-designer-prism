@@ -1,6 +1,6 @@
 # tools/ —— 工程工具目录
 
-> 💡 **目录定位**：存放**执行环节所需的工程工具**（脚本等），服务于 [`learning-materials/`](../learning-materials/) 的**设计蒸馏取证**与其它作业环节。
+> 💡 **目录定位**：存放**执行环节所需的工程工具**（脚本等），服务于 [`learning-materials/`](../05-learning-materials/) 的**设计蒸馏取证**与其它作业环节。
 >
 > 本目录**不存放设计知识**（那是 `03-design-assets/` 的职责），也不存放流程文档（那是 `04-workflows-and-cases/` 的职责）。
 

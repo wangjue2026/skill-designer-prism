@@ -47,7 +47,7 @@
 ## 组件信息
 - 弹窗表单页：使用 `IxProFormModal`。
 - 字段勾选：使用 `IxCheckbox`，置于每行字段名前。
-- 字段控件：按字段类型映射，规则与 `../03-patterns/03-form-patterns.md` 常见字段组件映射速查一致：单行输入 `IxInput`、多行输入 `IxProTextarea`、单选 `IxRadioGroup`、多选 `IxCheckboxGroup`、下拉单选 `IxSelect`、下拉多选 `IxSelect multiple`、数值 `IxInputNumber`、日期 `IxDatePicker` 等。
+- 字段控件：按字段类型映射，规则与 `../patterns/03-form-patterns.md` 常见字段组件映射速查一致：单行输入 `IxInput`、多行输入 `IxProTextarea`、单选 `IxRadioGroup`、多选 `IxCheckboxGroup`、下拉单选 `IxSelect`、下拉多选 `IxSelect multiple`、数值 `IxInputNumber`、日期 `IxDatePicker` 等。
 
 ## 页面设计要点
 
@@ -84,7 +84,7 @@
   - 当前勾选对象的字段集不一致时，仅展示所有勾选对象均支持的公共字段。
 
 ## 复用规则
-- 入口按钮位置、未勾选禁用、勾选数量限制等规则复用 `../03-patterns/02-table-patterns.md` 表格头部操作区规范。
-- 批量操作结果反馈（成功、部分失败、全部失败）复用 `../03-patterns/02-table-patterns.md` 批量操作反馈规则。
-- 字段控件映射复用 `../03-patterns/03-form-patterns.md` 常见字段组件映射速查。
-- 弹窗关闭、未保存离开确认等交互复用 `../03-patterns/04-interaction-patterns.md` 交互反馈与风险控制规则。
+- 入口按钮位置、未勾选禁用、勾选数量限制等规则复用 `../patterns/02-table-patterns.md` 表格头部操作区规范。
+- 批量操作结果反馈（成功、部分失败、全部失败）复用 `../patterns/02-table-patterns.md` 批量操作反馈规则。
+- 字段控件映射复用 `../patterns/03-form-patterns.md` 常见字段组件映射速查。
+- 弹窗关闭、未保存离开确认等交互复用 `../patterns/04-interaction-patterns.md` 交互反馈与风险控制规则。

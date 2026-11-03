@@ -3,7 +3,7 @@
 > 📌 **口径声明（重要）**：本表是**覆盖度清点**，**严格从 PRD 第一性拆解，零 EP 匹配**——标杆经验（EP-xx）**不进本表**，以避免"经验反向决定需求"。
 > 🎯 **唯一规则**：每一个业务动作，**要么认领一个落点页面，要么显式标注「本期不做 + 原因」**，禁止静默消失。
 > 📎 **上游依据**：[`sase-endpoint-compliance-prd.md`](./sase-endpoint-compliance-prd.md)（PRD 章节 / 字段字典）
-> 📎 **核对基准**：[`design-spec-sase-compliance-02.html`](../../design-spec-sase-compliance-02.html)（02 稿：补齐前 Page-01~05 → 补齐后 Page-01~06）
+> 📎 **核对基准**：02 稿设计说明书（`design-spec-sase-compliance-02.html`，产物未随仓库保存；如需核对请重新生成）——补齐前 Page-01~05 → 补齐后 Page-01~06
 
 **状态图例**：✅ 已交付　⚠️ 半交付　❌ 缺失　🚫 本期不做（已确认）
 

@@ -169,7 +169,7 @@
 ## 5. UI/UX 体验设计要求与约束
 
 1. **严格遵循 SASE 产品线设计资产**：
-   - 导航层级：必须严格归属于 [03-design-assets/product-lines-knowledge/SASE/sase-navigation.md](../../03-design-assets/product-lines-knowledge/SASE/sase-navigation.md) 的 `终端管理 ➔ 终端管控 ➔ 合规基线检测`；
+   - 导航层级：必须严格归属于 [03-design-assets/product-lines-knowledge/SASE/nav-sase.md](../../03-design-assets/product-lines-knowledge/SASE/nav-sase.md) 的 `终端管理 ➔ 终端管控 ➔ 合规基线检测`；
    - 业务页面模板：采用 [01-page-types.md](../../03-design-assets/page-templates/01-page-types.md) 的【标准列表管理/监控套头】结构；
    - 功能规范：下发周期采用 [execution-cycle.md](../../03-design-assets/feature/execution-cycle.md)，批量处置采用 [batch-edit.md](../../03-design-assets/feature/batch-edit.md)；
 2. **深度消费 Type-07 标杆经验 (EP-01 ~ EP-11)**：

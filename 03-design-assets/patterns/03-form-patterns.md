@@ -41,9 +41,9 @@
 
 ## 4. 表单承载方式
 
-表单承载方式应优先从 `../02-template/01-page-types.md` 已定义的页面模板中选择，不在本文重新定义页面容器。本文只补充表单复杂度对承载方式的影响。
+表单承载方式应优先从 `../page-templates/01-page-types.md` 已定义的页面模板中选择，不在本文重新定义页面容器。本文只补充表单复杂度对承载方式的影响。
 
-默认对应关系（页面类型 ID 与 `../02-template/01-page-types.md` 定义一致）：
+默认对应关系（页面类型 ID 与 `../page-templates/01-page-types.md` 定义一致）：
 
 - 配置表单页（页面类型 ID：`page-form-config`）：使用页面级 `IxProForm`，适合独立菜单级配置、字段较多、需要稳定 URL 或长时间编辑的表单。
 - 弹窗表单页（页面类型 ID：`page-form-modal`）：使用 `IxProFormModal`，是从列表或详情发起的新建、编辑、复制类表单的默认承载方式。

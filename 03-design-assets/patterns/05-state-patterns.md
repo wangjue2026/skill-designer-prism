@@ -18,7 +18,7 @@
 
 - 本文是跨页面类型的通用状态设计总纲，覆盖列表、详情、配置、弹窗、抽屉、概览等页面类型的状态设计。
 - 表格场景的状态细则见 [02-table-patterns.md](02-table-patterns.md) 第 12 节，表单场景的状态细则见 [03-form-patterns.md](03-form-patterns.md) 第 10 节。本文只做通用定义与衔接，不重复场景细节。
-- 状态组件的实现能力以 idux 组件库为准，业务组件选型映射见 [../05-components/idux-component-map.md](../05-components/idux-component-map.md)。
+- 状态组件的实现能力以 idux 组件库为准，业务组件选型映射见 [../components/idux-component-map.md](../components/idux-component-map.md)。
 - 状态说明文案与术语须与 [06-copywriting-terminology.md](06-copywriting-terminology.md) 保持一致。
 
 ## 2. 状态全景清单
@@ -91,7 +91,7 @@
 
 ## 8. 状态组件选择
 
-按状态场景选择组件，组件具体能力与参数以 idux 组件库为准；业务组件选型映射见 [../05-components/idux-component-map.md](../05-components/idux-component-map.md)。
+按状态场景选择组件，组件具体能力与参数以 idux 组件库为准；业务组件选型映射见 [../components/idux-component-map.md](../components/idux-component-map.md)。
 
 | 状态场景 | 推荐组件 | 说明 |
 | --- | --- | --- |
