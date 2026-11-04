@@ -8,7 +8,9 @@
 #   bash tools/gate-ex.sh 1.2 _output/<业务名>/02-体验目标-<业务名>.md _output/<业务名>/01-主场景-<业务名>.md
 #   bash tools/gate-ex.sh 1.3 _output/<业务名>/03-突破点-<业务名>.md
 #   bash tools/gate-ex.sh 1.4 _output/<业务名>/草图-<业务名>.html
-#   bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html     # 定稿页面清单前（EX-4.1-01/02，静默执行）
+#   bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html _output/<业务名>/04-扫读-<业务名>.md
+#        # 定稿页面清单前（EX-4.1-01/02/04，静默执行）
+#        # 第三参数 = 逐页决策域扫读表；不传则 EX-4.1-05 只告警，不阻断
 #
 # 1.4 会额外调用 sketch-selfcheck.sh（EX-1.4-04 结构级 5 条）
 # 4.1 为静默自检：不过就自己回补，不向用户提问、不新增停顿
@@ -21,7 +23,7 @@ UP="${3:-}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -z "$STAGE" ] || [ -z "$ART" ] || [ ! -f "$ART" ]; then
-  echo "用法: bash tools/gate-ex.sh <1.1|1.2|1.3|1.4|4.1> <产物文件> [上游场景文件]"
+  echo "用法: bash tools/gate-ex.sh <1.1|1.2|1.3|1.4|4.1> <产物文件> [上游场景文件 / 4.1 的扫读表]"
   exit 2
 fi
 

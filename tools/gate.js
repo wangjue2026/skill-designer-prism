@@ -436,7 +436,8 @@ function runEX() {
 
   if (stage === '4.1') {
     const html = readOrDie(file, 'node tools/gate.js ex 4.1 <草图或页面清单.html>');
-    head('EX-4.1 页面清单与装配（覆盖率 / 继承对账）');
+    const scanArg = process.argv[5];
+    head('EX-4.1 页面清单与装配（覆盖率 / 继承对账 / 逐页决策域扫读）');
     // EX-4.1-01 覆盖率：动作覆盖表
     const rows = html.match(/<tr>[\s\S]*?<\/tr>/g) || [];
     const coverRows = rows.filter((r) => {
@@ -495,6 +496,36 @@ function runEX() {
       else ok('EX-4.1-03', '功能域已继承 ' + doms.length + ' 个（清单未带列，按关键字核对）');
     }
     wr('EX-4.1-02', '人检：页面数 / 主结构 / 进入关系 / 突破点落点与 1.4 选定草图逐项对，结构差异 >30% 回 1.4（内部回退，不新增停顿）');
+
+    // EX-4.1-05 逐页决策域扫读表（第三参数传扫读表；未传只告警）
+    if (!scanArg || !fs.existsSync(scanArg)) {
+      wr('EX-4.1-05', '未传逐页决策域扫读表，无法核对每页必查域是否扫全（用法：bash tools/gate-ex.sh 4.1 <草图.html> _output/<业务名>/04-扫读-<业务名>.md）');
+    } else {
+      const scan = fs.readFileSync(scanArg, 'utf8');
+      const pageRows = [];
+      scan.split(/\r?\n/).forEach((ln) => {
+        if (!/^\s*\|/.test(ln)) return;
+        const raw = ln.split('|');
+        const cells = raw.slice(1, raw.length - 1).map((x) => x.trim());
+        if (!cells.length || /^:?-{2,}/.test(cells[0] || '')) return;
+        const pidm = (cells[0] || '').match(/Page-\d+/);
+        if (!pidm) return;
+        pageRows.push({ pid: pidm[0], cells: cells });
+      });
+      if (!pageRows.length) {
+        bad('EX-4.1-05', '扫读表里没有 Page-xx 行：逐页决策域扫读未做（表头须为 页面 / 内容要素 / 必查域 / 取值 / 命中 / 落地 / 落点）');
+      } else {
+        const noDom = [], noExp = [];
+        pageRows.forEach((r) => {
+          if (!/D-?\d\d/.test(r.cells[2] || '')) noDom.push(r.pid);
+          if (!/D\d\d-EP\d+/.test(r.cells[4] || '') && !/业务独立推导/.test(r.cells[4] || '')) noExp.push(r.pid);
+        });
+        if (noDom.length) bad('EX-4.1-05', '这些页没有「必查域」：' + noDom.join('、') + '（先按桥协议 Step 2.5 扫内容要素，再定必查域）');
+        if (noExp.length) bad('EX-4.1-05', '这些页没有命中编号：' + noExp.join('、') + '（命中列须写 D0x-EPxx + 档位，或「业务独立推导（含场景号）」）');
+        if (uniq.size && pageRows.length < uniq.size) bad('EX-4.1-05', '扫读表只覆盖 ' + pageRows.length + ' 页，页面清单有 ' + uniq.size + ' 页');
+        if (!noDom.length && !noExp.length && (!uniq.size || pageRows.length >= uniq.size)) ok('EX-4.1-05', '逐页决策域扫读 ' + pageRows.length + ' 页，页页有必查域与命中编号');
+      }
+    }
     return finish('EX-4.1');
   }
 
@@ -708,6 +739,59 @@ function runSP() {
   });
   if (tabLack.length) bad('SP-W-09', '多视图页面面板缺失：' + tabLack.join('；') + '（每个 Tab 面板都要有线框内容并挂 wf-pane-label，缺一个就会在 Demo 里变成空白页）');
   else ok('SP-W-09', '多视图页面面板齐：所有页内 Tab 均有对应线框面板');
+
+  /* SP-W-10 有特征物必有决策域经验：线框里画了什么，本页映射清单就必须有对应 D0x-EPxx（带档位） */
+  const domLack = [];
+  noStyle.split(/<h5[^>]*id="page-/).slice(1).forEach((s) => {
+    const body = s.split(/<h5[^>]*id="page-/)[0];
+    const idM = body.match(/(Page-\d+)/);
+    const pid = idM ? idM[1] : '某页';
+    const i = body.indexOf('<div class="wf-container">');
+    const j = body.indexOf('<div class="wf-annotation">', i);
+    const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
+    if (!wf) return;
+    // 本页映射清单：优先取「映射清单」字样之后的第一个表，退化为页内第一个表
+    let scope = body;
+    const tStart = body.search(/映射清单/);
+    if (tStart >= 0) {
+      const tbl = body.slice(tStart).match(/<table[\s\S]*?<\/table>/);
+      if (tbl) scope = tbl[0];
+    } else {
+      const tbl = body.match(/<table[\s\S]*?<\/table>/);
+      if (tbl) scope = tbl[0];
+    }
+    const isListPage = /page-(table|dashboard|list)/.test(body);
+    const need = [];
+    // ① 筛选控件 → D-09（至少 2 条：壳 + 触发/回显/排序）
+    const hasFilter = /wf-datefilter|wf-prosearch|wf-basic-search/.test(wf) || (isListPage && /wf-select/.test(wf));
+    if (hasFilter) {
+      const n = new Set(scope.match(/D09-EP\d+/g) || []);
+      if (n.size < 2) need.push('有筛选控件但本页只有 ' + n.size + ' 条 D09-EPxx（至少 2 条：壳 + 触发/回显/排序）');
+    }
+    // ①b 引用了 D09-EP02 就必须写档位，且线框结构与档位一致
+    const m02 = scope.match(/D09-EP02[^<]{0,48}/);
+    if (m02) {
+      const tier = (m02[0].match(/[①②③④⑤⑥⑦]/) || [''])[0];
+      if (!tier) need.push('引用 D09-EP02 但没写档位（①②③…⑦），无法核对线框是否照档位落地');
+      else if (/[④⑤]/.test(tier) && !/wf-prosearch/.test(wf)) need.push('声明 D09-EP02 ' + tier + '（复合搜索框）但线框里没有 wf-prosearch');
+      else if (/[②③]/.test(tier) && (wf.match(/wf-select/g) || []).length < 2) need.push('声明 D09-EP02 ' + tier + '（行内平铺）但线框平铺下拉不足 2 个');
+    }
+    // ② 表格 → D-02 或 D-03
+    if (/<table|wf-table/.test(wf) && !/D0[23]-EP\d+/.test(scope)) need.push('有表格但缺 D-02 / D-03（壳选型或密度）');
+    // ③ 表单录入 → D-07
+    if (/wf-form-item|wf-form-title|wf-textarea/.test(wf) && !/D07-EP\d+/.test(scope)) need.push('有表单录入但缺 D-07（控件选型）');
+    // ④ 批量 / 导入导出 → D-10
+    if (/批量|导入|导出/.test(wf) && !/D10-EP\d+/.test(scope)) need.push('有批量/导入导出但缺 D-10（入口与流程）');
+    // ⑤ 危险动作 → D-05
+    if (/删除|停用|禁用|下线|覆盖/.test(wf) && !/D05-EP\d+/.test(scope)) need.push('有删除/停用类动作但缺 D-05（拦到什么程度）');
+    // ⑥ 统计 / 图表 / 可视化件 → D-11（整页看数则 D-08）
+    if (/viz-decl|wf-kpi|wf-chart|<svg/.test(body) && !/D11-EP\d+|D08-EP\d+/.test(scope)) need.push('有统计/图表件但缺 D-11 或 D-08（件型与嵌入）');
+    // ⑦ 页内 Tab → D-06 或 D-01
+    if (/wf-tabs|wf-pane-label/.test(wf) && !/D06-EP\d+|D01-EP\d+/.test(scope)) need.push('有页内 Tab 但缺 D-06 / D-01（层级与动线）');
+    if (need.length) domLack.push(pid + '：' + need.join('；'));
+  });
+  if (domLack.length) bad('SP-W-10', '有特征物却没有对应决策域经验（= 没学习就自由发挥）：' + domLack.join(' ｜ ') + '（按桥协议 Step 2.5 逐项补扫，映射清单写 D0x-EPxx + 档位，不许只写域号）');
+  else ok('SP-W-10', '每页特征物均有对应决策域经验编号（筛选 / 表格 / 表单 / 批量 / 统计 / Tab）');
 
   wr('SP-W-01~05', '表单结构 / 线框规范 / 可视化件 / UI 文案 由 selfcheck 机检');
 

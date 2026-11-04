@@ -399,7 +399,7 @@ else
 fi
 
 # ---------- 11. 可视化件声明完整性 ----------
-head_ "11/11 可视化件声明完整性（含可视化件的页面须七字段齐全，且落到件型键与线框）"
+head_ "11/11 可视化件声明完整性（七字段齐全 + 件型键与线框 + 风格规范须为可执行值）"
 VIZ_SIG="$ROOT/01-system-solution-design/②设计思考与决策/需求大类设计决策/signatures/viz-signatures.json"
 VIZ_RESULT=$(node -e '
   const fs = require("fs");
@@ -415,9 +415,15 @@ VIZ_RESULT=$(node -e '
     if (missing.length) errors.push("第 " + (i + 1) + " 个《可视化件声明》缺字段：" + missing.join("、"));
     if (!/VIZ-\d{2}[-A-Z0-9]*|CHART-/.test(body)) errors.push("第 " + (i + 1) + " 个《可视化件声明》未落件型键（须 VIZ-xx-<形态> 或 CHART-*）");
     if (!/件型线框\.md/.test(body)) errors.push("第 " + (i + 1) + " 个《可视化件声明》未引用件型线框.md（线框与几何无出处）");
+    const cellM = body.match(/<b>风格规范<\/b>[\s\S]{0,60}?<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/);
+    const styleCell = cellM ? cellM[1] : body;
+    if (!/档\s*[AB]|风格档/.test(styleCell)) errors.push("第 " + (i + 1) + " 个《可视化件声明》「风格规范」缺档名（须写明 档 A / 档 B）");
+    const toks = new Set((styleCell.match(/glow-blue-s1|bg-blue-wash|border-ghost|dropshadow-s1|graphite-l\d+|r2|r4/gi) || []).map(function(x){return x.toLowerCase();}));
+    if (toks.size < 2) errors.push("第 " + (i + 1) + " 个《可视化件声明》「风格规范」只写了档名或文件名，缺可执行 token（至少 2 个：glow-blue-s1 / bg-blue-wash / border-ghost / r2 …）");
+    if (!/#[0-9A-Fa-f]{3,8}|rgba?\(|linear-gradient\(|\d+px/.test(styleCell)) errors.push("第 " + (i + 1) + " 个《可视化件声明》「风格规范」缺具体值（渐变 / rgba / hex / px 至少一项）");
   });
   if (errors.length) console.log("FAIL|" + errors.join("；"));
-  else console.log("PASS|已核验 " + blocks.length + " 个《可视化件声明》，七字段齐全且均落到件型键与线框");
+  else console.log("PASS|已核验 " + blocks.length + " 个《可视化件声明》，七字段齐全、落到件型键与线框，且风格规范为可执行值");
 ' "$SPEC" "$VIZ_SIG")
 VIZ_STATUS=$(echo "$VIZ_RESULT" | cut -d'|' -f1)
 VIZ_MSG=$(echo "$VIZ_RESULT" | cut -d'|' -f2-)
