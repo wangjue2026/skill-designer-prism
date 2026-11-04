@@ -55,7 +55,6 @@ graph TD
 skill-designer-prism/
 ├── SKILL.md                                         # 核心规约、路由中枢与行为准则
 ├── README.md                                        # 本文件：项目全局唯一的总概览与使用指南
-├── 系统方案设计全流程执行图.html                     # 全流程介绍：1.1 → 6.0 各环节、门禁卡点、人机交接与产物落点一览
 │
 ├── 00-triage-and-routing/                           # 【分诊与转轨中枢】
 │   └── triage-rules.md                              # 方案设计 vs 细节调优决策树与转轨红线
