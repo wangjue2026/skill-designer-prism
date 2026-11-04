@@ -222,9 +222,10 @@ function runEX() {
     if (noPair.length) bad('EX-1.4-07', '「做法」与「为什么」条数不配对：' + noPair.join('、'));
     if (badgeMiss.length) bad('EX-1.4-07', '图上标号与图下说明编号不一致：' + badgeMiss.join('；'));
     if (tooLong.length) wr('EX-1.4-07', '这些页面的单条说明过长（>200 字），拆成两句：' + Array.from(new Set(tooLong)).join('、'));
-    // 空洞词 / 营销词
+    // 空洞词 / 营销词（「已闭环」是 PRD 状态枚举名而非营销话术，扫描前先剔除，否则合法状态名被误拦）
     var hollow = ['提升体验', '优化体验', '更清晰', '更高效', '更智能', '更省心', '大幅提升', '赋能', '极致', '闭环', '收口', '影响面', '态势'];
-    var hollowHit = hollow.filter(function (w) { return plain.indexOf(w) >= 0; });
+    var plainForHollow = plain.replace(/已闭环/g, '');
+    var hollowHit = hollow.filter(function (w) { return plainForHollow.indexOf(w) >= 0; });
     if (hollowHit.length) bad('EX-1.4-07', '出现空洞词 / 营销词：' + hollowHit.join('、') + '（换成"能看见什么、能做什么"）');
     // 主按钮文案必须说明做什么，不许只写"确定/提交/保存"
     var dumbBtn = plain.match(/>(确定|提交|保存|是|否)</g) || [];
@@ -399,6 +400,37 @@ function runEX() {
     }
     if (ledger && !noType.length && !noId.length && !typeNoId.length && !dupId.length && !missInLedger.length && !missOnFig.length && typesUsed.indexOf('CAP') >= 0) {
       ok('EX-1.4-17', '占位可交接：' + allIds.length + ' 条带类型与编号，清单 ' + ledgerIds.length + ' 行（' + typesUsed.join(' / ') + '）');
+    }
+
+    // 18 页内 Tab 面板齐全（EX-1.4-18）：N 个 Tab = N 块 data-pane 面板，禁一句话代替面板
+    var paneLack = [];
+    var ALT_PANE = /(此处换成|内容同上|其余同上|此处略|面板略|另\s*[一二三四五1-5]\s*个\s*Tab\s*(内容)?(同上|略))/;
+    blocks.forEach(function (blk2, idx2) {
+      var b2 = blk2.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      if (/class="same"/.test(b2)) return;
+      var hd2 = (b2.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid2 = (hd2.match(/class="pid">([^<]+)</) || [, 'P' + (idx2 + 1)])[1];
+      var bar = (b2.match(/<div[^>]*class="[^"]*tabbar[^"]*"[\s\S]*?<\/div>/) || [''])[0];
+      var tabs = [];
+      (bar.match(/<([a-zA-Z]+)[^>]*class="[^"]*tabx[^"]*"[^>]*>[^<]+<\/\1>/g) || []).forEach(function (s) {
+        var n = s.replace(/<[^>]+>/g, '').trim();
+        if (n) tabs.push(n);
+      });
+      var panes = [];
+      (b2.match(/data-pane="([^"]+)"/g) || []).forEach(function (s) {
+        panes.push(s.replace(/^data-pane="/, '').replace(/"$/, '').trim());
+      });
+      var altHit = (b2.match(ALT_PANE) || [])[0];
+      if (!tabs.length) { if (altHit) paneLack.push(pid2 + '：用「' + altHit + '」代替面板内容'); return; }
+      if (!panes.length) { paneLack.push(pid2 + '：有 ' + tabs.length + ' 个页内 Tab（' + tabs.join(' / ') + '），但一块面板内容都没画'); return; }
+      var missPane = tabs.filter(function (t) { return panes.indexOf(t) < 0; });
+      if (missPane.length) paneLack.push(pid2 + '：缺面板「' + missPane.join('」「') + '」（Tab ' + tabs.length + ' 个 / 面板 ' + panes.length + ' 块）');
+      if (altHit) paneLack.push(pid2 + '：用「' + altHit + '」代替面板内容');
+    });
+    if (paneLack.length) {
+      bad('EX-1.4-18', '页内 Tab 面板不齐：' + paneLack.join('；') + '（N 个 Tab 必须有 N 块面板，每块挂 data-pane="<Tab 名>"；禁止「切到 X 时此处换成」这类替代句）');
+    } else {
+      ok('EX-1.4-18', '页内 Tab 面板齐全：每个 Tab 都有对应的 data-pane 面板，无替代句');
     }
   }
 

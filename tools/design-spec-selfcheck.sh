@@ -296,11 +296,14 @@ WF_RESULT=$(node -e '
     }
   }
 
-  // 10b 操作按钮默认不带图标（comp-button.md）：按钮文本不得以图标字符开头（规范允许的刷新 icon 按钮 ⟳ 除外）
-  const iconLead = /^[+＋✚✎✕✖🔍⚙🗑➕]/;
+  // 10b 操作按钮默认不带图标（comp-button.md）：按钮文本不得以图标字符开头；icon 按钮白名单（⟳ 刷新 / 🔍 搜索——两者均为规范要求的 32×32 图标按钮形态）。
+  // 注意：字符类含 emoji 时必须加 /u 标志，否则 surrogate 高代理会让 🔍（\uD83D\uDD0D）误撞上 🗑（\uD83D\uDDD1）而被误报
+  const iconLead = /^[+＋✚✎✕✖⚙🗑➕]/u;
+  const iconBtnOk = new Set(["⟳", "🔍"]);
   for (const b of btns) {
+    if (iconBtnOk.has(b.text)) continue;
     if (iconLead.test(b.text)) {
-      errors.push("【按钮图标】按钮「" + b.text + "」带前置图标；按 comp-button.md 默认不带图标（刷新 icon 按钮除外）");
+      errors.push("【按钮图标】按钮「" + b.text + "」带前置图标；按 comp-button.md 默认不带图标（刷新 / 搜索等 icon 按钮除外）");
     }
   }
 
