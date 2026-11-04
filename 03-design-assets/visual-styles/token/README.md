@@ -87,3 +87,49 @@
 | `border-ghost` | `1px solid #FFFFFF` | 白底页上的"隐形描边"，只用于把同色块与背景分开 |
 
 > 仍待人工裁决的 2 项：`badge-step`（序号胶囊 `0 20px 20px 0`）、`glass-card`（毛玻璃卡）—— 它们是**件型级**材质，不是档位级。
+
+---
+
+## 七、拓扑件型级 token（2026-11-04 新增登记）
+
+> **为什么单开一节**：这批值来自设计稿**矢量导出（SVG 属性）**，不在团队样式库 195 条里，混进 `基础-token.md` 会污染"真值"边界；但它们又必须被**命名引用**（禁止在说明书里写裸 hex）。所以登记为**件型级 token**：只在拓扑件里用，**不冒充全局色板**。
+> **证据等级**：A · 设计源属性（SVG 解析，2026-11-04 快照）。**换业务可复用**——描述的是"节点/连线/立体块"这层图形语言，不含业务语义。
+> **机读镜像**：暂不入 `基础-tokens.json`（非团队库真值），待件型级 token 机制成熟后统一立表。
+
+### 7.1 节点
+
+| Token 名 | 值 | 用途 |
+| :--- | :--- | :--- |
+| `node-ball-grad` | `linear-gradient(135deg, #1CBFFF 0%, #1C6EFF 100%)` | 圆形节点球底色（渐变方向按 135°） |
+| `node-ball-stroke` | `#EEF4FF` / `0.8px`（内描边，内缩 0.4） | 球内亮边，给"厚度" |
+| `node-badge-fill` | `#F52727` | 状态角标底（红） |
+| `node-badge-stroke` | `1px #FFFFFF` | 角标内描边（必须留，否则糊在球上） |
+| `node-alert-grad` | `linear-gradient(#FF7A7E 0%, #CF171D 100%)` | 异常 / 选中态的球 |
+| `node-alert-ring` | `linear-gradient(#CF171D 45.5%, #FD292A 100%)` | 异常态外环（1px，环直径 59.5） |
+| `node-shadow` | `offset y 10 / blur 5` | 节点柔和落影（**不是** `dropshadow-s1`） |
+
+### 7.2 连线
+
+| Token 名 | 值 | 用途 |
+| :--- | :--- | :--- |
+| `link-grad` | `linear-gradient(90deg, #AEB4BD 0%, #5E6573 100%)` | 主连线填充带（左浅右深） |
+| `link-faint` | `#BEC3CC` | 辅助链路 / 小点描边 |
+
+### 7.3 等距立体（`VIZ-08-F`）
+
+| Token 名 | 值 | 用途 |
+| :--- | :--- | :--- |
+| `cube-face-top` | `#FFFFFF` | 立体块顶面（亮面） |
+| `cube-face-side` | `#E6EAF6` | 立体块侧面 |
+| `cube-face-dark` | `#2F3540` | 立体块深面 / 轮廓（已存在同名灰阶，复用之） |
+| `cube-grad-a` | `linear-gradient(#B4BAD0 0%, #C9D0EA 100%)` | 立体块亮侧渐变档 A |
+| `cube-grad-b` | `linear-gradient(#8C93A6 0%, #CED6E4 100%)` | 立体块暗侧渐变档 B |
+| `cube-grad-hl` | `linear-gradient(#1C6EFF 0%, #1C6EFF 51%, transparent 100%)` | 立体块高亮（选中 / 主路径） |
+| `zone-fill` | `#C8CBD2` | 宽幅分区底 |
+
+### 7.4 待裁决
+
+| 项 | 情况 |
+| :--- | :--- |
+| `node-ball-grad` 的 `#1CBFFF` | **已裁决（2026-11-04，规划人员）：不并入 `苍穹blue` 色阶**，仅作为该渐变的端点色独立存在；写规范时只能通过 `node-ball-grad` 整体引用，不得单独当色阶档使用 |
+| 连线为何是"填充带"而非 stroke | 已确认设计稿口径（`fill` 闭合路径）；实现层用 `stroke 1px + marker` 亦可，但**箭头 5×5.8 与渐变方向必须一致**——是否写成实现约束待定 |
