@@ -40,6 +40,10 @@
   .pid { font-size: 12px; font-weight: 700; color: #fff; background: #2F3540; border-radius: 2px; padding: 1px 6px; }
   .page-hd .form { font-size: 12px; color: #8A92A1; }
   .page-hd .duty { font-size: 12px; color: #6F7785; margin-left: auto; }
+  .flow { font-size: 12px; color: #6F7785; margin: -6px 0 10px; }
+  .flow .go, .go { color: #1C6EFF; font-weight: 600; }
+  .from { font-size: 11px; color: #8A92A1; }
+  .flow-ledger { margin: 6px 0 18px; }
 
   .frame { border: 1px dashed #C3CBD8; background: #FBFCFE; padding: 10px; border-radius: 3px; }
   .wf-bar { display: flex; justify-content: space-between; background: #fff; border-bottom: 1px solid #E5E9F0; padding: 5px 8px; font-size: 11px; color: #8A92A1; }
@@ -117,6 +121,18 @@
     </tbody>
   </table>
 
+  <h2>每条主场景怎么走（图上锚点逐段可点）</h2>
+  <table class="flow-ledger">
+    <thead>
+      <tr><th style="width:56px;">场景</th><th style="width:48px;">步骤</th><th style="width:56px;">页面</th><th>触发元素（图上锚点）</th><th style="width:56px;">到哪</th><th>到这步看到什么</th><th style="width:90px;">末态判定</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>S1</td><td>1</td><td>P1</td><td>页头「开始新一轮检测」（data-go=P2）</td><td>P2</td><td>预置好的检测项 + 下发范围与影响</td><td>否</td></tr>
+      <tr><td>S1</td><td>2</td><td>P2</td><td>页脚「确定并下发」（data-go=P3）</td><td>P3</td><td>本轮三个数字与不合规明细</td><td>否</td></tr>
+      <tr><td>S1</td><td>3</td><td>P3</td><td>「未收到的 N 台」（data-go=P4）</td><td>P4</td><td>逐台没收到原因，可就地补发</td><td>✅ 补发完回 P3 看到数字变化即办完</td></tr>
+    </tbody>
+  </table>
+
   <h2>方案一和方案二的设计对比</h2>
   <table class="cmp">
     <thead>
@@ -168,6 +184,7 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P1</span><h3>合规基线检测</h3><span class="form">列表主页</span><span class="duty">看现在有没有不合规，开新一轮检测</span></div>
+      <div class="flow">进入：左侧菜单「终端安全 / 合规检测」（根页）　｜　去向：「开始新一轮检测」到 P2、任务行末「查看结果 →」到 P3</div>
       <div class="frame">
         <div class="wf-bar"><span>终端安全 / 合规检测</span><span>最近更新 __</span></div>
 
@@ -189,15 +206,15 @@
         <div class="box" style="margin-top:12px;">
           <i class="pt">3</i>
           <div style="display:flex;align-items:center;gap:8px;">
-            <span class="btn p">开始新一轮检测</span>
+            <span class="btn p go" data-go="P2">开始新一轮检测</span>
             <span class="btn">查看全部任务</span>
             <span class="hint" style="margin-left:auto;">当前范围：最近一轮</span>
           </div>
           <table class="tbl">
-            <thead><tr><th>任务</th><th>发起人</th><th>发起时间</th><th>已检</th><th>未收到</th><th>不合规</th></tr></thead>
+            <thead><tr><th>任务</th><th>发起人</th><th>发起时间</th><th>已检</th><th>未收到</th><th>不合规</th><th style="text-align:right;">操作</th></tr></thead>
             <tbody>
-              <tr><td>全公司基线检查</td><td>王工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
-              <tr><td>研发部专项检查</td><td>李工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+              <tr><td>全公司基线检查</td><td>王工</td><td>__</td><td>__</td><td>__</td><td>__</td><td style="text-align:right;"><i class="go" data-go="P3">查看结果 →</i></td></tr>
+              <tr><td>研发部专项检查</td><td>李工</td><td>__</td><td>__</td><td>__</td><td>__</td><td style="text-align:right;"><i class="go" data-go="P3">查看结果 →</i></td></tr>
             </tbody>
           </table>
         </div>
@@ -211,9 +228,10 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P2</span><h3>新建检测任务</h3><span class="form">右侧抽屉</span><span class="duty">定查什么、看会影响谁、确定下发</span></div>
+      <div class="flow">进入：P1「开始新一轮检测」　｜　去向：「确定并下发」到 P3；「从模板库选 →」到 P5</div>
       <div class="frame">
         <div class="wf-drawer">
-          <div class="wf-drawer-hd"><i class="pt">1</i>新建检测任务<span class="chip" style="margin-left:auto;">右侧抽屉</span></div>
+          <div class="wf-drawer-hd"><i class="pt">1</i>新建检测任务<span class="from" data-from="P1">从「开始新一轮检测」进入</span><span class="chip" style="margin-left:auto;">右侧抽屉</span></div>
           <div class="wf-drawer-body">
             <div class="box" style="padding-right:18px;">
               <i class="pt">2</i>
@@ -222,7 +240,7 @@
                 <div>是否安装企业安全软件</div>
                 <div>软件版本是否低于 __</div>
                 <div>最近 __ 小时是否上报过</div>
-                <div style="margin-top:4px;"><span class="lnk">展开全部检测项</span></div>
+                <div style="margin-top:4px;"><span class="lnk">展开全部检测项</span>　<span class="lnk go" data-go="P5">从模板库选 →</span></div>
               </div>
             </div>
 
@@ -238,7 +256,7 @@
             </div>
           </div>
           <div class="wf-drawer-ft">
-            <span class="btn p">确定并下发</span>
+            <span class="btn p go" data-go="P3">确定并下发</span>
             <span class="btn">取消</span>
           </div>
         </div>
@@ -252,8 +270,9 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P3</span><h3>任务执行与结果</h3><span class="form">详情页</span><span class="duty">看谁收到、谁不合规、就地补发</span></div>
+      <div class="flow">进入：P1 行末「查看结果 →」或 P2「确定并下发」　｜　去向：「未收到的 N 台」到 P4；看完回 P1（保留筛选与滚动位置）</div>
       <div class="frame">
-        <div class="wf-bar"><span>终端安全 / 合规检测 / 任务详情</span><span>发起时间 __</span></div>
+        <div class="wf-bar"><span>终端安全 / 合规检测 / 任务详情</span><span class="from" data-from="P1">从「查看结果 →」进入</span><span>发起时间 __</span></div>
         <div class="box" style="padding:8px 0 6px;">
           <i class="pt">1</i>
           <div class="kpis" style="grid-template-columns:repeat(3,1fr);">
@@ -271,7 +290,7 @@
               <tr><td>研发终端-07</td><td>员工B</td><td>软件版本</td><td><span class="tag t-warn">版本太低</span></td><td style="text-align:right;"><span class="lnk">就地补发</span></td></tr>
             </tbody>
           </table>
-          <div class="hint" style="margin-top:6px;">未收到的 __ 台单独看待，见右侧「未收到终端清单」</div>
+          <div class="hint" style="margin-top:6px;">未收到的 __ 台单独看待，<i class="go" data-go="P4">打开「未收到终端清单」→</i></div>
         </div>
       </div>
       <ul class="notes">
@@ -282,9 +301,10 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P4</span><h3>未收到终端清单</h3><span class="form">抽屉</span><span class="duty">查为什么没收到，就地补发</span></div>
+      <div class="flow">进入：P3「打开『未收到终端清单』→」　｜　去向：「补发选中」后回 P3，看到「未收到」数字减少</div>
       <div class="frame">
         <div class="wf-drawer">
-          <div class="wf-drawer-hd">未收到终端清单<span class="chip" style="margin-left:auto;">抽屉</span></div>
+          <div class="wf-drawer-hd">未收到终端清单<span class="from" data-from="P3">从「打开『未收到终端清单』」进入</span><span class="chip" style="margin-left:auto;">抽屉</span></div>
           <div class="wf-drawer-body">
             <div class="box" style="padding-right:18px;">
               <i class="pt">1</i>
@@ -313,9 +333,10 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P5</span><h3>规则模板库</h3><span class="form">抽屉</span><span class="duty">选一套现成规则、改差异后套用</span></div>
+      <div class="flow">进入：P2「从模板库选 →」　｜　去向：「套用选中」回到 P2，检测项变成模板里的那一套</div>
       <div class="frame">
         <div class="wf-drawer">
-          <div class="wf-drawer-hd">规则模板库<span class="chip" style="margin-left:auto;">抽屉</span></div>
+          <div class="wf-drawer-hd">规则模板库<span class="from" data-from="P2">从「从模板库选」进入</span><span class="chip" style="margin-left:auto;">抽屉</span></div>
           <div class="wf-drawer-body">
             <div class="box" style="padding-right:18px;">
               <i class="pt">1</i>
@@ -352,20 +373,21 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P1</span><h3>合规基线检测</h3><span class="form">列表主页</span><span class="duty">看全部任务与最近一轮结果</span></div>
+      <div class="flow">进入：左侧菜单「终端安全 / 合规检测」（根页）　｜　去向：「新建检测任务」到 P2、任务行末「查看结果 →」到 P3</div>
       <div class="frame">
         <div class="wf-bar"><span>终端安全 / 合规检测</span><span>最近更新 __</span></div>
         <div class="box" style="padding:8px 0 6px;">
           <i class="pt">1</i>
           <div style="display:flex;align-items:center;gap:8px;">
-            <span class="btn p">新建检测任务</span>
+            <span class="btn p go" data-go="P2">新建检测任务</span>
             <span class="inp">搜任务名</span>
             <span class="hint" style="margin-left:auto;">共 __ 个任务</span>
           </div>
           <table class="tbl">
-            <thead><tr><th>任务</th><th>发起人</th><th>发起时间</th><th>已检</th><th>未收到</th><th>不合规</th></tr></thead>
+            <thead><tr><th>任务</th><th>发起人</th><th>发起时间</th><th>已检</th><th>未收到</th><th>不合规</th><th style="text-align:right;">操作</th></tr></thead>
             <tbody>
-              <tr><td>全公司基线检查</td><td>王工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
-              <tr><td>研发部专项检查</td><td>李工</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+              <tr><td>全公司基线检查</td><td>王工</td><td>__</td><td>__</td><td>__</td><td>__</td><td style="text-align:right;"><i class="go" data-go="P3">查看结果 →</i></td></tr>
+              <tr><td>研发部专项检查</td><td>李工</td><td>__</td><td>__</td><td>__</td><td>__</td><td style="text-align:right;"><i class="go" data-go="P3">查看结果 →</i></td></tr>
             </tbody>
           </table>
         </div>
@@ -377,9 +399,10 @@
 
     <div class="page">
       <div class="page-hd"><span class="pid">P2</span><h3>新建检测任务</h3><span class="form">右侧抽屉</span><span class="duty">选分组、圈范围、确定下发</span></div>
+      <div class="flow">进入：P1「新建检测任务」　｜　去向：「确定并下发」到 P3</div>
       <div class="frame">
         <div class="wf-drawer">
-          <div class="wf-drawer-hd">新建检测任务<span class="chip" style="margin-left:auto;">右侧抽屉</span></div>
+          <div class="wf-drawer-hd">新建检测任务<span class="from" data-from="P1">从「新建检测任务」进入</span><span class="chip" style="margin-left:auto;">右侧抽屉</span></div>
           <div class="wf-drawer-body">
             <div class="box" style="padding-right:18px;">
               <i class="pt">1</i>
@@ -396,7 +419,7 @@
             </div>
           </div>
           <div class="wf-drawer-ft">
-            <span class="btn p">确定并下发</span>
+            <span class="btn p go" data-go="P3">确定并下发</span>
             <span class="btn">取消</span>
           </div>
         </div>

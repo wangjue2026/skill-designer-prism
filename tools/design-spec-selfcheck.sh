@@ -434,6 +434,18 @@ else
   is_bad
 fi
 
+# ---------- 11b. 件型落地对账（键在册 / 件数 / 形态 / 必写值；SP-W-12） ----------
+head_ "11b 件型落地对账（件型键必须在册 · 件数与声明对齐 · 线框形态跟件型一致）"
+VZ_RESULT=$(node "$ROOT/tools/viz-audit.js" "$SPEC")
+VZ_STATUS=$(echo "$VZ_RESULT" | cut -d'|' -f1)
+VZ_MSG=$(echo "$VZ_RESULT" | cut -d'|' -f2-)
+if [ "$VZ_STATUS" = "PASS" ]; then
+  echo "  ✅ $VZ_MSG"
+else
+  echo "  ❌ $VZ_MSG"
+  is_bad
+fi
+
 # ---------- 附：线框数据完整度（提示项，不计入 11 项通过率） ----------
 head_ "附：线框数据完整度（提示项 · 不计入通过率）"
 PLACEHOLDER=$(grep -o '__' "$NOCKECK" 2>/dev/null | wc -l | tr -d ' ')

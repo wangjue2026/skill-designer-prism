@@ -255,11 +255,12 @@ function runEX() {
     else if (badName.length) bad('EX-1.4-08', '页面名不合规（须名词化 / ≤6 字 / 无问句与指示代词）：' + badName.join('、'));
     else ok('EX-1.4-08', '页面名合规 ' + nm.length + ' 个：' + nm.join(' / '));
 
-    // 09 信息架构五件套（先 IA 后页面）
+    // 09 信息架构四件套（先 IA 后页面）
     var iaNeed = ['模块定位', '功能域', '映射'];
+    if (/class="[^"]*tabbar/.test(html)) iaNeed.push('view-ledger');
     var iaMiss = iaNeed.filter(function (k) { return plain.indexOf(k) < 0; });
-    if (iaMiss.length) bad('EX-1.4-09', '缺信息架构件：' + iaMiss.join('、') + '（三件套：模块定位 / 功能域树 / 页面×对象×动作映射）');
-    else ok('EX-1.4-09', '信息架构三件套齐（模块定位 / 功能域树 / 映射表）');
+    if (iaMiss.length) bad('EX-1.4-09', '缺信息架构件：' + iaMiss.join('、') + '（四件套：模块定位 / 功能域树 / 页面×对象×动作映射 / 页内视图清单 view-ledger）');
+    else ok('EX-1.4-09', '信息架构件齐（模块定位 / 功能域树 / 映射表' + (iaNeed.length > 3 ? ' / 页内视图清单' : '') + '）');
 
     // 10 不线上化的能力必须写线下承接
     if (/本期不做|不线上化/.test(plain) && !/线下/.test(plain)) bad('EX-1.4-10', '声明了本期不做 / 不线上化，但没写线下承接方式');
@@ -402,7 +403,7 @@ function runEX() {
       ok('EX-1.4-17', '占位可交接：' + allIds.length + ' 条带类型与编号，清单 ' + ledgerIds.length + ' 行（' + typesUsed.join(' / ') + '）');
     }
 
-    // 18 页内 Tab 面板齐全（EX-1.4-18）：N 个 Tab = N 块 data-pane 面板，禁一句话代替面板
+    // 18 页内 Tab 面板齐全且拆到块（EX-1.4-18）：N 个 Tab = N 块 data-pane 面板，每块 ≥2 个命名区块，禁一句话代替面板
     var paneLack = [];
     var ALT_PANE = /(此处换成|内容同上|其余同上|此处略|面板略|另\s*[一二三四五1-5]\s*个\s*Tab\s*(内容)?(同上|略))/;
     blocks.forEach(function (blk2, idx2) {
@@ -426,11 +427,110 @@ function runEX() {
       var missPane = tabs.filter(function (t) { return panes.indexOf(t) < 0; });
       if (missPane.length) paneLack.push(pid2 + '：缺面板「' + missPane.join('」「') + '」（Tab ' + tabs.length + ' 个 / 面板 ' + panes.length + ' 块）');
       if (altHit) paneLack.push(pid2 + '：用「' + altHit + '」代替面板内容');
+      // 逐面拆到块：每个 pane 内 ≥2 个 <b class="t"> 命名区块；只有 1 块须标 data-thin="sys"
+      var pAt = [], pRe2 = /data-pane="([^"]+)"/g, pM2;
+      while ((pM2 = pRe2.exec(b2))) pAt.push({ name: pM2[1], at: pM2.index });
+      pAt.forEach(function (o, i) {
+        var seg = b2.slice(o.at, i + 1 < pAt.length ? pAt[i + 1].at : b2.length);
+        var tagStart = b2.lastIndexOf('<div', o.at);
+        var tag = b2.slice(tagStart, b2.indexOf('>', o.at) + 1);
+        var titles = (seg.match(/class="t"/g) || []).length;
+        var textLen = seg.replace(/<[^>]*>/g, '').replace(/\s+/g, '').length;
+        var thin = /data-thin="sys"/.test(tag);
+        if (thin) {
+          if (titles < 1) paneLack.push(pid2 + ' 面板「' + o.name + '」标了 data-thin="sys" 但没有内容小标题（<b class="t">）');
+          return;
+        }
+        if (titles < 2) paneLack.push(pid2 + ' 面板「' + o.name + '」只有 ' + titles + ' 个命名区块（<b class="t">），至少要 2 个；只有一块时须标 data-thin="sys" 并写清系统接管了什么');
+        else if (textLen < 24) paneLack.push(pid2 + ' 面板「' + o.name + '」有标题没内容（去标签后仅 ' + textLen + ' 字）');
+      });
     });
     if (paneLack.length) {
-      bad('EX-1.4-18', '页内 Tab 面板不齐：' + paneLack.join('；') + '（N 个 Tab 必须有 N 块面板，每块挂 data-pane="<Tab 名>"；禁止「切到 X 时此处换成」这类替代句）');
+      bad('EX-1.4-18', '页内 Tab 面板不齐 / 未拆到块：' + paneLack.join('；') + '（N 个 Tab 必须有 N 块面板，每块挂 data-pane="<Tab 名>" 且内拆 ≥2 个 <b class="t"> 命名区块；禁止「切到 X 时此处换成」这类替代句）');
     } else {
-      ok('EX-1.4-18', '页内 Tab 面板齐全：每个 Tab 都有对应的 data-pane 面板，无替代句');
+      ok('EX-1.4-18', '页内 Tab 面板齐全且逐面拆到块：每个 Tab 都有对应 data-pane 面板，面板内 ≥2 个命名区块，无替代句');
+    }
+
+    // 19 场景链路可走通（EX-1.4-19）：flow-ledger + 图上 data-go/data-from + 连通性
+    var flowLedger = (html.match(/<table[^>]*class="[^"]*flow-ledger[\s\S]*?<\/table>/) || [''])[0];
+    var pidPos = [], pidRe2 = /<span class="pid">\s*(P\d+)\s*<\/span>/g, pm3;
+    while ((pm3 = pidRe2.exec(html))) pidPos.push({ id: pm3[1], at: pm3.index });
+    var pidSet = [];
+    pidPos.forEach(function (p) { if (pidSet.indexOf(p.id) < 0) pidSet.push(p.id); });
+    var edges = [], goRe2 = /data-go="\s*(P\d+)\s*"/g, gm2;
+    while ((gm2 = goRe2.exec(html))) {
+      var src = '';
+      pidPos.forEach(function (p) { if (p.at <= gm2.index) src = p.id; });
+      edges.push({ from: src, to: gm2[1], at: gm2.index });
+    }
+    var flow19 = [];
+    if (!flowLedger) flow19.push('缺场景链路表（<table class="flow-ledger">）');
+    else if (!/S\d/.test(flowLedger)) flow19.push('flow-ledger 里没有 S1~Sn 场景行');
+    if (!pidSet.length) flow19.push('未识别到页面（<span class="pid">Pn</span>）');
+    if (!edges.length) flow19.push('全篇没有跨页入口锚点（data-go），页面之间只能靠文字讲');
+    var badTarget = edges.filter(function (e) { return pidSet.indexOf(e.to) < 0; }).map(function (e) { return e.from + '→' + e.to; });
+    if (badTarget.length) flow19.push('这些锚点指向不存在的页：' + Array.from(new Set(badTarget)).join('、'));
+    // 入边：被 data-go 指向 / 根页 / 显式声明 data-entry="root"
+    var root = pidSet[0];
+    var inbound = {};
+    edges.forEach(function (e) { inbound[e.to] = true; });
+    var noIn = pidSet.filter(function (p) { return p !== root && !inbound[p]; });
+    if (noIn.length) flow19.push('这些页面没有入边（凭空出现）：' + noIn.join('、'));
+    // 连通性
+    if (pidSet.length) {
+      var seen = {}, queue = [root];
+      seen[root] = true;
+      while (queue.length) {
+        var cur = queue.shift();
+        edges.forEach(function (e) { if (e.from === cur && !seen[e.to]) { seen[e.to] = true; queue.push(e.to); } });
+      }
+      var unreach = pidSet.filter(function (p) { return !seen[p]; });
+      if (unreach.length) flow19.push('从 ' + root + ' 走不到这些页：' + unreach.join('、'));
+      if (edges.length && edges.length < pidSet.length - 1) flow19.push('锚点边数 ' + edges.length + ' 少于页面数 ' + pidSet.length + ' 所要求的 ' + (pidSet.length - 1) + '，链路不完整');
+    }
+    if (flow19.length) {
+      bad('EX-1.4-19', '场景链路走不通：' + flow19.join('；') + '（每条 Sx 要能在图上从第一屏点到末态屏：页头写"进入/去向"、图上标 data-go / data-from、并交 flow-ledger）');
+    } else {
+      ok('EX-1.4-19', '场景链路可走通：' + pidSet.length + ' 页 / ' + edges.length + ' 条跨页锚点，从 ' + root + ' 可达全部页面，flow-ledger 有场景行');
+    }
+
+    // 20 页内视图清单闭合（EX-1.4-20）：view-ledger 一视图一行，面板 data-view 与表对应
+    var viewLedger = (html.match(/<table[^>]*class="[^"]*view-ledger[\s\S]*?<\/table>/) || [''])[0];
+    var view20 = [];
+    var hasTabbar = /class="[^"]*tabbar/.test(html);
+    var viewIds = [];
+    (html.match(/data-view="([^"]+)"/g) || []).forEach(function (s) {
+      var v = s.replace(/^data-view="/, '').replace(/"$/, '').trim();
+      if (v && viewIds.indexOf(v) < 0) viewIds.push(v);
+    });
+    if (hasTabbar) {
+      if (!viewLedger) {
+        view20.push('有页内 Tab 但缺页内视图清单（<table class="view-ledger">）');
+      } else {
+        if (!/视图编号/.test(viewLedger) || !/主导图形/.test(viewLedger) || !/关键区块/.test(viewLedger)) {
+          view20.push('view-ledger 表头须含「视图编号 / 主导图形 / 关键区块」三列');
+        }
+        var vRows = (viewLedger.match(/<tr>[\s\S]*?<\/tr>/g) || []);
+        var ledgerViews = [], vBadBlock = [];
+        vRows.forEach(function (r) {
+          var cs = (r.match(/<t[dh][^>]*>[\s\S]*?<\/t[dh]>/g) || []).map(function (c) { return c.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); });
+          if (!cs.length || !/^P\d+-V\d+/.test(cs[0] || '')) return;
+          ledgerViews.push(cs[0]);
+          var blocks = (cs[5] || '').split('/').filter(function (x) { return x.trim().length >= 2; });
+          if (blocks.length < 2) vBadBlock.push(cs[0] + '（关键区块 ' + blocks.length + ' 项）');
+        });
+        if (!ledgerViews.length) view20.push('view-ledger 没有数据行（形如 P2-V1）');
+        var noView = viewIds.filter(function (v) { return ledgerViews.indexOf(v) < 0; });
+        if (noView.length) view20.push('这些面板的 data-view 在清单里找不到：' + noView.join('、'));
+        var noPane = ledgerViews.filter(function (v) { return viewIds.indexOf(v) < 0; });
+        if (noPane.length) view20.push('这些视图登记了却没有对应面板：' + noPane.join('、'));
+        if (vBadBlock.length) view20.push('这些视图的关键区块不足 2 项（等于没拆开）：' + vBadBlock.join('、'));
+      }
+    }
+    if (view20.length) {
+      bad('EX-1.4-20', '页内视图清单不闭合：' + view20.join('；') + '（每个 Tab 是一个承载单元：view-ledger 一行 + 面板 ≥2 个命名区块，两边编号逐字一致）');
+    } else {
+      ok('EX-1.4-20', hasTabbar ? ('页内视图清单闭合：' + viewIds.length + ' 个视图，面板与清单一一对应') : '无页内 Tab，本项不适用');
     }
   }
 
@@ -735,10 +835,20 @@ function runSP() {
     const paneCount = (wf.match(/wf-pane-label/g) || []).length;
     if (paneCount < tabNames.length) {
       tabLack.push(pid + '：' + tabNames.length + ' 个页内 Tab（' + tabNames.join(' / ') + '），线框只画了 ' + paneCount + ' 个面板内容');
+    } else {
+      // 每个面板标签之后必须有实质线框块（只挂标签、内容是空的，照样判缺）
+      const segs = wf.split('wf-pane-label').slice(1);
+      segs.forEach((seg, k) => {
+        const text = seg.replace(/<[^>]+>/g, '').replace(/\s+/g, '');
+        const blocks = (seg.match(/<(div|table|tr|ul|svg)/g) || []).length;
+        const nm = tabNames[k] || ('第 ' + (k + 1) + ' 个');
+        if (text.length < 12) tabLack.push(pid + ' 面板「' + nm + '」只有标签没有内容');
+        else if (blocks < 1) tabLack.push(pid + ' 面板「' + nm + '」没有线框结构（只有一句文字）');
+      });
     }
   });
-  if (tabLack.length) bad('SP-W-09', '多视图页面面板缺失：' + tabLack.join('；') + '（每个 Tab 面板都要有线框内容并挂 wf-pane-label，缺一个就会在 Demo 里变成空白页）');
-  else ok('SP-W-09', '多视图页面面板齐：所有页内 Tab 均有对应线框面板');
+  if (tabLack.length) bad('SP-W-09', '多视图页面面板缺失或空壳：' + tabLack.join('；') + '（每个 Tab 面板都要有线框内容并挂 wf-pane-label，缺一个就会在 Demo 里变成空白页）');
+  else ok('SP-W-09', '多视图页面面板齐：所有页内 Tab 均有对应线框面板且有实际结构');
 
   /* SP-W-10 有特征物必有决策域经验：线框里画了什么，本页映射清单就必须有对应 D0x-EPxx（带档位） */
   const domLack = [];
@@ -785,7 +895,9 @@ function runSP() {
     // ⑤ 危险动作 → D-05
     if (/删除|停用|禁用|下线|覆盖/.test(wf) && !/D05-EP\d+/.test(scope)) need.push('有删除/停用类动作但缺 D-05（拦到什么程度）');
     // ⑥ 统计 / 图表 / 可视化件 → D-11（整页看数则 D-08）
-    if (/viz-decl|wf-kpi|wf-chart|<svg/.test(body) && !/D11-EP\d+|D08-EP\d+/.test(scope)) need.push('有统计/图表件但缺 D-11 或 D-08（件型与嵌入）');
+    // 探针改为"件型原语 + data-viz"（旧探针含 <svg，会被普通图标误伤；且只认字样不认结构）
+    const VIZ_PROBES = /data-viz=|wf-kpi|wf-segbar|wf-topo|wf-rank|wf-steps|wf-flow|wf-split|wf-preview|wf-objcard|wf-diagram|wf-timeline|wf-chart/;
+    if (VIZ_PROBES.test(wf) && !/D11-EP\d+|D08-EP\d+/.test(scope)) need.push('有统计/图表件但缺 D-11 或 D-08（件型与嵌入）');
     // ⑦ 页内 Tab → D-06 或 D-01
     if (/wf-tabs|wf-pane-label/.test(wf) && !/D06-EP\d+|D01-EP\d+/.test(scope)) need.push('有页内 Tab 但缺 D-06 / D-01（层级与动线）');
     if (need.length) domLack.push(pid + '：' + need.join('；'));
@@ -793,7 +905,37 @@ function runSP() {
   if (domLack.length) bad('SP-W-10', '有特征物却没有对应决策域经验（= 没学习就自由发挥）：' + domLack.join(' ｜ ') + '（按桥协议 Step 2.5 逐项补扫，映射清单写 D0x-EPxx + 档位，不许只写域号）');
   else ok('SP-W-10', '每页特征物均有对应决策域经验编号（筛选 / 表格 / 表单 / 批量 / 统计 / Tab）');
 
+  /* SP-W-11 跨页动线闭合：每页批注写清「进入 / 去向」，提到的页面必须真实存在 */
+  const flowLack = [];
+  const specPageIds = [];
+  (noStyle.match(/<h5[^>]*id="page-[^"]*"[^>]*>([\s\S]*?)<\/h5>/g) || []).forEach((h) => {
+    const m = h.match(/(Page-\d{2})/);
+    if (m && specPageIds.indexOf(m[1]) < 0) specPageIds.push(m[1]);
+  });
+  noStyle.split(/<h5[^>]*id="page-/).slice(1).forEach((s) => {
+    const body = s.split(/<h5[^>]*id="page-/)[0];
+    const idM = body.match(/(Page-\d{2})/);
+    const pid = idM ? idM[1] : '某页';
+    const secText = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const noIn = !/进入/.test(secText);
+    const noOut = !/去向/.test(secText);
+    if (noIn || noOut) flowLack.push(pid + ' 未写「' + (noIn ? '进入' : '') + (noIn && noOut ? ' / ' : '') + (noOut ? '去向' : '') + '」');
+    const refs = (secText.match(/Page-\d{2}/g) || []).filter((x) => x !== pid);
+    const ghost = refs.filter((x) => specPageIds.indexOf(x) < 0);
+    if (ghost.length) flowLack.push(pid + ' 提到了不存在的页：' + Array.from(new Set(ghost)).join('、'));
+  });
+  if (flowLack.length) bad('SP-W-11', '跨页动线断链：' + flowLack.join('；') + '（每页批注首句写清"从 X 的哪个入口进来、办完去 Y"，提到的页必须存在）');
+  else ok('SP-W-11', '跨页动线闭合：' + specPageIds.length + ' 页均写明进入 / 去向，引用页均存在');
+
   wr('SP-W-01~05', '表单结构 / 线框规范 / 可视化件 / UI 文案 由 selfcheck 机检');
+
+  /* SP-W-12 可视化件件型对账（实现 tools/viz-audit.js，数据源 件型落地契约.json）
+     治「声明写 VIZ-01-A2、线框画成四张白卡」：键在册 / 件数与声明对齐 / 未打标 / 形态一致 / 必写值到位 */
+  const vizAudit = require('./viz-audit');
+  const vres = vizAudit.audit(noStyle);
+  if (vres.errors.length) bad('SP-W-12', '件型落地对账失败：' + [...new Set(vres.errors)].join('；'));
+  else if (vres.skipped) ok('SP-W-12', '本说明书未出现可视化件，跳过件型对账');
+  else ok('SP-W-12', '件型对账通过：' + vres.pages.length + ' 页可视化件均在册、件数与声明一致、形态与声明匹配');
 
   /* SP-C */
   head('SP-C 内容一致性（Part1 与 Part2 是否对得上）');

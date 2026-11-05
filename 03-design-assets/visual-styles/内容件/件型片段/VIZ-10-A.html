@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型片段 · VIZ-10-A（单开可预览）</title>
+<!--
+  件型片段 · VIZ-10-A（状态分布条 · 三态 + 数值行）
+  几何出处：件型线框.md §12.1 / §12.3（A-示例）
+
+  【怎么用】
+  1) 直接双击本文件 → 看到的就是这个件该有的样子（若仍是"几行字"，说明 <style> 被删了）。
+  2) 粘进设计说明书时，只复制「▼ 复制起点 / ▲ 复制终点」之间的那一段（.wf-segbar 块），
+     **不要复制 <style>**——5.0 模板自带同名 .wf-* 原语。
+  3) 类目与数值换成真实口径，结构不动；示例数据可整块替换。
+
+  【判据（照此验收）】
+  ① 行高 36 / 行底 graphite-l50 / r4 / 行内距左右 14 / 行距 8
+  ② 类目区定宽 126 不收缩：图标 14 + 名称 13/400 d40 + 总数 13 d10（数字等宽）
+  ③ 构成区 ml16 / max216：数值行 12px 三段定宽 70/52/44（正常 / 一般 / 差），数字 d20 等宽右对齐
+  ④ 条 h4 / r full / 段间无 gap 无圆角 / 轨道 graphite-l40；段色有序 green → orange-l10 → red-l10
+  ⑤ 段宽 = 各状态数 ÷ 合计，图例数字与段宽必须自洽；构成区与数值行同基线
+  示例数据自洽：分支 22+0+2=24；终端 3,546+13+9=3,568；应用 157+2+12=171
+-->
+<style>
+  /* ⚠️ 预览壳样式：仅为"单独打开能看出形态"而复制自 5.0 模板 <style> 的 .wf-* 原语。
+     唯一真源仍是 01-system-solution-design/⑤设计说明书/5.0-设计说明书标准模板.md，
+     模板改这里跟着改；粘进说明书时不要复制本段。 */
+  body { margin: 0; padding: 24px; background: #F8FAFC; color: #2F3540;
+    font: 13px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .preview-stage { max-width: 430px; }
+  .wf-segbar { background: #FFFFFF; border: 1px solid #E1E5EB; border-radius: 2px; padding: 16px; }
+  .wf-segbar__title { font-size: 12px; font-weight: 700; color: #454C59; margin-bottom: 8px; }
+  .wf-segbar-row { display: flex; align-items: center; height: 36px; padding: 0 14px; background: #F7F9FC;
+    border-radius: 4px; margin-bottom: 8px; }
+  .wf-segbar-row:last-child { margin-bottom: 0; }
+  .wf-segbar-row__cat { display: flex; align-items: center; gap: 6px; flex: 0 0 126px; width: 126px; }
+  .wf-segbar-row__icon { flex: 0 0 14px; width: 14px; height: 14px; border-radius: 50%; background: #BEC3CC; }
+  .wf-segbar-row__name { font-size: 13px; color: #454C59; }
+  .wf-segbar-row__total { font-size: 13px; color: #6F7785; font-variant-numeric: tabular-nums; }
+  .wf-segbar-row__dist { flex: 1; min-width: 0; max-width: 216px; margin-left: 16px; }
+  .wf-segbar-row__nums { display: flex; font-size: 12px; color: #6F7785; font-variant-numeric: tabular-nums; }
+  .wf-segbar-row__nums > span { flex: 0 0 70px; }
+  .wf-segbar-row__nums > span:nth-child(2) { flex-basis: 52px; }
+  .wf-segbar-row__nums > span:nth-child(3) { flex-basis: 44px; }
+  .wf-segbar-row__track { display: flex; height: 4px; border-radius: 2px; background: #EDF1F7; overflow: hidden; margin-top: 4px; }
+  .wf-segbar-row__track > i { display: block; height: 100%; }
+</style>
+</head>
+<body>
+<div class="preview-stage">
+
+<!-- ▼▼ 复制起点：只复制这一段，粘进说明书的 .wf-container 内 ▼▼ -->
+<div class="wf-segbar wf-segbar--a" data-viz="VIZ-10-A">
+  <div class="wf-segbar__title">资产健康构成</div>
+
+  <div class="wf-segbar-row">
+    <div class="wf-segbar-row__cat">
+      <i class="wf-segbar-row__icon"></i>
+      <span class="wf-segbar-row__name">分支</span>
+      <span class="wf-segbar-row__total">24 个</span>
+    </div>
+    <div class="wf-segbar-row__dist">
+      <div class="wf-segbar-row__nums">
+        <span>正常 22</span><span>一般 0</span><span>差 2</span>
+      </div>
+      <div class="wf-segbar-row__track">
+        <i style="width:91.7%;background:#2FBF9E"></i><i style="width:0;background:#FFB27A"></i><i style="width:8.3%;background:#FF7B7B"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="wf-segbar-row">
+    <div class="wf-segbar-row__cat">
+      <i class="wf-segbar-row__icon"></i>
+      <span class="wf-segbar-row__name">终端</span>
+      <span class="wf-segbar-row__total">3,568 个</span>
+    </div>
+    <div class="wf-segbar-row__dist">
+      <div class="wf-segbar-row__nums">
+        <span>正常 3,546</span><span>一般 13</span><span>差 9</span>
+      </div>
+      <div class="wf-segbar-row__track">
+        <i style="width:99.39%;background:#2FBF9E"></i><i style="width:0.36%;background:#FFB27A"></i><i style="width:0.25%;background:#FF7B7B"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="wf-segbar-row">
+    <div class="wf-segbar-row__cat">
+      <i class="wf-segbar-row__icon"></i>
+      <span class="wf-segbar-row__name">应用</span>
+      <span class="wf-segbar-row__total">171 个</span>
+    </div>
+    <div class="wf-segbar-row__dist">
+      <div class="wf-segbar-row__nums">
+        <span>正常 157</span><span>一般 2</span><span>差 12</span>
+      </div>
+      <div class="wf-segbar-row__track">
+        <i style="width:91.81%;background:#2FBF9E"></i><i style="width:1.17%;background:#FFB27A"></i><i style="width:7.02%;background:#FF7B7B"></i>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ▲▲ 复制终点 ▲▲ -->
+
+</div>
+</body>
+</html>

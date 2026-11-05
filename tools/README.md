@@ -220,6 +220,18 @@ TARGET=<内网地址> PORT=<独占端口> node tools/internal-reverse-proxy.js
 | 何时跑 | **任何 `03-design-assets/visual-styles/图表件/**` 改动之后**；也可作为提交前置 |
 | 边界 | 只读不改文件；**不校验 HTML 交付物**（那是 `gate.js` / `gate-sp.sh` 的职责） |
 
+### `viz-audit.js` —— 可视化件件型对账（`SP-W-12` 的唯一实现）
+
+> 治的病：声明写 `VIZ-01-A2`、线框画成四张白底小卡。过去所有可视化门禁只验"编号与字段存在"，**形态这一层零校验**——资产再厚也拦不住落地退化。
+
+| 项 | 说明 |
+| :--- | :--- |
+| 用法 | `node tools/viz-audit.js <design-spec.html>`（`gate.js sp` 与 `design-spec-selfcheck.sh` 11b 都会调它） |
+| 数据源 | `03-design-assets/visual-styles/内容件/件型落地契约.json`（键 → 线框原语 → 必含类名 → **件型 token 台账 `tokens`**） |
+| 校验 | **V1 键在册**（杜撰键如 `VIZ-13-T3` 直接退回）／**V2 件数对账**（`data-viz` 实例数 = `viz-decl` 块数）／**V3 未打标**（有线框原语却无 `data-viz`）／**V4 形态一致**（`strict` 键的必含类名 + 单元数）／**V5 值到位**（风格规范命中 `style_must`） |
+| 退出码 | `0` 通过（无可视化件的说明书自适应跳过）；`1` 存在失败项 |
+| 边界 | 只读不改文件；按 `<h5 id="page-">` 逐页比对，不跨页混算 |
+
 ### `check-links.js` —— 文档链接可达性校验（常规校验）
 
 > 目录改名 / 文件搬迁后，"链接还写着旧路径"是最典型的静默失效：文档还能打开，但点进去是空的，AI 会据此判断"资产不存在"从而退回猜。本脚本把它挡在提交之前。
