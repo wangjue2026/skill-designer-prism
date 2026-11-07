@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型参考库 · 全形态（白板需求承载）</title>
+<style>
+  :root{
+    --blue:#1C6EFF; --blue-l50:#E8F4FF; --turq:#12A679; --red:#D9363E; --orange:#FA721B; --brown:#B8763B;
+    --g-l50:#F7F9FC; --g-l40:#EDF1F7; --g-l30:#E1E5EB; --g-l20:#D3D7DE; --g-l10:#BEC3CC;
+    --g-d40:#2F3540; --g-d10:#6F7785; --g-mute:#A1A7B3;
+    --bg-blue-wash:linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%);
+  }
+  body{margin:0;padding:24px;background:#F8FAFC;color:var(--g-d40);
+    font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h2{font-size:16px;margin:0 0 4px}
+  h3{font-size:14px;margin:28px 0 6px}
+  h5{font-size:13px;margin:0 0 8px;color:var(--g-d10)}
+  .hint{font-size:12px;color:var(--g-d10);margin:0 0 10px}
+  .wf-container{background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:16px;margin:0 0 16px}
+  .wf-sub{font-size:12px;font-weight:700;color:#454C59;margin:14px 0 6px}
+  .wf-sub:first-child{margin-top:0}
+
+  /* ===== ① VIZ-01-A 扁平单行指标条 ===== */
+  .wf-kpi--flat{display:flex;background:var(--g-l50);border:1px solid var(--g-l30);border-radius:2px;
+    box-shadow:0 4px 20px rgba(117,157,218,.15);margin-bottom:10px}
+  .wf-kpi--flat.is-sase{background:var(--bg-blue-wash)}
+  .wf-kpi--flat .wf-kpi-item{flex:1 1 0;min-width:0;padding:12px 12px 12px 32px;
+    display:flex;flex-direction:column;justify-content:center;gap:0}
+  .wf-kpi-item__icon{width:24px;height:24px;display:block}
+  .wf-kpi--flat .wf-kpi-item__value{font-size:24px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .wf-kpi--flat .wf-kpi-item__label{font-size:12px;line-height:20px;color:var(--g-d10)}
+  .is-ok .wf-kpi-item__value{color:var(--turq)}
+  .is-bad .wf-kpi-item__value{color:var(--red)}
+  .is-warn .wf-kpi-item__value{color:var(--orange)}
+  .is-idle .wf-kpi-item__value{color:var(--g-mute)}
+
+  /* ===== ① VIZ-01-A2 扁平指标条（标签在上 · 可点筛选） ===== */
+  .wf-kpi--strip{display:flex;margin-bottom:8px}
+  .wf-kpi--strip .wf-kpi-item{flex:1 1 0;min-width:0;height:72px;padding:0 12px 0 32px;background:var(--g-l50);
+    display:flex;flex-direction:column;justify-content:center;border-bottom:2px solid transparent}
+  /* 选中态：弱提示（底内线 + 文字转主色），禁止整格反白 */
+  .wf-kpi--strip .wf-kpi-item.is-on{border-bottom-color:var(--blue)}
+  .wf-kpi--strip .wf-kpi-item.is-on .wf-kpi-item__label,
+  .wf-kpi--strip .wf-kpi-item.is-on .wf-kpi-item__value{color:var(--blue)}
+  .wf-kpi--strip .wf-kpi-item__label{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:400;
+    line-height:16px;color:#454C59;margin-bottom:4px;white-space:nowrap;overflow:hidden}
+  .wf-kpi--strip .wf-kpi-item__icon{width:16px;height:16px;flex:0 0 16px;display:block}
+  .wf-kpi--strip .wf-kpi-item__value{margin-left:20px;font-size:24px;font-weight:700;line-height:1;
+    font-variant-numeric:tabular-nums}
+
+  /* ===== ① VIZ-01-B 分组（左维度树 + 右概览卡） ===== */
+  .wf-kpi--group{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+  .wf-group-tree{flex:0 0 200px;background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:8px;font-size:12px}
+  .wf-group-tree div{height:32px;line-height:32px;padding:0 10px;border-radius:2px;color:var(--g-d40)}
+  .wf-group-tree div.on{background:var(--blue-l50);color:var(--blue)}
+  /* 概览卡组底：非 SASE 取 graphite-l50（SASE 才用 blue-l50 / bg-blue-wash） */
+  .wf-group-cards{flex:1 1 0;min-width:0;background:var(--g-l50);border-radius:4px;padding:12px 16px 8px;
+    display:flex;gap:8px;align-items:flex-start}
+  .wf-kpi--group .wf-kpi-item{flex:1 1 0;min-width:0;background:#fff;border:1px solid var(--g-l30);
+    border-radius:2px;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;
+    min-height:60px}
+  .wf-kpi--group .wf-kpi-item__label{font-size:12px;color:var(--g-d10);line-height:16px}
+  .wf-kpi--group .wf-kpi-item__value{font-size:20px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+
+  /* ===== ① VIZ-01-B2 分区面板（指标组 + 子状态小卡） ===== */
+  /* 面板宽度由内容撑开（指标组 + 小卡列），不拉伸铺满整行；实测 394/774 只是样本容器，不作规范 */
+  .wf-kpi--panel{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+  .wf-kpi--panel .wf-panel{flex:0 0 auto;min-width:0;background:#fff;border:1px solid var(--g-l30);border-radius:2px;
+    padding:0 16px 12px}
+  .wf-panel__title{height:40px;line-height:40px;font-size:14px;font-weight:600}
+  .wf-kpi--panel .wf-kpi-item{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .wf-kpi--panel .wf-kpi-item__value{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+  /* 子状态小卡：120×86，行高 20（12 图标 + 标签 + 数值右对齐），最多 3 行 */
+  .wf-subcards{display:flex;gap:8px}
+  .wf-smallcard{width:120px;height:86px;background:#fff;border:1px solid var(--g-l30);border-radius:2px;
+    padding:12px 16px;display:flex;flex-direction:column;justify-content:center}
+  .wf-smallcard .row{display:flex;align-items:center;gap:6px;height:20px;font-size:12px;line-height:20px}
+  .wf-smallcard .row i{width:12px;height:12px;border-radius:50%;flex:0 0 12px;box-sizing:border-box}
+  .wf-smallcard .row span{flex:1 1 auto;min-width:0;color:var(--g-d10);overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .wf-smallcard .row b{font-weight:400;color:var(--g-d40);font-variant-numeric:tabular-nums}
+  .wf-smallcard.is-ghost .row i{border:1px dashed var(--g-l10);background:transparent}
+  .wf-smallcard.is-ghost .row b{color:var(--g-mute)}
+  .wf-glass{background:rgba(255,255,255,.72);backdrop-filter:blur(8px);border:1px solid #fff;
+    border-radius:2px;padding:16px 24px}
+
+  .wf-table{width:100%;border-collapse:collapse;font-size:12px}
+  .wf-table th{height:32px;background:var(--g-l40);color:#454C59;font-weight:400;text-align:left;padding:0 12px}
+  .wf-table td{height:40px;padding:0 12px;border-bottom:1px solid var(--g-l40)}
+  .viz-decl{font-size:11px;color:var(--g-d10);background:#fff;border:1px dashed var(--g-l20);border-radius:4px;
+    padding:12px;margin:12px 0;line-height:1.9}
+</style>
+</head>
+<body>
+
+<h2>件型参考库 · 全形态</h2>
+<p class="hint">承载需求：在线用户 / 在线终端 / 终端访问路径（白板需求，示例数据自洽）。本页：① 顶部统计概览 4 个形态 + 1 个容器底色变体（A / A·SASE / A2 / B / B2）。</p>
+
+<h5 id="page-01">Page-01 顶部统计概览（A / A·SASE / A2 / B / B2）</h5>
+<div class="wf-container">
+
+  <!-- 业务图标为渐变 SVG 素材型：一份 defs，全页复用，不套通用线性图标 -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <defs>
+      <linearGradient id="gUser" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12A679"/><stop offset="1" stop-color="#12A679" stop-opacity=".6"/></linearGradient>
+      <linearGradient id="gDev" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1CBFFF"/><stop offset="1" stop-color="#1C6EFF"/></linearGradient>
+      <linearGradient id="gBad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D9363E"/><stop offset="1" stop-color="#D9363E" stop-opacity=".6"/></linearGradient>
+    </defs>
+  </svg>
+
+  <div class="wf-sub">VIZ-01-A 扁平单行指标条（图标 + 值 + 标签，非 SASE 且有白底父容器 → 底 graphite-l50）</div>
+  <div class="wf-kpi wf-kpi--flat" data-viz="VIZ-01-A">
+    <div class="wf-kpi-item">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.6" r="4" fill="url(#gUser)"/><path d="M3.6 20.4c.6-4.3 4.2-6.9 8.4-6.9s7.8 2.6 8.4 6.9z" fill="url(#gUser)" opacity=".55"/></svg>
+      <div class="wf-kpi-item__value">1,284</div>
+      <div class="wf-kpi-item__label">在线用户</div>
+    </div>
+    <div class="wf-kpi-item">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2" fill="url(#gDev)"/><rect x="4.4" y="5.9" width="13.6" height="9.2" rx="1" fill="#fff" opacity=".92"/><path d="M15.4 9.4h4.9v3.9h-4.9z" fill="#fff" opacity=".45"/><path d="M8.6 20.4h6.8" stroke="#1C6EFF" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <div class="wf-kpi-item__value">3,568</div>
+      <div class="wf-kpi-item__label">在线终端</div>
+    </div>
+    <div class="wf-kpi-item is-bad">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 2.6 20h18.8z" fill="url(#gBad)"/><path d="M12 9.4v4.4M12 16.6h.01" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="wf-kpi-item__value">59</div>
+      <div class="wf-kpi-item__label">异常终端</div>
+    </div>
+    <div class="wf-kpi-item is-idle">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="#A1A7B3" stroke-width="1.8" stroke-dasharray="3.4 3"/><path d="M8.5 12h7" stroke="#A1A7B3" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="wf-kpi-item__value">31</div>
+      <div class="wf-kpi-item__label">离线终端</div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-01-A · SASE 容器底色（bg-blue-wash 三段纵向渐变，上深下浅；同一结构只换容器底）</div>
+  <div class="wf-kpi wf-kpi--flat is-sase" data-viz="VIZ-01-A">
+    <div class="wf-kpi-item">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.6" r="4" fill="url(#gUser)"/><path d="M3.6 20.4c.6-4.3 4.2-6.9 8.4-6.9s7.8 2.6 8.4 6.9z" fill="url(#gUser)" opacity=".55"/></svg>
+      <div class="wf-kpi-item__value">1,284</div>
+      <div class="wf-kpi-item__label">在线用户</div>
+    </div>
+    <div class="wf-kpi-item">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2" fill="url(#gDev)"/><rect x="4.4" y="5.9" width="13.6" height="9.2" rx="1" fill="#fff" opacity=".92"/><path d="M15.4 9.4h4.9v3.9h-4.9z" fill="#fff" opacity=".45"/><path d="M8.6 20.4h6.8" stroke="#1C6EFF" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <div class="wf-kpi-item__value">3,568</div>
+      <div class="wf-kpi-item__label">在线终端</div>
+    </div>
+    <div class="wf-kpi-item is-bad">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 2.6 20h18.8z" fill="url(#gBad)"/><path d="M12 9.4v4.4M12 16.6h.01" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="wf-kpi-item__value">59</div>
+      <div class="wf-kpi-item__label">异常终端</div>
+    </div>
+    <div class="wf-kpi-item is-idle">
+      <svg class="wf-kpi-item__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="#A1A7B3" stroke-width="1.8" stroke-dasharray="3.4 3"/><path d="M8.5 12h7" stroke="#A1A7B3" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="wf-kpi-item__value">31</div>
+      <div class="wf-kpi-item__label">离线终端</div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-01-A2 扁平指标条（标签在上 · 6 格等分 · 可点筛选 · 无框贴条，需白底内容区；默认不预选任何格）</div>
+  <div class="wf-kpi wf-kpi--strip" data-viz="VIZ-01-A2">
+    <div class="wf-kpi-item">
+      <span class="wf-kpi-item__label"><svg class="wf-kpi-item__icon" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="5.2" height="5.2" rx="1" fill="#1C6EFF"/><rect x="8.8" y="2" width="5.2" height="5.2" rx="1" fill="#1C6EFF" opacity=".55"/><rect x="2" y="8.8" width="5.2" height="5.2" rx="1" fill="#1C6EFF" opacity=".55"/><rect x="8.8" y="8.8" width="5.2" height="5.2" rx="1" fill="#1C6EFF" opacity=".3"/></svg>全部终端</span>
+      <span class="wf-kpi-item__value">3,568</span>
+    </div>
+    <div class="wf-kpi-item">
+      <span class="wf-kpi-item__label"><svg class="wf-kpi-item__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="#12A679"/><path d="M5 8.2 7.1 10.3 11 6.2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>正常</span>
+      <span class="wf-kpi-item__value">3,478</span>
+    </div>
+    <div class="wf-kpi-item">
+      <span class="wf-kpi-item__label"><svg class="wf-kpi-item__icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="#FA721B"/><path d="M8 6.2v3.1M8 11.4h.01" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>告警</span>
+      <span class="wf-kpi-item__value">52</span>
+    </div>
+    <div class="wf-kpi-item">
+      <span class="wf-kpi-item__label"><svg class="wf-kpi-item__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="#D9363E"/><path d="M5.6 5.6l4.8 4.8M10.4 5.6l-4.8 4.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>严重</span>
+      <span class="wf-kpi-item__value">7</span>
+    </div>
+    <div class="wf-kpi-item">
+      <span class="wf-kpi-item__label"><svg class="wf-kpi-item__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="#A1A7B3" stroke-width="1.6"/><path d="M8 5v3.4M8 10.6h.01" stroke="#A1A7B3" stroke-width="1.6" stroke-linecap="round"/></svg>离线</span>
+      <span class="wf-kpi-item__value">31</span>
+    </div>
+    <div class="wf-kpi-item">
+      <span class="wf-kpi-item__label"><svg class="wf-kpi-item__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="#BEC3CC" stroke-width="1.6" stroke-dasharray="2.6 2.4"/></svg>未纳管</span>
+      <span class="wf-kpi-item__value">0</span>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-01-B 分组（左维度树 + 右概览卡，指标按组织分层查看；卡高随内容，不撑满）</div>
+  <div class="wf-kpi wf-kpi--group" data-viz="VIZ-01-B">
+    <div class="wf-group-tree">
+      <div class="on">深圳总部 (3,568)</div>
+      <div>研发一部 (1,420)</div>
+      <div>财务部 (986)</div>
+      <div>离线设备 (31)</div>
+    </div>
+    <div class="wf-group-cards">
+      <div class="wf-kpi-item">
+        <span class="wf-kpi-item__label">终端安装率</span>
+        <span class="wf-kpi-item__value">96.3%</span>
+      </div>
+      <div class="wf-kpi-item is-bad">
+        <span class="wf-kpi-item__label">未安装终端</span>
+        <span class="wf-kpi-item__value">132</span>
+      </div>
+      <div class="wf-kpi-item is-ok">
+        <span class="wf-kpi-item__label">已安装终端</span>
+        <span class="wf-kpi-item__value">3,436</span>
+      </div>
+      <div class="wf-kpi-item">
+        <span class="wf-kpi-item__label">终端总数</span>
+        <span class="wf-kpi-item__value">3,568</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-01-B2 分区面板（指标组 + 子状态小卡 + 毛玻璃卡；子状态一律收进小卡，每行 h20）</div>
+  <div class="wf-kpi wf-kpi--panel" data-viz="VIZ-01-B2">
+    <div class="wf-panel">
+      <div class="wf-panel__title">身份与在线</div>
+      <div class="wf-kpi-item">
+        <svg class="wf-kpi-item__icon" style="width:32px;height:32px" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.6" r="4" fill="url(#gUser)"/><path d="M3.6 20.4c.6-4.3 4.2-6.9 8.4-6.9s7.8 2.6 8.4 6.9z" fill="url(#gUser)" opacity=".55"/></svg>
+        <span class="wf-kpi-item__value">1,284</span>
+        <span style="font-size:12px;color:var(--g-d10)">在线用户</span>
+      </div>
+      <div class="wf-subcards">
+        <div class="wf-smallcard">
+          <div class="row"><i style="background:#1C6EFF"></i><span>PC 端</span><b>986</b></div>
+          <div class="row"><i style="background:#1C6EFF;opacity:.55"></i><span>移动端</span><b>298</b></div>
+        </div>
+        <div class="wf-smallcard is-ghost" aria-label="子状态占位样式">
+          <div class="row"><i></i><span>子状态</span><b>—</b></div>
+          <div class="row"><i></i><span>子状态</span><b>—</b></div>
+          <div class="row"><i></i><span>子状态</span><b>—</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="wf-panel">
+      <div class="wf-panel__title">终端健康</div>
+      <div class="wf-kpi-item">
+        <svg class="wf-kpi-item__icon" style="width:32px;height:32px" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2" fill="url(#gDev)"/><rect x="4.4" y="5.9" width="13.6" height="9.2" rx="1" fill="#fff" opacity=".92"/><path d="M8.6 20.4h6.8" stroke="#1C6EFF" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="wf-kpi-item__value">3,568</span>
+        <span style="font-size:12px;color:var(--g-d10)">在线终端</span>
+      </div>
+      <div class="wf-subcards">
+        <div class="wf-smallcard">
+          <div class="row"><i style="background:#12A679"></i><span>正常</span><b>3,478</b></div>
+          <div class="row"><i style="background:#D9363E"></i><span>异常</span><b style="color:var(--red)">59</b></div>
+          <div class="row"><i style="background:#A1A7B3"></i><span>离线</span><b>31</b></div>
+        </div>
+        <div class="wf-smallcard is-ghost" aria-label="子状态占位样式">
+          <div class="row"><i></i><span>子状态</span><b>—</b></div>
+          <div class="row"><i></i><span>子状态</span><b>—</b></div>
+          <div class="row"><i></i><span>子状态</span><b>—</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="hint" style="margin:8px 0 0">面板宽由内容撑开（指标组 + 小卡列），不铺满整行——实测 394×180 / 774×180 只是样本容器，不作规范。小卡 120×86 固定，行数 1~3 按实际子状态增减（每行 h20）；含「正常 / 异常 / 离线」三态时三行刚好占满，行数不足留白不拉高；超过 3 项改用 ⑩ 状态分布条。虚线卡即「内容未定」时的占位样式：虚线圆 + 「—」，不编数据。</p>
+  <div class="wf-glass" style="margin-top:8px;font-size:12px;color:var(--g-d10)">毛玻璃卡示例：叠加在插画上，承载一句结论「近 7 天终端健康率 97.5%」，不承载明细</div>
+
+</div>
+
+<div class="viz-decl">
+| 件型 | 顶部统计概览 |
+| 件型键 | `VIZ-01-A`（measured） |
+| 线框与几何 | `件型线框.md` §3.1 线框 / §3.4 几何表 / §3.5 状态矩阵 |
+| 线框原语 | `class="wf-kpi wf-kpi--flat" data-viz="VIZ-01-A"`；必含 `wf-kpi-item` ×≥3、`wf-kpi-item__icon`、`wf-kpi-item__value` |
+| 图形编码规则 | 正常=对勾圆·turquoise-d10；告警=三角感叹·orange；严重=叉圆·red-d10；中性=圆点·graphite-l30；异常时图标与数值同色（§3.5） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 SASE：bg-blue-wash = linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%)（三段纵向、上深下浅）；非 SASE：下方还有白底大容器 → graphite-l50 #F7F9FC（拉开层次）；顶部概览为独立容器 → #FFFFFF ／ 描边 graphite-l30 #E1E5EB 1px ／ 阴影 glow-blue-s1 = 0 4px 20px rgba(117,157,218,.15)（档 B 默认；档 A 切 dropshadow-s1 = 0 2px 10px rgba(30,35,43,.16)） ／ 圆角 r2（2） ／ 内距 12 12 12 32（左 32 / 右 12 / 上下 12） ／ 项 项高 92（图标 24 + 值 24 + 标签 20 = 68，上下各留 12） ／ 数值 24/700 #2F3540（无命名字阶，须写死） ／ 标签 12/20 #6F7785 ／ 图标 24×24 业务专属渐变 SVG 素材型，按风格绘制（不套通用线性图标） ／ 状态色 异常：图标 + 数值同转 #D9363E；正常 #12A679；中性 #A1A7B3；文字只随状态转一次，禁止只改一项 ／ 特有 项间等距；单卡 = 图标 24 + 值 + 标签，纵向三行 |
+| 交互与退化 | 项间等距；单卡 = 图标 24 + 值 + 标签，纵向三行 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 顶部统计概览 |
+| 件型键 | `VIZ-01-A`（measured · 容器底色变体，非新形态） |
+| 线框与几何 | `件型线框.md` §3.1 线框 / §3.4 几何表 / §3.5 状态矩阵 |
+| 线框原语 | `class="wf-kpi wf-kpi--flat is-sase" data-viz="VIZ-01-A"`；结构与 `VIZ-01-A` 完全一致，只差容器底 |
+| 图形编码规则 | 同 `VIZ-01-A`：正常=对勾圆·turquoise-d10；告警=三角感叹·orange；严重=叉圆·red-d10；中性=圆点·graphite-l30；异常时图标与数值同色（§3.5） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 SASE 产品用 bg-blue-wash = linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%)（三段纵向、上深下浅）；非 SASE 用 graphite-l50 #F7F9FC；独立容器可用 #FFFFFF ／ 描边 graphite-l30 #E1E5EB 1px ／ 阴影 glow-blue-s1 = 0 4px 20px rgba(117,157,218,.15)（档 B 默认；档 A 切 dropshadow-s1 = 0 2px 10px rgba(30,35,43,.16)） ／ 圆角 r2（2） ／ 内距 12 12 12 32 ／ 项 项高 92（图标 24 + 值 24 + 标签 20 = 68，上下各留 12） ／ 数值 24/700 #2F3540 ／ 标签 12/20 #6F7785 ／ 图标 24×24 业务专属渐变 SVG 素材型（不套通用线性图标） ／ 状态色 异常：图标 + 数值同转 #D9363E；正常 #12A679；中性 #A1A7B3 ／ 特有 渐变底与灰底是**两个容器语气**，同页只能出现一种真实用色；本页把两版并列仅作对照，落地时按产品（SASE / 非 SASE）二选一 |
+| 交互与退化 | 同 `VIZ-01-A`；底色按产品取，不按页面位置随便挑 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 顶部统计概览 |
+| 件型键 | `VIZ-01-A2`（measured） |
+| 线框与几何 | `件型线框.md` §3.8 线框 / §3.8 几何表 / §3.5 状态矩阵 |
+| 线框原语 | `class="wf-kpi wf-kpi--strip" data-viz="VIZ-01-A2"`；必含 `wf-kpi-item` ×≥3、`wf-kpi-item__label`、`wf-kpi-item__value` |
+| 图形编码规则 | 全部=圆点·blue；健康=对勾圆·green；告警=三角感叹·orange-l10；严重=叉圆·red-l10；离线=空心圆·graphite；未纳管=虚线圆·graphite-l30；文字不变色（§3.8） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 格底 graphite-l50 #F7F9FC；选中态**不换底**（保持 l50），只用底内线 2px 主色 + 文字转 #1C6EFF 的弱提示，禁止整格反白 ／ 描边 无 ／ 阴影 无 ／ 圆角 0 ／ 内距 格内距 0 12 0 32；条 mb8；6 格等分（flex:1 1 0，无 gap） ／ 项 格高 72（宽随容器等分，不写死） ／ 数值 24/700 #2F3540，ml20（= 图标 16 + gap 4，对齐标签文字起点） ／ 标签 12/400 #2F3540，lh16，mb4 ／ 图标 16×16 内联语义图标（对勾圆 / 三角感叹 / 叉圆 / 空心圆 / 虚线圆），mr4，禁止用纯色方块占位 ／ 状态色 标签前图标按状态语义着色（绿/橙/红/蓝/灰），文字不变色 ／ 特有 整条只铺一次底、各格 transparent（否则出现白缝）；默认不得预选任何一格；分组用 1px graphite-l20 竖线（h40、留白 16）而非拆卡；格底为 graphite-l50，必须置于白底内容区（wf-shell）；页面底同为 l50 时会与底同色、件浮不起来 |
+| 交互与退化 | 整条只铺一次底、各格 transparent（否则出现白缝）；默认不得预选任何一格；分组用 1px graphite-l20 竖线（h40、留白 16）而非拆卡；格底为 graphite-l50，必须置于白底内容区（wf-shell）；页面底同为 l50 时会与底同色、件浮不起来 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 顶部统计概览 |
+| 件型键 | `VIZ-01-B`（partial） |
+| 线框与几何 | `件型线框.md` §3.2 线框 / §3.4 几何表 / §3.5 状态矩阵 |
+| 线框原语 | `class="wf-kpi wf-kpi--group" data-viz="VIZ-01-B"`；必含 `wf-kpi-item` ×≥3、`wf-kpi-item__value` |
+| 图形编码规则 | 同 VIZ-01-A；异常指标图标与数值同色 red-d10（§3.5） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 概览卡组**非 SASE 取 graphite-l50 #F7F9FC**（与 01-A 非 SASE 同一层背景），卡内指标块才用 #FFFFFF；SASE 产品走 blue-l50 #E8F4FF（--color-primary-bg）或 bg-blue-wash，两者不混 ／ 描边 维度树 graphite-l30 #E1E5EB 1px；概览卡无框 ／ 阴影 无 ／ 圆角 概览卡无圆角（树节点 r2） ／ 内距 概览卡 pt 12px / pb 8px ／ 项 分组头 h130、总数块宽 16%、底距 8、白底；指标块高随内容（label 16 + gap 4 + value 20 + 上下 10），不得拉伸铺满容器高 ／ 图标 按状态着色 ／ 状态色 同 01-A 归位 ／ 特有 左维度树 + 右概览卡；分组卡内不得再嵌卡（卡套卡） |
+| 交互与退化 | 左维度树 + 右概览卡；分组卡内不得再嵌卡（卡套卡）；⚠ 未采项：概览卡圆角；指标项内距与 gap；数值/标签字阶（A-实测值是否共用） |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 顶部统计概览 |
+| 件型键 | `VIZ-01-B2`（measured） |
+| 线框与几何 | `件型线框.md` §3.9 线框 / §3.9 几何表 / §3.5 状态矩阵 |
+| 线框原语 | `class="wf-kpi wf-kpi--panel" data-viz="VIZ-01-B2"`；必含 `wf-kpi-item` ×≥2、`wf-kpi-item__value` |
+| 图形编码规则 | 指标组图标 32×32 按指标语义自绘；子状态小卡图标 12×12 按状态语义色（正常 turquoise／异常 red-d10）（§3.9） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 面板白底；子状态小卡白底；毛玻璃卡 backdrop-blur + 白底 ／ 描边 graphite-l30 #E1E5EB 1px ／ 阴影 无 ／ 圆角 r2（2） ／ 内距 面板 0 16 12；小卡 12 16；毛玻璃卡 16 24 ／ 项 小卡 120×86；**面板宽由内容撑开（指标组 + 小卡列），flex:0 0 auto 不拉伸铺满整行**，1~2 块并排、放不下自动换行；面板间距 8 ／ 标题 14/600，行高 40 ／ 数值 20/600（指标组）；小卡值 12 graphite-d40 右对齐 ／ 标签 12 graphite-d10；小卡标签 12 ／ 图标 指标组 32×32；小卡状态图标 12×12 ／ 状态色 小卡内状态点 + 数值按语义着色 ／ 特有 子状态必须收进小卡，不散在组里；插画作背景层不承载信息，透明度足够低；毛玻璃上对比度 ≥4.5:1 |
+| 交互与退化 | 子状态必须收进小卡，不散在组里；插画作背景层不承载信息，透明度足够低；毛玻璃上对比度 ≥4.5:1；小卡内部按**行**排（行高 20：状态图标 12 + 标签 12 d10 + 数值 12 d40 右对齐），1~3 行竖向居中，行数不足不拉高、超出改用 ⑩；文案未定时用虚线圆 + `—` 的占位行，不编内容 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+</body>
+</html>

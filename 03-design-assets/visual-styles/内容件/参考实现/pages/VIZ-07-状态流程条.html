@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型参考库 · ⑦状态流程条</title>
+<style>
+  :root{--blue:#1C6EFF;--turq:#12A679;--red:#D9363E;--orange:#FA721B;
+    --g-l50:#F7F9FC;--g-l40:#EDF1F7;--g-l30:#E1E5EB;--g-l20:#D3D7DE;--g-l10:#BEC3CC;--g-d40:#2F3540;--g-d10:#6F7785}
+  body{margin:0;padding:24px;background:#F8FAFC;color:var(--g-d40);
+    font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h2{font-size:16px;margin:0 0 4px} h5{font-size:13px;margin:0 0 8px;color:var(--g-d10)}
+  .hint{font-size:12px;color:var(--g-d10);margin:0 0 10px}
+  .wf-container{background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:16px;margin:0 0 16px}
+  .wf-sub{font-size:12px;font-weight:700;color:#454C59;margin:14px 0 6px}
+  .viz-decl{font-size:11px;color:var(--g-d10);background:#fff;border:1px dashed var(--g-l20);border-radius:4px;padding:12px;margin:12px 0;line-height:1.9}
+
+  /* ⑦ VIZ-07 状态流程条（pending：按 VIZ-04 步骤几何 + 三态色推定） */
+  .wf-flow{display:flex;align-items:flex-start;padding:16px 8px;background:var(--g-l50);
+    border:1px solid var(--g-l30);border-radius:4px;margin-bottom:10px}
+  .wf-flow__stage{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+  .wf-flow__stage::before{content:"";position:absolute;top:15px;left:0;right:0;height:2px;background:var(--g-l20)}
+  .wf-flow__stage:first-child::before{left:50%}
+  .wf-flow__stage:last-child::before{right:50%}
+  .wf-flow__stage i{width:30px;height:30px;border-radius:50%;background:#fff;border:2px solid var(--g-l20);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--g-d10);z-index:1}
+  .wf-flow__stage b{font-size:14px;font-weight:400;color:var(--g-d40)}
+  .wf-flow__stage span{font-size:12px;color:var(--g-d10)}
+  .wf-flow__stage.done i{background:var(--turq);border-color:var(--turq);color:#fff}
+  .wf-flow__stage.done::before{background:var(--turq)}
+  .wf-flow__stage.now i{background:var(--blue);border-color:var(--blue);color:#fff}
+  .wf-flow__stage.now b{color:var(--blue)}
+  .wf-flow__stage.now::before{background:linear-gradient(90deg,var(--turq),var(--g-l20))}
+  .wf-flow__stage.bad i{background:#FFF1F0;border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+
+<h2>件型参考库 · 状态流程条</h2>
+<p class="hint">承载需求：接入策略下发流程（申请 → 审批 → 下发 → 生效），用于看"走到哪一步、哪一步卡住"。</p>
+
+<h5 id="page-04">Page-04 ⑦ 状态流程条（阶段推进 · pending 按 fallback 推定）</h5>
+<div class="wf-container">
+
+  <div class="wf-sub">VIZ-07 状态流程条（四阶段 · 已完成 / 当前 / 未开始 / 受阻四态）</div>
+  <div class="wf-flow" data-viz="VIZ-07">
+    <div class="wf-flow__stage done"><i>✓</i><b>接入申请</b><span>08:12 已提交</span></div>
+    <div class="wf-flow__stage done"><i>✓</i><b>策略审批</b><span>08:40 已通过</span></div>
+    <div class="wf-flow__stage now"><i>3</i><b>策略下发</b><span>下发中 · 12/28 台</span></div>
+    <div class="wf-flow__stage"><i>4</i><b>生效验证</b><span>未开始</span></div>
+  </div>
+
+  <p class="hint" style="margin-top:10px">受阻态规则：只在失败节点换 red-d10 + 失败图标，其余阶段保持原态，不整条变红；阶段 &gt;6 时横滚或折叠为「当前 + 进度（3/8）」。</p>
+
+
+    <div class="wf-flow__stage bad"><i>!</i><b>策略审批</b><span>审批驳回（范围超限）</span></div>
+    <div class="wf-flow__stage"><i>3</i><b>策略下发</b><span>未开始</span></div>
+  </div>
+
+</div>
+
+<div class="viz-decl">
+| 件型 | 状态流程条 |
+| 件型键 | `VIZ-07`（pending） |
+| 线框与几何 | `件型线框.md` §9.1 线框 / §9.2 几何表 / §9.3 状态矩阵 |
+| 线框原语 | `class="wf-flow" data-viz="VIZ-07"`；必含 `wf-flow__stage` ×≥3 |
+| 图形编码规则 | 本件无图形编码项（素材件按素材原样贴入） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 其余按 fallback 推定，声明须标注「无实测值，按通用值推定」 |
+| 交互与退化 | ⚠ 未采项：阶段节点尺寸与间距；连接线粗细与色；当前/已完成/未开始三态归位；阶段标签字阶；无实测值 → 无实测。按 VIZ-04 步骤件几何 ＋ 三态色（主色／turquoise／graphite）推定；声明必须标注「无实测值，按通用值推定」，交付列为本期风险项 |
+| 可替代性 | 可参数化重绘（无实测值，按 fallback 推定后落地） |
+</div>
+
+</body>
+</html>

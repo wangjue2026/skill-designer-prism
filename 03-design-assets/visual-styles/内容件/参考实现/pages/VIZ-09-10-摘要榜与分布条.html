@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型参考库 · ⑨条目摘要榜 / ⑩状态分布条</title>
+<style>
+  :root{--blue:#1C6EFF;--turq:#12A679;--red:#D9363E;--red-l10:#F52727;--orange:#FA721B;--orange-l10:#FA8C16;
+    --blue-l20:#BAE6FD;--g-l50:#F7F9FC;--g-l40:#EDF1F7;--g-l30:#E1E5EB;--g-l20:#D3D7DE;--g-l10:#BEC3CC;
+    --g-d40:#2F3540;--g-d30:#454C59;--g-d20:#5E6573;--g-d10:#6F7785}
+  body{margin:0;padding:24px;background:#F8FAFC;color:var(--g-d40);
+    font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h2{font-size:16px;margin:0 0 4px} h5{font-size:13px;margin:0 0 8px;color:var(--g-d10)}
+  .hint{font-size:12px;color:var(--g-d10);margin:0 0 10px}
+  .wf-container{background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:16px;margin:0 0 16px}
+  .wf-sub{font-size:12px;font-weight:700;color:var(--g-d30);margin:18px 0 6px}
+  .wf-sub:first-child{margin-top:0}
+  .viz-decl{font-size:11px;color:var(--g-d10);background:#fff;border:1px dashed var(--g-l20);border-radius:4px;padding:12px;margin:12px 0;line-height:1.9}
+
+  /* 自适应约定：容器不写死宽高；等分单元给 min-width 兜底；窄屏降列或横向滚 */
+  /* ⑨A 单列分页（列内距 20 · 行高 30 / 行距 4 / 行底 l50 / r4 · 状态点 6 · 主文 12-500） */
+  .wf-rank--list{background:#fff;border:1px solid var(--g-l30);border-radius:2px;padding:16px 20px;margin-bottom:6px;min-width:0}
+  .rank-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .rank-title{font-size:12px;font-weight:700;color:var(--g-d40);margin-bottom:4px}
+  .rank-sub{font-size:12px;color:var(--g-d10);margin-bottom:8px}
+  .wf-rank--list .wf-rank__row{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;
+    background:var(--g-l50);border-radius:4px;margin-bottom:4px;font-size:12px;cursor:pointer;min-width:0}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--red-l10);flex:0 0 6px}
+  .wf-rank--list .wf-rank__row b{font-size:12px;font-weight:500;color:var(--g-d40);white-space:nowrap;flex-shrink:0}
+  .wf-rank--list .wf-rank__row s{text-decoration:none;font-size:12px;color:var(--g-d10);margin-left:6px;
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wf-rank--list .wf-rank__row em{margin-left:auto;flex:0 0 auto;font-style:normal;font-size:12px;font-weight:500;
+    color:var(--red-l10);font-variant-numeric:tabular-nums}
+  .wf-rank__page{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+  .wf-rank__page button{width:16px;height:16px;line-height:1;border:0;background:transparent;
+    font-size:11px;color:var(--g-d10);cursor:pointer}
+  .wf-rank__page button:disabled{color:var(--g-l10);opacity:.3}
+
+  /* ⑨B 多列网格（列随宽度 auto-fit · 行 32 · chip h16 · 竖线对齐 · 数字右对齐 · 行底统一 l50） */
+  .wf-rank--grid{background:#fff;border:1px solid var(--g-l30);border-radius:2px;padding:16px;margin-bottom:6px;
+    display:flex;flex-direction:column;min-width:0}
+  .grid-head{display:flex;align-items:center;justify-content:space-between;height:24px;margin-bottom:8px;gap:8px}
+  .grid-title{font-size:12px;font-weight:700;color:var(--g-d40)}
+  .dim-switch{height:24px;padding:0 6px 0 8px;border:1px solid var(--g-l20);border-radius:2px;background:#fff;
+    font-size:11px;color:var(--g-d30);display:flex;align-items:center;gap:4px;flex:0 0 auto}
+  /* 列数自适应：够宽 2 列，窄屏自动降 1 列 */
+  .wf-rank--grid .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 16px;flex:1 1 auto}
+  /* 单元格 = chip 定宽 | 标题定宽 | 竖线 1px | 计数右对齐 | 占比右对齐；列宽定死才能跨行对齐 */
+  .wf-rank--grid .wf-rank__cell{display:grid;
+    grid-template-columns:44px var(--name-w,80px) 1px var(--count-w,52px) minmax(44px,1fr);
+    column-gap:8px;align-items:center;height:32px;padding:0 10px;border-radius:4px;
+    background:var(--g-l50);font-size:12px;min-width:0}
+  .chip{height:16px;padding:0 4px;box-sizing:border-box;border-radius:2px;background:var(--g-l40);
+    color:var(--g-d10);font-size:10px;line-height:16px;justify-self:start;max-width:44px;
+    overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .wf-rank--grid .wf-rank__cell .name{font-weight:400;font-size:12px;color:var(--g-d40);min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sep{width:1px;height:12px;background:var(--g-l20);justify-self:center;flex:0 0 1px}
+  .wf-rank--grid .wf-rank__cell .count{font-size:11px;color:var(--g-d10);font-variant-numeric:tabular-nums;
+    text-align:right;white-space:nowrap}
+  .wf-rank--grid .wf-rank__cell .pct{font-style:normal;font-size:11px;font-weight:500;color:var(--g-d20);
+    font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+
+  /* ⑨C 排行卡（双列 5 行 · 序号 18-700 名次色阶 · 行底名次 tint · 标题行 40） */
+  .wf-rank--board{background:#fff;border:1px solid var(--g-l30);border-radius:2px;margin-bottom:6px;min-width:0}
+  .board-title{display:flex;align-items:center;justify-content:space-between;height:40px;padding:0 16px;gap:8px;
+    font-size:14px;font-weight:600;color:var(--g-d40)}
+  .board-title em{font-style:normal;font-size:12px;font-weight:400;color:var(--g-d10)}
+  .board-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 16px;padding:4px 4px 16px 12px}
+  .wf-rank--board .wf-rank__row{display:flex;align-items:center;gap:10px;height:32px;padding:0 12px;margin:0 8px 4px 0;
+    border-radius:4px;font-size:12px;background:var(--g-l50);min-width:0}
+  .wf-rank--board .wf-rank__no{flex:0 0 26px;font-size:18px;font-weight:700;line-height:1;
+    font-variant-numeric:tabular-nums;color:var(--blue-l20)}
+  .wf-rank--board .wf-rank__row b{font-weight:400;color:var(--g-d40);min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wf-rank--board .wf-rank__row em{margin-left:auto;flex:0 0 auto;font-style:normal;color:var(--g-d10);font-variant-numeric:tabular-nums}
+  .n1{background:#FFF1F0} .n1 .wf-rank__no{color:var(--red)}
+  .n2{background:#FFF7E8} .n2 .wf-rank__no{color:var(--orange)}
+  .n3{background:#FFFBE6} .n3 .wf-rank__no{color:var(--orange-l10)}
+
+  /* ⑩A 三态 + 数值行（类目 127：图标 14 / 名称 54 / 竖线 1 / 总数 40 · 数值三段 70-52-44 · 条 h4） */
+  .wf-segbar--a{background:#fff;border:1px solid var(--g-l30);border-radius:2px;padding:16px;margin-bottom:6px;min-width:0}
+  .segtitle{font-size:12px;font-weight:700;color:var(--g-d40);margin-bottom:8px}
+  .wf-segbar--a .wf-segbar-row{display:flex;align-items:center;height:36px;padding:0 14px;background:var(--g-l50);
+    border-radius:4px;margin-bottom:8px;min-width:0}
+  .wf-segbar--a .wf-segbar-row:last-child{margin-bottom:0}
+  /* 类目区用 grid：四列宽度定死，竖线才跨行对齐；总数右对齐 */
+  .cat{display:grid;grid-template-columns:14px 54px 1px 40px;column-gap:6px;align-items:center;
+    flex:0 0 127px;width:127px}
+  .cat svg{width:14px;height:14px;flex:0 0 14px}
+  .cat b{font-size:13px;font-weight:400;color:var(--g-d40);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cat .sep{margin:0;justify-self:center}
+  .cat em{font-size:13px;font-style:normal;color:var(--g-d10);font-variant-numeric:tabular-nums;text-align:right}
+  .wf-segbar--a .wf-segbar-row__dist{flex:1 1 200px;min-width:160px;max-width:100%;margin-left:16px}
+  .nums{display:flex;font-size:12px;color:var(--g-d10);font-variant-numeric:tabular-nums}
+  .nums span{flex:0 0 70px;display:flex;justify-content:space-between;gap:4px;padding-right:8px}
+  .nums span:nth-child(2){flex-basis:52px}
+  .nums span:nth-child(3){flex-basis:44px}
+  .nums b{font-weight:500;color:var(--g-d20);text-align:right}
+  .wf-segbar--a .wf-segbar-row__track{display:flex;height:4px;border-radius:999px;background:var(--g-l40);
+    overflow:hidden;margin-top:4px}
+  .wf-segbar--a .wf-segbar-row__track i{display:block;height:100%}
+
+  /* ⑩B 两态 + 条右说明（行 32 底色居中 · 类目 144 · 条 72×4 · 右侧 11px 说明） */
+  .wf-segbar--b{background:#fff;border:1px solid var(--g-l30);border-radius:2px;padding:16px;margin-bottom:6px;min-width:0}
+  .wf-segbar--b .wf-segbar-row{height:32px;display:flex;align-items:center;gap:8px;padding:0 10px;
+    background:var(--g-l50);border-radius:4px;margin-bottom:8px;min-width:0}
+  .wf-segbar--b .wf-segbar-row:last-child{margin-bottom:0}
+  .wf-segbar--b .wf-segbar-row .cat{display:flex;grid-template-columns:none;column-gap:0;gap:6px;
+    flex:0 0 144px;width:144px;align-items:center}
+  .wf-segbar--b .cat .pt{width:6px;height:6px;border-radius:50%;background:var(--orange);flex:0 0 6px}
+  .wf-segbar--b .cat b{font-size:12px;color:var(--g-d30);width:58px;flex:0 0 58px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .wf-segbar--b .cat em{display:flex;align-items:center;font-size:12px;color:var(--g-d10);white-space:nowrap}
+  .wf-segbar--b .cat em s{text-decoration:none;color:var(--g-d40);font-variant-numeric:tabular-nums;
+    display:inline-block;width:34px;text-align:right;margin-right:4px}
+  .wf-segbar--b .wf-segbar-row__track{display:flex;width:72px;height:4px;border-radius:999px;
+    background:var(--g-l40);overflow:hidden;flex:0 0 72px}
+  .wf-segbar--b .wf-segbar-row__track i{display:block;height:100%}
+  .wf-segbar--b .wf-segbar-row .desc{font-size:11px;color:var(--g-d10);white-space:nowrap;min-width:0;
+    overflow:hidden;text-overflow:ellipsis}
+  .wf-segbar--b .wf-segbar-row .desc b{color:var(--turq);font-weight:400}
+  .wf-segbar--b .wf-segbar-row .desc i{color:var(--g-l20);font-style:normal;margin:0 4px}
+  .wf-segbar--b .wf-segbar-row .desc u{color:var(--red);text-decoration:none}
+
+  @media (max-width:640px){
+    .wf-rank--grid .grid{grid-template-columns:1fr}
+    .wf-rank--board .board-body{grid-template-columns:1fr}
+    .wf-segbar--a .wf-segbar-row{flex-wrap:wrap;height:auto;padding:8px 14px;row-gap:6px}
+    .wf-segbar--a .wf-segbar-row__dist{margin-left:0;flex:1 1 100%}
+  }
+</style>
+</head>
+<body>
+
+<h2>件型参考库 · 条目摘要榜与状态分布条</h2>
+<p class="hint">承载需求：在线用户 Top、终端平台构成。</p>
+
+<h5 id="page-06">Page-06 ⑨ 条目摘要榜（A/B/C）＋ ⑩ 状态分布条（A/B）</h5>
+<div class="wf-container">
+
+  <div class="wf-sub">VIZ-09-A 单列分页（一行一次决策 · 状态点 6 + 主文 12/500 + 计数红 · 整行可点 · 超出翻页）</div>
+  <div class="wf-rank--list" data-viz="VIZ-09-A">
+    <div class="rank-head">
+      <div>
+        <div class="rank-title">在线用户</div>
+        <div class="rank-sub">按在线时长排序 · 共 1,284</div>
+      </div>
+    </div>
+    <div class="wf-rank__row"><span class="dot"></span><b>zhang.wei</b><s>研发一部</s><em>3 小时 12 分</em></div>
+    <div class="wf-rank__row"><span class="dot"></span><b>wang.qiang</b><s>研发二部</s><em>5 小时 05 分</em></div>
+    <div class="wf-rank__row"><span class="dot"></span><b>li.na</b><s>财务部</s><em>1 小时 40 分</em></div>
+    <div class="wf-rank__page">
+      <button disabled>‹</button><span style="font-size:11px;color:var(--g-d10)">1 / 86</span><button>›</button>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-09-B 多列网格固定 N（行底 l50 统一 · 竖线跨行对齐 · 数字右对齐 · 列数随宽自适应）</div>
+  <div class="wf-rank--grid" data-viz="VIZ-09-B">
+    <div class="grid-head">
+      <span class="grid-title">终端操作系统分布</span>
+      <span class="dim-switch">按版本 ▾</span>
+    </div>
+    <div class="grid">
+      <div class="wf-rank__cell"><span class="chip">桌面</span><b class="name">Windows 11</b><i class="sep" aria-hidden="true"></i><span class="count">2,140</span><em class="pct">60.0%</em></div>
+      <div class="wf-rank__cell"><span class="chip">桌面</span><b class="name">Windows 10</b><i class="sep" aria-hidden="true"></i><span class="count">864</span><em class="pct">24.2%</em></div>
+      <div class="wf-rank__cell"><span class="chip">桌面</span><b class="name">macOS 14</b><i class="sep" aria-hidden="true"></i><span class="count">702</span><em class="pct">19.7%</em></div>
+      <div class="wf-rank__cell"><span class="chip">桌面</span><b class="name">macOS 13</b><i class="sep" aria-hidden="true"></i><span class="count">284</span><em class="pct">8.0%</em></div>
+      <div class="wf-rank__cell"><span class="chip">服务器</span><b class="name">Ubuntu 22.04</b><i class="sep" aria-hidden="true"></i><span class="count">318</span><em class="pct">8.9%</em></div>
+      <div class="wf-rank__cell"><span class="chip">服务器</span><b class="name">CentOS 7</b><i class="sep" aria-hidden="true"></i><span class="count">124</span><em class="pct">3.5%</em></div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-09-C 排行卡（双列 5 行 · 序号 18/700 名次色阶 · 行底名次 tint · 固定 N 不翻页）</div>
+  <div class="wf-rank--board" data-viz="VIZ-09-C">
+    <div class="board-title"><span>访问量 Top 10 应用</span><em>近 7 天</em></div>
+    <div class="board-body">
+      <div class="wf-rank__row n1"><span class="wf-rank__no">1</span><b>OA 系统</b><em>18,420</em></div>
+      <div class="wf-rank__row n2"><span class="wf-rank__no">2</span><b>ERP 系统</b><em>12,860</em></div>
+      <div class="wf-rank__row n3"><span class="wf-rank__no">3</span><b>邮件服务</b><em>9,240</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">4</span><b>代码仓库</b><em>7,512</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">5</span><b>文档中心</b><em>6,104</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">6</span><b>即时通讯</b><em>5,688</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">7</span><b>报表平台</b><em>4,320</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">8</span><b>会议系统</b><em>3,860</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">9</span><b>工单系统</b><em>3,140</em></div>
+      <div class="wf-rank__row"><span class="wf-rank__no">10</span><b>知识库</b><em>2,470</em></div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-10-A 三态 + 数值行（类目 127 四列对齐：图标/名称/竖线/总数 · 数值三段 70-52-44 · 条 h4 段无缝）</div>
+  <div class="wf-segbar--a" data-viz="VIZ-10-A">
+    <div class="segtitle">终端平台健康构成</div>
+    <div class="wf-segbar-row">
+      <div class="cat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></svg>
+        <b>Windows</b><span class="sep" aria-hidden="true"></span><em>2,140</em>
+      </div>
+      <div class="wf-segbar-row__dist">
+        <div class="nums"><span>正常 <b>2,100</b></span><span>一般 <b>25</b></span><span>差 <b>15</b></span></div>
+        <div class="wf-segbar-row__track"><i style="width:98.13%;background:#12A679"></i><i style="width:1.17%;background:#FA8C16"></i><i style="width:0.70%;background:#D9363E"></i></div>
+      </div>
+    </div>
+    <div class="wf-segbar-row">
+      <div class="cat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="2"><rect x="4" y="5" width="16" height="10" rx="1.5"/><path d="M2 18h20"/></svg>
+        <b>macOS</b><span class="sep" aria-hidden="true"></span><em>986</em>
+      </div>
+      <div class="wf-segbar-row__dist">
+        <div class="nums"><span>正常 <b>970</b></span><span>一般 <b>10</b></span><span>差 <b>6</b></span></div>
+        <div class="wf-segbar-row__track"><i style="width:98.38%;background:#12A679"></i><i style="width:1.01%;background:#FA8C16"></i><i style="width:0.61%;background:#D9363E"></i></div>
+      </div>
+    </div>
+    <div class="wf-segbar-row">
+      <div class="cat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="2"><path d="M4 6h16v12H4z"/><path d="M8 10l-2 2 2 2M16 10l2 2-2 2"/></svg>
+        <b>Linux</b><span class="sep" aria-hidden="true"></span><em>442</em>
+      </div>
+      <div class="wf-segbar-row__dist">
+        <div class="nums"><span>正常 <b>430</b></span><span>一般 <b>8</b></span><span>差 <b>4</b></span></div>
+        <div class="wf-segbar-row__track"><i style="width:97.29%;background:#12A679"></i><i style="width:1.81%;background:#FA8C16"></i><i style="width:0.90%;background:#D9363E"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-10-B 两态 + 条右说明（行 32 浅底居中 · 数字与单位间距 4px · 类目 144 · 条 72×4 · 右侧 11px 说明）</div>
+  <div class="wf-segbar--b" data-viz="VIZ-10-B">
+    <div class="segtitle">终端在线构成</div>
+    <div class="wf-segbar-row">
+      <div class="cat"><span class="pt"></span><b>Windows</b><em><s>2,140</s>个</em></div>
+      <div class="wf-segbar-row__track"><i style="width:98.5%;background:#12A679"></i><i style="width:1.5%;background:#D9363E"></i></div>
+      <span class="desc"><b>2,108 健康</b><i>/</i><u>32 异常</u></span>
+    </div>
+    <div class="wf-segbar-row">
+      <div class="cat"><span class="pt"></span><b>macOS</b><em><s>986</s>个</em></div>
+      <div class="wf-segbar-row__track"><i style="width:99.2%;background:#12A679"></i><i style="width:0.8%;background:#D9363E"></i></div>
+      <span class="desc"><b>978 健康</b><i>/</i><u>8 异常</u></span>
+    </div>
+    <div class="wf-segbar-row">
+      <div class="cat"><span class="pt"></span><b>Linux</b><em><s>442</s>个</em></div>
+      <div class="wf-segbar-row__track"><i style="width:97.3%;background:#12A679"></i><i style="width:2.7%;background:#D9363E"></i></div>
+      <span class="desc"><b>430 健康</b><i>/</i><u>12 异常</u></span>
+    </div>
+  </div>
+
+</div>
+
+<div class="viz-decl">
+| 件型 | 条目摘要榜 |
+| 件型键 | `VIZ-09-A`（measured） |
+| 线框与几何 | `件型线框.md` §11.1 线框 / §11.3 几何表 / §11.4 状态矩阵 |
+| 线框原语 | `class="wf-rank wf-rank--list" data-viz="VIZ-09-A"`；必含 `wf-rank__row` ×≥2 |
+| 图形编码规则 | 计数强调用 red-l10；状态点 red-l10 |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 卡白底；行底 graphite-l50 ／ 描边 卡 graphite-l30 #E1E5EB 1px；hover 行 white + 1px blue/40 ／ 阴影 无 ／ 圆角 卡 r4；行 r4 ／ 内距 卡 p16；列内距左右 20；行内距左右 10 ／ 项 行高 30；行距 4 ／ 标题 12/700 graphite-d40，下距 4 ／ 数值 值 graphite-d20 ／ 标签 副标题 12 graphite-d10 下距 8；说明 12 d10；计数 12/500 red-l10 等宽 ／ 图标 状态点 6×6 圆点 red-l10，与主文间距 6 ／ 状态色 计数强调用 red-l10；状态点 red-l10 ／ 特有 主文 12/500 不截断（nowrap + flex-shrink-0），说明区建议 truncate；聚合计数=1 时不显示“等 N 个”；超出翻页不滚动 |
+| 交互与退化 | 主文 12/500 不截断（nowrap + flex-shrink-0），说明区建议 truncate；聚合计数=1 时不显示“等 N 个”；超出翻页不滚动；**自适应**：卡宽随容器（不写死 max-width），行内主文不缩、说明与部门可 truncate，计数固定右贴，窄屏不折行 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 条目摘要榜 |
+| 件型键 | `VIZ-09-B`（measured） |
+| 线框与几何 | `件型线框.md` §11.2 线框 / §11.3 几何表 / §11.4 状态矩阵 |
+| 线框原语 | `class="wf-rank wf-rank--grid" data-viz="VIZ-09-B"`；必含 `wf-rank__cell` ×≥4 |
+| 图形编码规则 | 本件无图形编码项（素材件按素材原样贴入） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 卡白底；**格子底 graphite-l50（与 ⑨A 行底同一层，不得用白底另起一套）** ／ 描边 卡 graphite-l30 #E1E5EB 1px ／ 阴影 无 ／ 圆角 卡 r4；格子 r4 ／ 内距 卡 p16；格子左右 10；列 gap 16、行 gap 4 ／ 项 卡高**不写死**（样本 184 = 标题行 24 + 下距 8 + 3 行 × 32 + 上下内距），2 列 × 3 行；格子高 32 ／ 标题 12/700，标题行 h24，下距 8 ／ 数值 数字 11/500 graphite-d20 等宽**右对齐**（定宽 52，跨行同列对齐） ／ 标签 主文 12/400 graphite-d40；**标题列定宽 80**（= 最长标题宽 + 12，竖线紧随其后，跨行同 x），truncate ／ 图标 类型 chip h16、px4、r2、底 graphite-l40、字 10 graphite-d10，chip 列定宽 44 ／ 特有 固定取前 N；**竖线为 1px graphite-l20、h12、`justify-self:center`，靠定宽列跨行对齐**（不是文字 `|`，否则每行位置不同）；占比列 `1fr` 右对齐 |
+| 交互与退化 | 固定取前 N，第 N+1 起不进卡片；副标题与规模之间用 1px 竖线分隔（graphite-l20）。**对齐铁律**：竖线、计数、占比三者必须跨行同列——靠 `grid-template-columns: 44px 80px 1px 52px 1fr` 定列，禁止用文字竖线或 flex 自适应宽度。**自适应**：列数 `repeat(auto-fit,minmax(260px,1fr))`，窄屏自动降 1 列，卡高随行数增长（不写死 184） |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 条目摘要榜 |
+| 件型键 | `VIZ-09-C`（measured） |
+| 线框与几何 | `件型线框.md` §11.7 线框 / §11.7 几何表 / §11.4 状态矩阵 |
+| 线框原语 | `class="wf-rank wf-rank--board" data-viz="VIZ-09-C"`；必含 `wf-rank__row` ×≥4、`wf-rank__no` |
+| 图形编码规则 | 名次序号 18/700 按名次色阶：1=red-d10／2=orange／3=brown／4+=blue-l20；行底 tint 同系浅底（§11.7 实测）；非图标 |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 卡白底；行底按名次 tint：1~3 名 red-l50 / orange-l50 / 同系浅底，4 名起 graphite-l50 ／ 描边 无 ／ 阴影 无 ／ 圆角 卡 r2 ／ 内距 标题行内距 0 16；列表体 4 4 16 12；行内距 0 12，右距 8，行距 4 ／ 项 卡宽随栏宽（双列）；标题行高 40px；行高 32px ／ 标题 14/600 ／ 数值 12 graphite-d40 右对齐 ／ 标签 名称 12/400 graphite-d40 单行截断 ／ 图标 序号 18/700，名次色阶：1 red-d10 / 2 orange / 3 brown / 4+ blue-l20 ／ 状态色 名次色阶固定（红→橙→棕→蓝），行底 tint 必须与序号同系 ／ 特有 序号比名称大两级；双列先列满再换列（1~5 左，6~10 右）；固定 N 不翻页 |
+| 交互与退化 | 序号比名称大两级；双列先列满再换列（1~5 左，6~10 右）；固定 N 不翻页；**自适应**：列数 `repeat(auto-fit,minmax(240px,1fr))`，窄屏降 1 列；名称 truncate，数值右贴不换行 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 状态分布条 |
+| 件型键 | `VIZ-10-A`（measured） |
+| 线框与几何 | `件型线框.md` §12.1 线框 / §12.3 几何表 / §12.4 状态矩阵 |
+| 线框原语 | `class="wf-segbar wf-segbar--a" data-viz="VIZ-10-A"`；必含 `wf-segbar-row` ×≥2、`wf-segbar-row__dist`、`wf-segbar-row__track` |
+| 图形编码规则 | 类目图标 14×14 按类目语义自绘·graphite-d10；段色有序 green→orange-l10→red-l10，段宽=各状态数÷合计（§12.1/§12.3） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 行底 graphite-l50；条轨道 graphite-l40 ／ 描边 无 ／ 阴影 无 ／ 圆角 行 r4；条 r full（段无圆角） ／ 内距 列左右 16；行内距左右 14；行距 8 ／ 项 行高 36px；**类目区 127 四列定宽：图标 14 / 名称 54 / 竖线 1 / 总数 40**；构成区 flex1 / ml16；条 h4（4px）；数值行三段定宽 70/52/44px ／ 标题 12/700 graphite-d40，下距 8 ／ 数值 数值行 12 graphite-d10，数字 d20/500 等宽**右对齐**（三段内各自右贴） ／ 标签 类目 13/400 graphite-d40；总数 13 d10 **右对齐**；图标 14×14 ／ 图标 类目图标 14×14 graphite-d10 ／ 状态色 有序段色 green → orange-l10 → red-l10，段间无 gap 无圆角；条距数值行 4 ／ 特有 段宽 = 各状态数 ÷ 合计，与图例数字必须自洽；行内分段条不得跨行等高 |
+| 交互与退化 | 段宽 = 各状态数 ÷ 合计，与图例数字必须自洽；行内分段条不得跨行等高。**对齐铁律**：竖线靠类目区四列定宽跨行对齐（不用文字 `|`），三态数字各自右贴；**自适应**：构成区 `flex:1 1 200px / min-width:160px`（不写死 max216），窄屏数值行与条折到下一行，类目区不压缩 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 状态分布条 |
+| 件型键 | `VIZ-10-B`（measured） |
+| 线框与几何 | `件型线框.md` §12.2 线框 / §12.3 几何表 / §12.4 状态矩阵 |
+| 线框原语 | `class="wf-segbar wf-segbar--b" data-viz="VIZ-10-B"`；必含 `wf-segbar-row` ×≥3、`wf-segbar-row__track` |
+| 图形编码规则 | 类目图标 14×14 按类目语义自绘·graphite-d10；两态段色 green→red-l10（§12.2/§12.3） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 **行底 graphite-l50（h32、r4、内容垂直居中），与 ⑨A / ⑩A 同一层底色** ／ 描边 graphite-l30 #E1E5EB 1px（卡） ／ 阴影 无 ／ 圆角 卡 r2 ／ 内距 卡 p16；行内左右 10；行距 8 ／ 项 卡高**不写死**（样本 184 = 标题 24 + 下距 8 + 3 行 × 32 + 行距）；类目区定宽 144px；条 72×4px ／ 标题 12/700，行高 24，下距 8 ／ 数值 数值 12 graphite-d40 等宽、定宽 34 **右对齐**，**与单位「个」间距 4px** ／ 标签 名称 58 定宽 12 graphite-d30 ／ 图标 圆点 6×6 orange ／ 状态色 turquoise-d10 → red-d10；“0 异常”用 graphite 弱化，不用红 ／ 特有 4 行等分；第 4 行可留明细（h20，10px，标签 orange-d10） |
+| 交互与退化 | 4 行等分；第 4 行可留明细（h20，10px，标签 orange-d10）。**自适应**：卡高随行数（不写死 184）；行 32 固定、内容垂直居中；说明区 truncate；窄屏条与说明折行不压缩数字 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+</body>
+</html>

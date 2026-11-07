@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型参考库 · ⑧拓扑图 7 个亚种</title>
+<style>
+  :root{--blue:#1C6EFF;--turq:#12A679;--red:#D9363E;--red-main:#F52727;--orange:#FA721B;
+    --g-l50:#F7F9FC;--g-l40:#EDF1F7;--g-l30:#E1E5EB;--g-l20:#D3D7DE;--g-l10:#CBD5E1;--g-mute:#A1A7B3;
+    --g-d40:#2F3540;--g-d10:#6F7785;--g-txt2:#454C59}
+  body{margin:0;padding:24px;background:#F8FAFC;color:var(--g-d40);
+    font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h2{font-size:16px;margin:0 0 4px} h5{font-size:13px;margin:0 0 8px;color:var(--g-d10)}
+  .hint{font-size:12px;color:var(--g-d10);margin:0 0 10px}
+  .wf-container{background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:16px;margin:0 0 16px}
+  .wf-sub{font-size:12px;font-weight:700;color:var(--g-txt2);margin:18px 0 6px}
+  .wf-sub:first-child{margin-top:0}
+  .viz-decl{font-size:11px;color:var(--g-d10);background:#fff;border:1px dashed var(--g-l20);border-radius:4px;padding:12px;margin:12px 0;line-height:1.9}
+
+  /* ⑧A 原理型（resource：通栏素材 1200×176，可收起） */
+  .wf-topo--a{background:var(--g-l50);border:1px solid var(--g-l30);border-radius:2px;padding:24px 16px;margin-bottom:6px;min-width:0;overflow-x:auto}
+  /* 内容随宽等比缩放；窄于 760 保底宽横向滚动，不压扁图标与文字 */
+  .wf-topo--a svg{display:block;width:100%;height:auto;min-width:760px}
+  .topo-caption{display:flex;justify-content:space-between;font-size:12px;color:var(--g-d10);margin-bottom:6px}
+
+  /* ⑧B 研判型（pending：图状关系 + 汇聚，节点 44、连线 #A1A7B3） */
+  .wf-topo--b{position:relative;min-height:220px;background:var(--g-l50);border:1px solid var(--g-l30);border-radius:2px;
+    margin-bottom:6px;padding:16px}
+  .wf-topo--b svg.links{position:absolute;inset:0;width:100%;height:100%}
+  .wf-topo--b .wf-topo__node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%)}
+  .wf-topo--b .wf-topo__node i{width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--g-l10);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(31,35,43,.08)}
+  .wf-topo--b .wf-topo__node span{font-size:12px;line-height:16px;font-weight:500;color:var(--g-d40);white-space:nowrap}
+  .n-ok i{border-color:var(--turq)!important} .n-bad i{border-color:var(--red)!important}
+  /* hover 反馈：节点描边转主色 + 轻投影；连线加粗转主色；只用颜色/描边，不做缩放与位移 */
+  .wf-topo--b .wf-topo__node i{transition:border-color .15s ease,box-shadow .15s ease}
+  .wf-topo--b .wf-topo__node:hover i{border-color:var(--blue)!important;box-shadow:0 2px 8px rgba(28,110,255,.18)}
+  .wf-topo--b .wf-topo__node span{transition:color .15s ease}
+  .wf-topo--b .wf-topo__node:hover span{color:var(--blue)}
+  .wf-topo--b svg.links path{pointer-events:stroke;transition:stroke .15s ease,stroke-width .15s ease}
+  .wf-topo--b svg.links path:hover{stroke:var(--blue);stroke-width:2.4}
+
+  /* ⑧C 链路分段态（measured：节点 44 + 段 h2 + 箭头 10 + 徽标 20 + 数值胶囊） */
+  .wf-topo--c{display:flex;align-items:flex-start;padding:20px;background:var(--g-l50);
+    border:1px solid var(--g-l30);border-radius:2px;margin-bottom:6px;position:relative}
+  .wf-topo--c .wf-topo__node{width:44px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .wf-topo--c .wf-topo__node i{width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--g-l10);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(31,35,43,.08)}
+  .wf-topo--c .wf-topo__node span{font-size:12px;line-height:16px;font-weight:500;text-align:center;white-space:nowrap;color:var(--g-d40)}
+  .wf-topo--c .wf-topo__seg{flex:1 1 0;min-width:60px;height:29px;margin:0 12px;display:flex;flex-direction:column;align-items:center;position:relative}
+  .wf-topo--c .wf-topo__seg b{font-size:10px;line-height:20px;height:20px;border-radius:999px;padding:0 8px;font-weight:400;white-space:nowrap}
+  .wf-topo--c .wf-topo__seg .line{display:flex;align-items:center;width:100%;height:2px;margin-top:6px;position:relative}
+  .wf-topo--c .wf-topo__seg .line>i{flex:1;height:2px;border-radius:999px;display:block}
+  .wf-topo--c .wf-topo__seg .line>em{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;
+    margin-right:-2px;font-style:normal}
+  .wf-topo--c .cap{position:absolute;top:34px;height:21px;line-height:21px;padding:0 6px;border-radius:4px;
+    font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .seg-ok i{background:var(--turq)} .seg-ok .line>em{border-left:10px solid var(--turq)}
+  .seg-ok b{background:#E6F8F2;border:1px solid #B7EB8F;color:var(--turq)}
+  .seg-ok .cap{background:#fff;border:1px solid var(--g-l30);color:var(--g-d40)}
+  .seg-bad i{background:var(--red)} .seg-bad .line>em{border-left:10px solid var(--red)}
+  .seg-bad b{background:#FFF1F0;border:1px solid #FFA39E;color:var(--red)}
+  .seg-bad .cap{background:#FFF1F0;border:1px solid #FFA39E;color:var(--red)}
+
+  /* ⑧D 分区容器型（partial·实现层：点阵画布 + 列标题竖条 + 分组卡 r4/白内描边/标题行 h36 + 球 32 + 角标 14） */
+  .wf-topo--d{background:var(--g-l50);border-radius:2px;padding:20px;margin-bottom:6px;
+    background-image:radial-gradient(var(--g-l30) 1px, transparent 1px);background-size:10px 10px}
+  /* 列与分组卡宽度由内容撑开；卡间距 40；列间用 40 的槽位插一条组间连线 */
+  .d-cols{display:flex;gap:40px 0;flex-wrap:wrap;align-items:flex-start}
+  .d-col{flex:0 0 auto;min-width:0}
+  .d-coltitle{display:flex;align-items:center;gap:10px;height:40px;font-size:14px;font-weight:600;color:var(--blue)}
+  .d-coltitle::before{content:"";width:2px;height:14px;background:var(--blue);border-radius:1px}
+  .wf-topo--d .wf-topo__group{background:#fff;border-radius:4px;box-shadow:0 2px 10px rgba(30,35,43,.16);
+    border:1px solid #fff;padding:0 0 8px;margin-bottom:40px;width:max-content;max-width:100%}
+  .group-head{display:flex;align-items:center;justify-content:space-between;height:36px;padding:0 8px;
+    background:var(--g-l50);border-radius:4px 4px 0 0;font-size:14px;font-weight:700;color:var(--g-txt2)}
+  .group-head em{font-size:12px;font-weight:400;color:var(--g-d10);font-style:normal}
+  .group-body{background:#fff;border-radius:2px;margin:5px;padding:8px;display:flex;gap:16px;flex-wrap:wrap}
+  .wf-topo--d .wf-topo__node{width:auto;min-width:72px;max-width:112px;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .wf-topo--d .wf-topo__node i{position:relative;width:32px;height:32px;border-radius:50%;background:#fff;
+    border:1px solid var(--g-l20);display:flex;align-items:center;justify-content:center}
+  .wf-topo--d .wf-topo__node i em{position:absolute;top:-4px;left:20px;min-width:14px;height:14px;border-radius:9999px;
+    background:var(--red-main);color:#fff;font-size:12px;font-style:normal;display:flex;align-items:center;
+    justify-content:center;padding:0 2px}
+  .wf-topo--d .wf-topo__node span{font-size:12px;line-height:20px;color:var(--g-d10);width:100%;max-width:112px;
+    text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 组与组之间的连线：1px 灰线 + 5×5 三角，落在两列卡片之间的 40 槽位里 */
+  .d-link{flex:0 0 40px;height:1px;margin:105px 0 0;display:flex;align-items:center;color:var(--g-mute)}
+  .d-link svg{display:block;width:40px;height:10px;overflow:visible}
+  @media (max-width:900px){.d-cols{gap:40px}.d-link{display:none}}
+
+  /* ⑧E 分层链路型（pending：层与虚线区域框 · 无卡） */
+  .wf-topo--e{position:relative;display:flex;gap:96px;padding:32px 24px;background:var(--g-l50);
+    border:1px solid var(--g-l30);border-radius:2px;margin-bottom:6px}
+  .wf-topo--e svg.links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .wf-topo--e .wf-topo__layer{flex:1 1 0;min-width:0;border:1px dashed var(--g-l20);border-radius:4px;padding:16px;
+    display:flex;gap:24px;justify-content:center;align-items:center;position:relative}
+  .wf-topo--e .wf-topo__layer::before{content:attr(data-layer);position:absolute;top:-10px;left:12px;background:var(--g-l50);
+    padding:0 6px;font-size:11px;color:var(--g-d10)}
+  .wf-topo--e .wf-topo__node{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .wf-topo--e .wf-topo__node i{width:36px;height:36px;border-radius:8px;background:#fff;border:1px solid var(--g-l30);
+    display:flex;align-items:center;justify-content:center}
+  .wf-topo--e .wf-topo__node span{font-size:12px;color:var(--g-d40)}
+
+</style>
+</head>
+<body>
+
+<h2>件型参考库 · 拓扑图（5 个亚种）</h2>
+<p class="hint">承载需求：终端访问路径。A 原理型 / B 研判型 / C 链路分段 / D 分区容器 / E 分层链路（F 等距立体、G 2.5D 已判定不做，见下）。</p>
+
+<h5 id="page-05">Page-05 ⑧ 拓扑图（A–E 五个可落地亚种）</h5>
+<div class="wf-container">
+
+  <div class="wf-sub">VIZ-08-A 原理型链路拓扑（resource：通栏素材 1200×176，可收起，不自造节点样式）</div>
+  <div class="wf-topo wf-topo--a" data-viz="VIZ-08-A">
+    <div class="topo-caption"><span>接入链路原理（素材件 · 节点带语义图标）</span><span>收起 ▾</span></div>
+    <svg viewBox="0 0 1200 176" role="img" aria-label="原理型链路拓扑素材：终端 → 网关 → 代理 → 应用（带图标与箭头）">
+      <defs>
+        <marker id="arwA" viewBox="0 0 6 6" refX="5.2" refY="3" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0 6 3 0 6z" fill="#BEC3CC"/>
+        </marker>
+      </defs>
+
+      <rect x="24" y="44" width="224" height="88" rx="4" fill="#FFFFFF" stroke="#E1E5EB"/>
+      <rect x="44" y="72" width="32" height="32" rx="8" fill="#E8F4FF"/>
+      <g stroke="#1C6EFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="52" y="79" width="16" height="11" rx="1.5"/><path d="M56 96h8M60 90v6"/>
+      </g>
+      <text x="88" y="80" font-size="14" font-weight="600" fill="#2F3540">终端</text>
+      <text x="88" y="102" font-size="12" fill="#6F7785">3,568 台在线</text>
+
+      <rect x="336" y="44" width="224" height="88" rx="4" fill="#FFFFFF" stroke="#E1E5EB"/>
+      <rect x="356" y="72" width="32" height="32" rx="8" fill="#E8F4FF"/>
+      <g stroke="#1C6EFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="364" y="78" width="16" height="6" rx="1.5"/><rect x="364" y="88" width="16" height="6" rx="1.5"/>
+        <circle cx="367.5" cy="81" r="0.9" fill="#1C6EFF"/><circle cx="367.5" cy="91" r="0.9" fill="#1C6EFF"/>
+      </g>
+      <text x="400" y="80" font-size="14" font-weight="600" fill="#2F3540">接入网关</text>
+      <text x="400" y="102" font-size="12" fill="#6F7785">GW-SZ-01</text>
+
+      <rect x="648" y="44" width="224" height="88" rx="4" fill="#FFFFFF" stroke="#E1E5EB"/>
+      <rect x="668" y="72" width="32" height="32" rx="8" fill="#E8F4FF"/>
+      <g stroke="#1C6EFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M684 76v24M676 82h16M676 94h16"/><circle cx="684" cy="88" r="4"/>
+      </g>
+      <text x="712" y="80" font-size="14" font-weight="600" fill="#2F3540">代理节点</text>
+      <text x="712" y="102" font-size="12" fill="#6F7785">PX-02</text>
+
+      <rect x="960" y="44" width="224" height="88" rx="4" fill="#FFFFFF" stroke="#E1E5EB"/>
+      <rect x="980" y="72" width="32" height="32" rx="8" fill="#E8F4FF"/>
+      <g stroke="#1C6EFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M995 78h6l4 4v14h-14V78z"/><path d="M1001 78v4h4"/><path d="M992 90h8M992 94h5"/>
+      </g>
+      <text x="1024" y="80" font-size="14" font-weight="600" fill="#2F3540">目标应用</text>
+      <text x="1024" y="102" font-size="12" fill="#6F7785">OA 系统</text>
+
+      <g stroke="#BEC3CC" stroke-width="1.5" marker-end="url(#arwA)">
+        <path d="M252 88h76"/><path d="M564 88h76"/><path d="M876 88h76"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="wf-sub">VIZ-08-B 研判型可重绘拓扑（pending：图状分支 + 汇聚，节点 44、节点态与图标双重编码）</div>
+  <div class="wf-topo wf-topo--b" data-viz="VIZ-08-B">
+    <svg class="links" viewBox="0 0 1000 220" preserveAspectRatio="none">
+      <path d="M150 70 C 300 70 300 110 430 110" fill="none" stroke="#A1A7B3" stroke-width="1.5"/>
+      <path d="M150 160 C 300 160 300 110 430 110" fill="none" stroke="#A1A7B3" stroke-width="1.5"/>
+      <path d="M500 110 C 640 110 640 65 780 65" fill="none" stroke="#A1A7B3" stroke-width="1.5"/>
+      <path d="M500 110 C 640 110 640 160 780 160" fill="none" stroke="#A1A7B3" stroke-width="1.5"/>
+    </svg>
+    <div class="wf-topo__node n-ok" style="left:15%;top:32%"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12A679" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></svg></i><span>PC-DEV-001</span></div>
+    <div class="wf-topo__node n-ok" style="left:15%;top:73%"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12A679" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></svg></i><span>PC-DEV-002</span></div>
+    <div class="wf-topo__node n-bad" style="left:47%;top:50%"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D9363E" stroke-width="1.8"><path d="M12 4 2.8 20h18.4z"/><path d="M12 10v4M12 17h.01"/></svg></i><span>GW-SZ-01 异常</span></div>
+    <div class="wf-topo__node" style="left:80%;top:30%"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h4"/></svg></i><span>OA 系统</span></div>
+    <div class="wf-topo__node" style="left:80%;top:73%"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/></svg></i><span>ERP 系统</span></div>
+  </div>
+
+  <div class="wf-sub">VIZ-08-C 链路分段态（measured：节点 44 三态描边 · 段 h2+箭头 10 · 徽标 20 · 数值胶囊）</div>
+  <div class="wf-topo wf-topo--c" data-viz="VIZ-08-C">
+    <div class="wf-topo__node n-ok"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></svg></i><span>PC-DEV-001</span></div>
+    <div class="wf-topo__seg seg-ok"><b>正常</b><span class="line"><i></i><em></em></span><span class="cap">28ms</span></div>
+    <div class="wf-topo__node n-bad"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D9363E" stroke-width="1.8"><path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="3"/></svg></i><span>GW-SZ-01</span></div>
+    <div class="wf-topo__seg seg-bad"><b>时延异常</b><span class="line"><i></i><em></em></span><span class="cap">180ms</span></div>
+    <div class="wf-topo__node"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg></i><span>PX-02</span></div>
+    <div class="wf-topo__seg seg-ok"><b>正常</b><span class="line"><i></i><em></em></span><span class="cap">4ms</span></div>
+    <div class="wf-topo__node n-ok"><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h4"/></svg></i><span>OA 系统</span></div>
+  </div>
+
+  <div class="wf-sub">VIZ-08-D 分区容器型（partial·实现层：点阵画布 · 列标题竖条 · 分组卡 r4+白内描边+标题行 h36 · 球 32+角标 14）</div>
+  <div class="wf-topo wf-topo--d" data-viz="VIZ-08-D">
+    <div class="d-cols">
+      <div class="d-col">
+        <div class="d-coltitle">研发一部</div>
+        <div class="wf-topo__group">
+          <div class="group-head"><span>在组终端</span><em>2 台</em></div>
+          <div class="group-body">
+            <div class="wf-topo__node"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C6EFF" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/></svg><em>1</em></i><span>PC-DEV-001</span></div>
+            <div class="wf-topo__node"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C6EFF" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/></svg><em>2</em></i><span>PC-DEV-002</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="d-link" aria-hidden="true">
+        <svg viewBox="0 0 40 10" fill="none"><path d="M0 5h32" stroke="currentColor" stroke-width="1"/><path d="M31.5 1.5 36.5 5l-5 3.5z" fill="currentColor"/></svg>
+      </div>
+      <div class="d-col">
+        <div class="d-coltitle">财务部</div>
+        <div class="wf-topo__group">
+          <div class="group-head"><span>在组终端</span><em>2 台</em></div>
+          <div class="group-body">
+            <div class="wf-topo__node"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C6EFF" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/></svg></i><span>PC-FIN-001</span></div>
+            <div class="wf-topo__node"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C6EFF" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/></svg></i><span>PC-FIN-002</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-08-E 分层链路型（pending：层 + 虚线区域框，曲线连线，节点无卡底）</div>
+  <div class="wf-topo wf-topo--e" data-viz="VIZ-08-E">
+    <svg class="links" viewBox="0 0 1000 180" preserveAspectRatio="none">
+      <path d="M250 90 C 400 90 560 90 700 90" fill="none" stroke="#D3D7DE" stroke-width="2"/>
+    </svg>
+    <div class="wf-topo__layer" data-layer="入口层">
+      <div class="wf-topo__node"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/></svg></i><span>PC-DEV-001</span></div>
+      <div class="wf-topo__node"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1.5"/></svg></i><span>PC-DEV-002</span></div>
+    </div>
+    <div class="wf-topo__layer" data-layer="资产层">
+      <div class="wf-topo__node"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/></svg></i><span>OA 系统</span></div>
+      <div class="wf-topo__node"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F7785" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/></svg></i><span>ERP 系统</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="viz-decl">
+| 件型 | 拓扑图 |
+| 件型键 | `VIZ-08-A`（resource） |
+| 线框与几何 | `件型线框.md` §10.1 线框 / §10.3 几何表 / §10.4 状态矩阵 |
+| 线框原语 | `class="wf-topo wf-topo--a" data-viz="VIZ-08-A"` |
+| 图形编码规则 | 本件无图形编码项（素材件按素材原样贴入） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 素材件：按素材原样贴入，不自造 token |
+| 交互与退化 | 作为素材原样贴入，不自造节点样式；素材内**每个节点必须带语义图标**（同一套画法：32 圆角方块浅底 + 1.8 线性描边），节点间连线**带单向箭头**、线色 `#BEC3CC`（比 #A1A7B3 再退一档）；⚠ 未采项：素材宽高比；嵌入容器最大宽。**自适应**：容器上下内距固定 24px，素材 width:100% 等比缩放；窄于 760 保底宽 + 容器横向滚动 |
+| 可替代性 | 定制不可仿（素材保留件，附素材） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 拓扑图 |
+| 件型键 | `VIZ-08-B`（pending） |
+| 线框与几何 | `件型线框.md` §10.2 线框 / §10.3 几何表 / §10.4 状态矩阵 |
+| 线框原语 | `class="wf-topo wf-topo--b" data-viz="VIZ-08-B"`；必含 `wf-topo__node` ×≥3 |
+| 图形编码规则 | 节点状态=色+图标双重编码：异常=red-d10＋异常形；无数据节点置灰不隐藏（§10.4） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 其余按 fallback 推定，声明须标注「无实测值，按通用值推定」 |
+| 交互与退化 | ⚠ 未采项：节点宽高与圆角；层间距；连线粗细与 dash；异常节点取色；无实测值 → 无实测。节点与段几何按 VIZ-08-C 推定；声明必须标注「无实测值，按通用值推定」。**hover 反馈**：节点描边转 blue #1C6EFF + `0 2px 8px rgba(28,110,255,.18)` 轻投影，标签同转主色；连线加粗到 2.4 并转主色（命中区 `pointer-events:stroke`）；只用颜色/描边/投影，不做缩放与位移动效；**自适应**：图区高度随内容，节点坐标用百分比，窄屏整体缩排不裁切 |
+| 可替代性 | 可参数化重绘（无实测值，按 fallback 推定后落地） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 拓扑图 |
+| 件型键 | `VIZ-08-C`（measured） |
+| 线框与几何 | `件型线框.md` §10.7 线框 / §10.8 几何表 / §10.9 状态矩阵 |
+| 线框原语 | `class="wf-topo wf-topo--c" data-viz="VIZ-08-C"`；必含 `wf-topo__node` ×≥2、`wf-topo__seg` |
+| 图形编码规则 | 节点图标 20×20 线性 stroke1.8 按对象语义自绘；段徽标 20×20：正常=对勾·turquoise-d10／异常=叉·red-d10（§10.8/§10.9 实测） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 区块总高 108（含上边框 1），图区 p20 ／ 描边 节点圆描边 2（状态描边：正常 turquoise-d10 / 异常 red-d10 / 中性 graphite-l10 #CBD5E1——状态编码，不走容器描边口径） ／ 阴影 shadow-xs（节点圆） ／ 圆角 节点圆 r full；段横线 r full；徽标 r full；胶囊 r4 ／ 内距 段容器左右 mx12 ／ 项 节点圆 44×44；图标 20×20 stroke1.8；段容器高 28~29；段横线 h2；箭头 10×10；徽标 20×20；数值胶囊高 21 pad 2×6 ／ 数值 数值胶囊字 10 等宽 ／ 标签 节点名 12/500 lh16 graphite-d40，距圆 6 ／ 图标 20×20 线性，stroke 1.8 ／ 状态色 正常段 turquoise-d10；异常段 red（应为 red-d10）；徽标正常 底#E6F8F2/边#B7EB8F/字turquoise-d10；异常 底#FFF1F0/边#FFA39E/字red ／ 特有 节点态与段态独立，禁止一红到底；有异常才渲染数值胶囊，无数据不留空位；徽标在上、线在下，间距 6 |
+| 交互与退化 | 节点态与段态独立，禁止一红到底；有异常才渲染数值胶囊，无数据不留空位；徽标在上、线在下，间距 6。**不提供端到端总时延胶囊**——总时延是页面级汇总口径，属业务信息，不属于本件；**自适应**：段容器 flex:1 + min-width 60，窄屏时整条横向滚动，节点圆与胶囊不压缩 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 拓扑图 |
+| 件型键 | `VIZ-08-D`（partial） |
+| 线框与几何 | `件型线框.md` §10.13 线框 / §10.14 几何表 / §10.4 状态矩阵 |
+| 线框原语 | `class="wf-topo wf-topo--d" data-viz="VIZ-08-D"`；必含 `wf-topo__group` ×≥2、`wf-topo__node` |
+| 图形编码规则 | 节点状态=色+角标计数双重编码；异常=red-d10（§10.14） |
+| 风格规范 | 档 B（默认；切档只换容器语气 token，不动结构） ／ 底 分组卡白底；画布底见 §10.14 ／ 描边 分组卡 / 概览卡 graphite-l30 #E1E5EB 1px ／ 阴影 无 ／ 圆角 r2（2） ／ 内距 无 ／ 项 节点球 40（设计源）/ 32（实现层）；角标 18（设计源）/ 14（实现层） ／ 标题 组标题 + 计数（字阶见 §10.14） ／ 状态色 节点状态色 + 角标计数，按 §10.14 实现层读数 ／ 特有 折叠态 / 空态 / 2 位角标仍待实测；球径与角标须先定口径（设计源 or 实现层） |
+| 交互与退化 | 折叠态 / 空态 / 2 位角标仍待实测；球径与角标须先定口径（设计源 or 实现层）；⚠ 未采项：折叠后高度；空路径占位表现；2 位角标溢出规则。**组间连线**：资产组与资产组之间画一条 1px `#A1A7B3` + 5×5 三角的组间箭头（不是节点级连线），落在两列之间的槽位里；**自适应**：分组卡 `width:max-content`（宽高随节点数与标签长），列与卡间距固定 40px；窄于 900 隐藏组间箭头（此时按列堆叠） |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 拓扑图 |
+| 件型键 | `VIZ-08-E`（pending） |
+| 线框与几何 | `件型线框.md` §10.4 状态矩阵 |
+| 线框原语 | `class="wf-topo wf-topo--e" data-viz="VIZ-08-E"`；必含 `wf-topo__node` ×≥2、`wf-topo__layer` |
+| 图形编码规则 | 节点状态=色+图标双重编码：异常=red-d10＋异常形；无数据置灰不隐藏（§10.4） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 其余按 fallback 推定，声明须标注「无实测值，按通用值推定」 |
+| 交互与退化 | ⚠ 未采项：节点尺寸 / 层间距；实线与虚线 dash 参数；区域框描边与底色；主轴高亮做法；无实测值 → 无实测。节点卡按 VIZ-08-D 推定，层与虚线区域框自绘；声明必须标注「无实测值，按通用值推定」 |
+| 可替代性 | 可参数化重绘（无实测值，按 fallback 推定后落地） |
+</div>
+
+
+
+</body>
+</html>

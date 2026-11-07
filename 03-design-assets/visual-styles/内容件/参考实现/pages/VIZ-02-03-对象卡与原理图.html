@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型参考库 · ②对象信息卡 / ③功能原理示意图（含时间线变体）</title>
+<style>
+  :root{--blue:#1C6EFF;--turq:#12A679;--red:#D9363E;--orange:#FA721B;
+    --g-l50:#F7F9FC;--g-l40:#EDF1F7;--g-l30:#E1E5EB;--g-l20:#D3D7DE;--g-l10:#BEC3CC;--g-d40:#2F3540;--g-d10:#6F7785}
+  body{margin:0;padding:24px;background:#F8FAFC;color:var(--g-d40);
+    font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h2{font-size:16px;margin:0 0 4px} h5{font-size:13px;margin:0 0 8px;color:var(--g-d10)}
+  .hint{font-size:12px;color:var(--g-d10);margin:0 0 10px}
+  .wf-container{background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:16px;margin:0 0 16px}
+  .wf-sub{font-size:12px;font-weight:700;color:#454C59;margin:14px 0 6px}
+  .wf-sub:first-child{margin-top:0}
+  .viz-decl{font-size:11px;color:var(--g-d10);background:#fff;border:1px dashed var(--g-l20);border-radius:4px;padding:12px;margin:12px 0;line-height:1.9}
+
+  /* 自适应约定（本页所有件型通用）：宽度不足时优先「保结构」——
+     ① 容器 flex-wrap，等分单元给 min-width 兜底；② 超出可视宽的图/时间轴横向滚动
+     （不压字、不折行、不砍字段）；③ 高度随内容，不写死容器高；④ 字段区列数由 auto-fit 自动降列。 */
+
+  /* ② VIZ-02 顶部对象信息卡（pending：按 fallback 推定，label 12 / value 14） */
+  .wf-objcard{background:linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%);
+    border:1px solid var(--g-l30);border-radius:2px;padding:16px 20px;
+    display:flex;flex-direction:column;gap:12px;margin-bottom:10px;min-width:0}
+  .obj-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+  .obj-head b{font-size:14px;line-height:22px;color:var(--g-d40);min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .obj-head svg{flex:0 0 24px}
+  .obj-tag{flex:0 0 auto;height:20px;line-height:18px;padding:0 8px;border-radius:2px;font-size:12px;
+    background:#E6F8F2;border:1px solid #B7EB8F;color:var(--turq)}
+  /* 字段区列数随可用宽度自动降列（6→4→3→2→1），不压缩字段文字 */
+  .obj-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 24px;min-width:0}
+  .obj-field{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .obj-field label{font-size:12px;line-height:20px;color:var(--g-d10)}
+  .obj-field span{font-size:14px;line-height:22px;color:var(--g-d40);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* ③ VIZ-03 功能原理示意图（resource：单张 SVG 素材，配色随素材） */
+  .wf-diagram{background:var(--g-l50);border:1px solid var(--g-l30);border-radius:2px;padding:16px;
+    margin-bottom:10px;overflow-x:auto;min-width:0}
+  /* 素材等比缩放；窄于 720 时保底宽横向滚动，宁可滚不把图内文字压到读不出 */
+  .wf-diagram svg{display:block;width:100%;height:auto;min-width:720px}
+
+  /* ③ VIZ-03-T 时间线变体（pending：按 fallback 推定；横竖两套） */
+  .wf-timeline{position:relative;display:flex;align-items:flex-start;gap:0;
+    padding:4px 0 8px;margin-bottom:10px;overflow-x:auto;min-width:0}
+  .wf-timeline__node{position:relative;flex:1 1 0;min-width:140px;padding-top:10px;
+    display:flex;flex-direction:column;align-items:center;gap:4px}
+  /* 轴穿过圆点中心：点 12（含 2px 内描边）+ padding-top 10 → 圆心 y=16，轴贴 15 */
+  .wf-timeline__node::after{content:"";position:absolute;left:50%;right:-50%;top:15px;height:2px;
+    background:var(--g-l20);z-index:0}
+  .wf-timeline__node:last-child::after{content:none}
+  .wf-timeline__node i{width:12px;height:12px;box-sizing:border-box;border-radius:50%;background:var(--blue);
+    border:2px solid #fff;box-shadow:0 0 0 1px var(--blue);position:relative;z-index:1}
+  .wf-timeline__node.done i{background:var(--turq);box-shadow:0 0 0 1px var(--turq)}
+  .wf-timeline__node.done::after{background:var(--turq)}
+  .wf-timeline__node.bad i{background:var(--red);box-shadow:0 0 0 1px var(--red)}
+  .wf-timeline__node b{font-size:12px;font-weight:500;line-height:20px;color:var(--g-d40);white-space:nowrap}
+  .wf-timeline__node span{font-size:12px;line-height:20px;color:var(--g-d10);text-align:center}
+
+  /* 竖向时间线：轴在左、点压在轴上、内容右排；窄屏首选竖版（不横向滚动） */
+  .wf-timeline--v{display:block;overflow:visible;padding:0}
+  .wf-timeline--v .wf-timeline__node{display:block;flex:none;min-width:0;padding:0 0 16px 26px;
+    text-align:left;align-items:flex-start}
+  .wf-timeline--v .wf-timeline__node i{position:absolute;left:0;top:2px}
+  .wf-timeline--v .wf-timeline__node::after{content:"";position:absolute;left:5px;right:auto;top:8px;
+    bottom:-2px;width:2px;height:auto;background:var(--g-l20)}
+  .wf-timeline--v .wf-timeline__node:last-child{padding-bottom:0}
+  .wf-timeline--v .wf-timeline__node:last-child::after{content:none}
+  .wf-timeline--v .wf-timeline__node b{display:block}
+  .wf-timeline--v .wf-timeline__node span{display:block;text-align:left}
+
+  /* 空间不足：字段区降到单列，横版时间线交给横向滚动，不压字不折行 */
+  @media (max-width:640px){
+    .obj-fields{grid-template-columns:1fr}
+    .wf-objcard{padding:12px}
+  }
+</style>
+</head>
+<body>
+
+<h2>件型参考库 · 对象信息卡与功能原理图</h2>
+<p class="hint">承载需求：终端访问路径（终端 → 接入网关 → 代理节点 → 目标应用）。</p>
+
+<h5 id="page-02">Page-02 ② 对象信息卡 / ③ 原理示意图（含时间线变体）</h5>
+<div class="wf-container">
+
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <defs>
+      <linearGradient id="gDev2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1CBFFF"/><stop offset="1" stop-color="#1C6EFF"/></linearGradient>
+    </defs>
+  </svg>
+
+  <div class="wf-sub">VIZ-02 顶部对象信息卡（单对象身份摘要 · 详情页/抽屉顶部 · SASE 渐变底 · pending 按 fallback 推定）</div>
+  <div class="wf-objcard" data-viz="VIZ-02">
+    <div class="obj-head">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2" fill="url(#gDev2)"/><rect x="4.4" y="5.9" width="13.6" height="9.2" rx="1" fill="#fff" opacity=".92"/><path d="M8.6 20.4h6.8" stroke="#1C6EFF" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <b>PC-DEV-001</b>
+      <span class="obj-tag">在线</span>
+    </div>
+    <div class="obj-fields">
+      <div class="obj-field"><label>所属组织</label><span>研发一部</span></div>
+      <div class="obj-field"><label>操作系统</label><span>Windows 11 22H2</span></div>
+      <div class="obj-field"><label>接入网关</label><span>GW-SZ-01</span></div>
+      <div class="obj-field"><label>在线时长</label><span>3 小时 12 分</span></div>
+      <div class="obj-field"><label>健康状态</label><span>正常</span></div>
+      <div class="obj-field"><label>最近活动</label><span>2 分钟前</span></div>
+    </div>
+  </div>
+
+  <div class="wf-sub">VIZ-03 功能原理示意图（系统怎么工作 · 单张 SVG 素材件，不做 DOM 重绘）</div>
+  <div class="wf-diagram" data-viz="VIZ-03">
+    <svg viewBox="0 0 1200 176" role="img" aria-label="SSL 解密工作原理示意图（分区 + 属性标注，非节点链路）">
+      <rect x="0" y="0" width="300" height="176" fill="#F7F9FC"/>
+      <text x="24" y="44" font-size="14" font-weight="600" fill="#2F3540">终端侧</text>
+      <text x="24" y="72" font-size="12" fill="#6F7785">业务流量以密文发出</text>
+      <text x="24" y="94" font-size="12" fill="#6F7785">客户端不感知解密过程</text>
+      <rect x="300" y="0" width="600" height="176" fill="#E8F4FF"/>
+      <text x="324" y="44" font-size="14" font-weight="600" fill="#1C6EFF">平台内部处理（四步）</text>
+      <text x="324" y="74" font-size="12" fill="#454C59">① 流量镜像　② 证书匹配　③ 解密检查　④ 重新加密转发</text>
+      <text x="324" y="98" font-size="12" fill="#6F7785">每步命中策略写右侧属性区；流程本身不画节点与连线</text>
+      <rect x="900" y="0" width="300" height="176" fill="#F7F9FC"/>
+      <text x="924" y="44" font-size="14" font-weight="600" fill="#2F3540">目标应用</text>
+      <text x="924" y="72" font-size="12" fill="#6F7785">收到已重新加密的流量</text>
+      <text x="924" y="94" font-size="12" fill="#6F7785">应用侧无改造</text>
+    </svg>
+  </div>
+
+  <div class="wf-sub">VIZ-03-T · 横向时间线（轴穿过圆点中心，点在轴上、文字在轴下；宽度不足横向滚动）</div>
+  <div class="wf-timeline" data-viz="VIZ-03-T">
+    <div class="wf-timeline__node done"><i></i><b>08:12 接入</b><span>终端发起连接</span></div>
+    <div class="wf-timeline__node done"><i></i><b>08:12 鉴权</b><span>网关验证身份</span></div>
+    <div class="wf-timeline__node bad"><i></i><b>08:13 转发</b><span>代理匹配策略（时延 180ms）</span></div>
+    <div class="wf-timeline__node"><i></i><b>08:13 到达</b><span>目标应用响应</span></div>
+  </div>
+
+  <div class="wf-sub">VIZ-03-T · 竖向时间线（同一数据的窄屏 / 侧栏版：轴在左、点压在轴上、内容右排）</div>
+  <div class="wf-timeline wf-timeline--v" data-viz="VIZ-03-T">
+    <div class="wf-timeline__node done"><i></i><b>08:12 接入</b><span>终端发起连接，网关按接入方式分配虚拟 IP</span></div>
+    <div class="wf-timeline__node done"><i></i><b>08:12 鉴权</b><span>网关验证身份，命中「研发一部」策略组</span></div>
+    <div class="wf-timeline__node bad"><i></i><b>08:13 转发</b><span>代理匹配策略（时延 180ms，超阈值 120ms）</span></div>
+    <div class="wf-timeline__node"><i></i><b>08:13 到达</b><span>目标应用响应，链路完成</span></div>
+  </div>
+
+</div>
+
+<div class="viz-decl">
+| 件型 | 顶部对象信息卡 |
+| 件型键 | `VIZ-02`（pending） |
+| 线框与几何 | `件型线框.md` §4.1 线框 / §4.2 几何表 / §4.3 状态矩阵 |
+| 线框原语 | `class="wf-objcard" data-viz="VIZ-02"` |
+| 图形编码规则 | 本件无图形编码项（素材件按素材原样贴入） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 其余按 fallback 推定，声明须标注「无实测值，按通用值推定」 |
+| 交互与退化 | ⚠ 未采项：容器底 / 描边 / 圆角；身份字段区字阶与间距；状态徽标形态；窄屏退化；无实测值 → 无实测。按 VIZ-01-B2 子状态小卡字阶（label 12／value 14/22）＋ 档 B 容器推定；声明必须标注「无实测值，按通用值推定」，并在交付说明列为本期风险项 |
+| 可替代性 | 可参数化重绘（无实测值，按 fallback 推定后落地） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 功能原理示意图 |
+| 件型键 | `VIZ-03`（resource） |
+| 线框与几何 | `件型线框.md` §5.1 线框 / §5.2 几何表 / §5.3 状态矩阵 |
+| 线框原语 | `class="wf-diagram" data-viz="VIZ-03"` |
+| 图形编码规则 | 本件无图形编码项（素材件按素材原样贴入） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 素材件：按素材原样贴入，不自造 token |
+| 交互与退化 | 配色随素材，不自造 token；重绘边界见 D-11 场景②；⚠ 未采项：素材宽高比；嵌入容器的最大宽 |
+| 可替代性 | 定制不可仿（素材保留件，附素材） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 功能原理示意图（时间线变体） |
+| 件型键 | `VIZ-03-T`（pending） |
+| 线框与几何 | `件型线框.md` §5.1 线框 / §5.2 几何表 / §5.3 状态矩阵 |
+| 线框原语 | `class="wf-timeline" data-viz="VIZ-03-T"`；必含 `wf-timeline__node` ×≥3 |
+| 图形编码规则 | 本件无图形编码项（素材件按素材原样贴入） |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 轴 h2、graphite-l20 #D3D7DE，**必须穿过圆点圆心**（点 12 含 2px 内描边，圆心距节点顶 16，轴贴 15）——点在轴上，不在轴上方 ／ 节点圆 12、白 2px 内描边 + 1px 状态环；已完成 turquoise-d10、异常 red-d10、当前 blue ／ 时间标签 12/500 d40（lh20）、说明 12/400 d10 ／ 其余按 fallback 推定，声明须标注「无实测值，按通用值推定」 |
+| 交互与退化 | ⚠ 未采项：轴与节点的几何；时间标签字阶；节点状态色归位；无实测值 → 无实测。结构照 VIZ-03（SVG 素材口径）；时间轴与节点几何按 VIZ-04 步骤件推定（轴 h2、节点 12、分区标签 14/22、副标 12/20）；声明必须标注「无实测值，按通用值推定」。**自适应**：横版节点 min-width 140 + 容器 overflow-x:auto（窄屏横向滚动，不压字不折行）；窄/侧栏场景改用竖版（轴在左、内容右排），不横向滚；轴段色只随已完成节点转绿，异常点只染自身、不染后续轴段（避免读成"错误已传导"） |
+| 可替代性 | 可参数化重绘（无实测值，按 fallback 推定后落地） |
+</div>
+
+<div class="viz-decl">
+| 件型 | 功能原理示意图（时间线变体） |
+| 件型键 | `VIZ-03-T`（pending · 竖向版式，非新形态） |
+| 线框与几何 | `件型线框.md` §5.1 线框 / §5.2 几何表 / §5.3 状态矩阵 |
+| 线框原语 | `class="wf-timeline wf-timeline--v" data-viz="VIZ-03-T"`；必含 `wf-timeline__node` ×≥3 |
+| 图形编码规则 | 同横版：已完成 turquoise-d10 / 异常 red-d10 / 当前 blue；轴段随态染色 |
+| 风格规范 | 档 B（推定；切档只换容器语气 token，不动结构） ／ 容器底 按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC） ／ 描边 graphite-l30 #E1E5EB 1px ／ 圆角 r2 ／ 竖轴 x 居中于节点圆（宽 2、色 graphite-l20 #D3D7DE），圆点压在轴上（left 0、top 2） ／ 节点圆 12、白 2px 内描边 + 1px 状态环 ／ 内容区左内距 26、行距 16 ／ 时间标签 12/500 d40（lh20）、说明 12/400 d10 ／ 其余按 fallback 推定，声明须标注「无实测值，按通用值推定」 |
+| 交互与退化 | 竖版用于窄屏 / 侧栏（宽度不足时横版会横向滚动，此时优先换竖版）；文字右排、左对齐，超长换行不截断（时间线说明属可读信息）；轴只连到最后一个节点，不拖尾；无实测值，按通用值推定 |
+| 可替代性 | 可参数化重绘（无实测值，按 fallback 推定后落地） |
+</div>
+
+</body>
+</html>

@@ -84,7 +84,7 @@
 | Token 名 | 值 | 用途 |
 | :--- | :--- | :--- |
 | `glow-blue-s1` | `0 4px 20px rgba(117,157,218,.15)` | 卡片 / 指引卡浮起（替代 `dropshadow-s1`） |
-| `border-ghost` | `1px solid #FFFFFF` | 白底页上的"隐形描边"，只用于把同色块与背景分开 |
+| `border-ghost` | `1px solid #FFFFFF` | 白底页上的"隐形描边"，只用于把同色块与背景分开。**可视化件结构描边不用此项**，统一 `graphite-l30 #E1E5EB` |
 
 > 仍待人工裁决的 2 项：`badge-step`（序号胶囊 `0 20px 20px 0`）、`glass-card`（毛玻璃卡）—— 它们是**件型级**材质，不是档位级。
 

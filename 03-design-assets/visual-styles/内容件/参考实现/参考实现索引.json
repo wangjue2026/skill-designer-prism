@@ -1,0 +1,178 @@
+{
+  "version": "2026-11-07",
+  "note": "键 → 参考实现页 + 选择器 + 填空槽位。本索引只登记「哪段是业务内容」，不复制样式；样式唯一真源仍是 pages/ 下的整页 CSS 与 件型落地契约.json。",
+  "slotTaxonomy": {
+    "values": "数值（计数 / 百分比 / 时延 / 总量）",
+    "labels": "指标名 / 类目名 / 字段名 / 阶段名",
+    "names": "对象名 / 组织名 / 应用名 / 终端名",
+    "states": "状态词（正常 / 告警 / 严重 / 离线 / 未纳管 …）",
+    "times": "时间 / 时长",
+    "copy": "标题 / 副标题 / 说明文案",
+    "icons": "图标语义槽：形状必须按新需求重画，尺寸 / 线宽 / 底色 / 色值不动"
+  },
+  "keys": [
+    {
+      "key": "VIZ-01-A",
+      "file": "pages/VIZ-01-顶部统计概览.html",
+      "selector": "[data-viz=\"VIZ-01-A\"]",
+      "instances": 2,
+      "variants": [
+        { "selector": "[data-viz=\"VIZ-01-A\"]:not(.is-sase)", "note": "非 SASE：容器底 graphite-l50" },
+        { "selector": "[data-viz=\"VIZ-01-A\"].is-sase", "note": "SASE：bg-blue-wash 三段渐变底" }
+      ],
+      "slots": { "values": ".wf-kpi-item__value", "labels": ".wf-kpi-item__label", "icons": ".wf-kpi-item__icon" }
+    },
+    {
+      "key": "VIZ-01-A2",
+      "file": "pages/VIZ-01-顶部统计概览.html",
+      "selector": "[data-viz=\"VIZ-01-A2\"]",
+      "slots": { "values": ".wf-kpi-item__value", "labels": ".wf-kpi-item__label", "icons": ".wf-kpi-item__icon" },
+      "note": "默认不得预选任何一格；选中态只换文字与底内线，不换底色"
+    },
+    {
+      "key": "VIZ-01-B",
+      "file": "pages/VIZ-01-顶部统计概览.html",
+      "selector": "[data-viz=\"VIZ-01-B\"]",
+      "slots": { "values": ".wf-kpi-item__value", "labels": ".wf-kpi-item__label", "names": ".wf-group-tree div", "copy": ".wf-group-tree div" },
+      "note": "维度树节点与右侧指标卡必须同源（树选谁，卡就是谁的口径）"
+    },
+    {
+      "key": "VIZ-01-B2",
+      "file": "pages/VIZ-01-顶部统计概览.html",
+      "selector": "[data-viz=\"VIZ-01-B2\"]",
+      "slots": { "values": ".wf-kpi-item__value, .wf-smallcard b", "labels": ".wf-kpi-item__label, .wf-smallcard .row span", "icons": ".wf-kpi-item__icon" },
+      "note": "子状态按行排（h20），1~3 行；未定内容用虚线圆 + — 占位；>3 项改用 ⑩"
+    },
+    {
+      "key": "VIZ-02",
+      "file": "pages/VIZ-02-03-对象卡与原理图.html",
+      "selector": "[data-viz=\"VIZ-02\"]",
+      "slots": { "values": ".obj-field span", "labels": ".obj-field label", "names": ".obj-head b", "states": ".obj-tag", "icons": ".obj-head svg" },
+      "note": "单对象：卡内只出现一个主体标识；字段缺失显示 —，不留空"
+    },
+    {
+      "key": "VIZ-03",
+      "file": "pages/VIZ-02-03-对象卡与原理图.html",
+      "selector": "[data-viz=\"VIZ-03\"]",
+      "slots": { "copy": "svg text", "icons": "svg > g" },
+      "note": "素材件：整张 SVG 按新业务重画（分区 + 属性标注），不改成节点链路"
+    },
+    {
+      "key": "VIZ-03-T",
+      "file": "pages/VIZ-02-03-对象卡与原理图.html",
+      "selector": "[data-viz=\"VIZ-03-T\"]",
+      "instances": 2,
+      "variants": [
+        { "selector": "[data-viz=\"VIZ-03-T\"]:not(.wf-timeline--v)", "note": "横版：轴穿过圆点中心；窄屏横向滚" },
+        { "selector": "[data-viz=\"VIZ-03-T\"].wf-timeline--v", "note": "竖版：轴在左，窄屏 / 侧栏首选" }
+      ],
+      "slots": { "labels": ".wf-timeline__node b", "copy": ".wf-timeline__node span", "states": ".wf-timeline__node" },
+      "note": "阶段数 ≥3；已完成段绿、异常点只染自身"
+    },
+    {
+      "key": "VIZ-04",
+      "file": "pages/VIZ-04-05-06-指引与配置.html",
+      "selector": "[data-viz=\"VIZ-04\"]",
+      "slots": { "labels": ".wf-steps__body b", "copy": ".wf-steps__body p", "values": ".wf-steps__no" },
+      "note": "步骤 >4 必须分组或收起；序号方块底 graphite-l40、字深色"
+    },
+    {
+      "key": "VIZ-04-B",
+      "file": "pages/VIZ-04-05-06-指引与配置.html",
+      "selector": "[data-viz=\"VIZ-04-B\"]",
+      "slots": { "labels": ".wf-steps__body b", "copy": ".wf-steps__body p", "values": ".wf-steps__no" },
+      "note": "步骤卡等高、说明固定 2 行位；序列里只放带序号的卡"
+    },
+    {
+      "key": "VIZ-05",
+      "file": "pages/VIZ-04-05-06-指引与配置.html",
+      "selector": "[data-viz=\"VIZ-05\"]",
+      "slots": { "labels": ".cfg-item label", "values": ".cfg-item .ctl", "copy": ".cfg-item .note, svg text" },
+      "note": "左配置右图解、不上下堆叠；图只解释生效范围，不画成拓扑网络；切配置整图替换"
+    },
+    {
+      "key": "VIZ-06",
+      "file": "pages/VIZ-04-05-06-指引与配置.html",
+      "selector": "[data-viz=\"VIZ-06\"]",
+      "slots": { "labels": ".cfg-item label", "values": ".cfg-item .ctl", "copy": ".preview-head span, .preview-body div" },
+      "note": "改配置即时刷新；变化项主色高亮；加载用骨架，禁止全灰假图"
+    },
+    {
+      "key": "VIZ-07",
+      "file": "pages/VIZ-07-状态流程条.html",
+      "selector": "[data-viz=\"VIZ-07\"]",
+      "slots": { "labels": ".wf-flow__stage b", "copy": ".wf-flow__stage span", "states": ".wf-flow__stage" },
+      "note": "当前态蓝底白字；受阻只染失败节点，不整条变红；阶段 >6 横滚或折叠"
+    },
+    {
+      "key": "VIZ-08-A",
+      "file": "pages/VIZ-08-拓扑图.html",
+      "selector": "[data-viz=\"VIZ-08-A\"]",
+      "slots": { "labels": "svg text", "values": "svg text", "icons": "svg > rect + g" },
+      "note": "素材件：节点带语义图标、连线带箭头（色 #BEC3CC）、上下内距 24；窄屏横向滚"
+    },
+    {
+      "key": "VIZ-08-B",
+      "file": "pages/VIZ-08-拓扑图.html",
+      "selector": "[data-viz=\"VIZ-08-B\"]",
+      "slots": { "names": ".wf-topo__node span", "states": ".wf-topo__node", "icons": ".wf-topo__node svg" },
+      "note": "节点态与图标双重编码；hover 只换描边与投影；节点坐标用百分比"
+    },
+    {
+      "key": "VIZ-08-C",
+      "file": "pages/VIZ-08-拓扑图.html",
+      "selector": "[data-viz=\"VIZ-08-C\"]",
+      "slots": { "names": ".wf-topo__node span", "values": ".wf-topo__seg b, .wf-topo__seg .cap", "states": ".wf-topo__seg" },
+      "note": "节点态与段态独立；有异常才渲染数值胶囊；不提供端到端总时延胶囊"
+    },
+    {
+      "key": "VIZ-08-D",
+      "file": "pages/VIZ-08-拓扑图.html",
+      "selector": "[data-viz=\"VIZ-08-D\"]",
+      "slots": { "labels": ".d-coltitle, .group-head span", "values": ".group-head em, .wf-topo__node i em", "names": ".wf-topo__node span" },
+      "note": "分组卡宽高随内容（width:max-content），卡间距 40；组与组之间画 1px 组间箭头"
+    },
+    {
+      "key": "VIZ-08-E",
+      "file": "pages/VIZ-08-拓扑图.html",
+      "selector": "[data-viz=\"VIZ-08-E\"]",
+      "slots": { "names": ".wf-topo__node span", "labels": ".wf-topo__layer" },
+      "note": "层用虚线框、节点无卡底；曲线连线；区域框标签即层名"
+    },
+    {
+      "key": "VIZ-09-A",
+      "file": "pages/VIZ-09-10-摘要榜与分布条.html",
+      "selector": "[data-viz=\"VIZ-09-A\"]",
+      "slots": { "names": ".wf-rank__row b", "copy": ".wf-rank__row s", "values": ".wf-rank__row em", "states": ".dot" },
+      "note": "整行可点；超出翻页不滚动；主文不截断、说明可截断"
+    },
+    {
+      "key": "VIZ-09-B",
+      "file": "pages/VIZ-09-10-摘要榜与分布条.html",
+      "selector": "[data-viz=\"VIZ-09-B\"]",
+      "slots": { "names": ".wf-rank__cell .name", "values": ".wf-rank__cell .count, .wf-rank__cell .pct", "labels": ".chip" },
+      "note": "竖线（1px 元素）与计数、占比必须跨行同列；列数 auto-fit，窄屏降 1 列"
+    },
+    {
+      "key": "VIZ-09-C",
+      "file": "pages/VIZ-09-10-摘要榜与分布条.html",
+      "selector": "[data-viz=\"VIZ-09-C\"]",
+      "slots": { "names": ".wf-rank__row b", "values": ".wf-rank__row em, .wf-rank__no" },
+      "note": "序号按名次色阶，行底 tint 与序号同系；固定 N 不翻页；窄屏降 1 列"
+    },
+    {
+      "key": "VIZ-10-A",
+      "file": "pages/VIZ-09-10-摘要榜与分布条.html",
+      "selector": "[data-viz=\"VIZ-10-A\"]",
+      "slots": { "labels": ".cat b", "values": ".cat em, .nums b", "icons": ".cat svg" },
+      "note": "类目区四列定宽（14/54/1/40）保证竖线跨行对齐；段宽 = 状态数 ÷ 合计"
+    },
+    {
+      "key": "VIZ-10-B",
+      "file": "pages/VIZ-09-10-摘要榜与分布条.html",
+      "selector": "[data-viz=\"VIZ-10-B\"]",
+      "slots": { "labels": ".cat b", "values": ".cat em s, .desc b, .desc u" },
+      "note": "行 32 浅底居中；数字与单位间距 4px；两态段色 turquoise-d10 → red-d10"
+    }
+  ]
+}

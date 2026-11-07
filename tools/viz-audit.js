@@ -46,6 +46,17 @@ function firstVizKey(text) {
   return m ? m[0] : null;
 }
 
+// geometry 兼容两种格式：旧字符串 / 新对象 { wire, geom, state }
+function fmtGeo(g) {
+  if (!g) return '件型线框.md';
+  if (typeof g === 'string') return g;
+  const parts = [];
+  if (g.wire) parts.push('线框 §' + g.wire);
+  if (g.geom) parts.push('几何表 §' + g.geom);
+  if (g.state) parts.push('状态矩阵 §' + g.state);
+  return '件型线框.md' + (parts.length ? ' ' + parts.join(' / ') : '');
+}
+
 function audit(html, opts) {
   const contract = loadContract();
   const errors = [];
@@ -83,8 +94,10 @@ function audit(html, opts) {
 
     // 线框区：wf-container 起，到 wf-annotation 止
     const i = body.indexOf('<div class="wf-container"');
-    const j = body.indexOf('<div class="wf-annotation"', i);
-    const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
+    // 线框区到第一个《可视化件声明》为止；批注 wf-annotation 允许穿插在线框内，不能当结束标记
+    const dstart = body.indexOf('<div class="viz-decl"', i);
+    const wfRaw = i >= 0 ? body.slice(i, dstart > i ? dstart : undefined) : '';
+    const wf = wfRaw.replace(/<div class="wf-annotation"[\s\S]*?<\/div>/g, '');
     const wfText = stripTags(wf);
 
     // 页内声明
@@ -157,7 +170,7 @@ function audit(html, opts) {
       const missing = need.filter((cls) => !new RegExp('class="[^"]*\\b' + cls + '\\b').test(wf));
       if (missing.length) {
         errors.push(pid + ' 声明 `' + c.key + '` 与线框形态不一致：缺 ' + missing.map((x) => '`' + x + '`').join('、')
-          + '（' + c.name + '·' + c.form + '；几何见 ' + (c.geometry || '件型线框.md') + '，有片段照 visual-styles/内容件/件型片段/ 拼）');
+          + '（' + c.name + '·' + c.form + '；几何见 ' + fmtGeo(c.geometry) + '；结构照契约 required 逐项写，图标按语义自绘内联 SVG）');
       }
       const unit = need[1];
       if (unit && c.min_items) {
@@ -167,6 +180,32 @@ function audit(html, opts) {
       // 5b 取值可追溯：声明必须给出取值出处（件型线框.md 节号）或显式写明推定
       if (!/件型线框\.md|§\s*\d|无实测值|按通用值推定/.test(d.text)) {
         errors.push(pid + ' `' + c.key + '` 声明没写取值出处（须引用 件型线框.md 的节号，或写明"无实测值，按通用值推定"）');
+      }
+      // 6b 节号必须属于该键 geometry（治「抄了别的件的节号」）
+      const g = c.geometry || {};
+      const allowed = [g.wire, g.geom, g.state].filter(Boolean);
+      if (allowed.length) {
+        const secs = [...String(d.text).matchAll(/§\s*(\d+(?:\.\d+)?)/g)].map((m) => m[1]);
+                const chaps = allowed.map((a) => String(a).split('.')[0]);
+        const bad = [...new Set(secs)].filter((x) => !(allowed.includes(x) || chaps.includes(String(x).split('.')[0])));
+        if (bad.length) {
+          errors.push(pid + ' \`' + c.key + '\` 声明的取值节号 §' + bad.join(' / §') + ' 不属于该键（' + fmtGeo(g) + '）——照别的件的节号写 = 取值出处错位');
+        }
+      }
+      // 7 风格规范须覆盖该键关键 token（治手拼漏项）
+      if (c.tokens && (c.tokens.status === 'measured' || c.tokens.status === 'partial')) {
+        const words = new Set();
+        Object.entries(c.tokens).forEach(([f2, v]) => {
+          if (f2 === 'status' || f2 === 'src' || f2 === 'missing' || typeof v !== 'string') return;
+          (v.match(/#[0-9A-Fa-f]{6}\b|\b[a-z][a-z0-9]*(?:-[a-z0-9]+)+\b|\d+(?:\.\d+)?(?:px|\/(?:400|500|600|700))/g) || []).forEach((w) => words.add(w.toLowerCase()));
+        });
+        const list = [...words];
+        if (list.length >= 4) {
+          const hit = list.filter((w) => String(d.text).toLowerCase().includes(w)).length;
+          if (hit / list.length < 0.5) {
+            errors.push(pid + ' \`' + c.key + '\` 的「风格规范」与契约 tokens 覆盖不足（命中 ' + hit + '/' + list.length + '）——多半是手工转述漏项，改用 node tools/viz-render.js ' + c.key + ' 整块粘贴');
+          }
+        }
       }
       // 5 值到位
       if (c.style_must && c.style_must.length) {

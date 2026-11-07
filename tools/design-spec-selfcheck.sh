@@ -418,7 +418,7 @@ VIZ_RESULT=$(node -e '
     const cellM = body.match(/<b>风格规范<\/b>[\s\S]{0,60}?<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/);
     const styleCell = cellM ? cellM[1] : body;
     if (!/档\s*[AB]|风格档/.test(styleCell)) errors.push("第 " + (i + 1) + " 个《可视化件声明》「风格规范」缺档名（须写明 档 A / 档 B）");
-    const toks = new Set((styleCell.match(/glow-blue-s1|bg-blue-wash|border-ghost|dropshadow-s1|graphite-l\d+|r2|r4/gi) || []).map(function(x){return x.toLowerCase();}));
+    const toks = new Set((styleCell.match(/glow-blue-s1|bg-blue-wash|border-ghost|dropshadow-s1|graphite-[a-z0-9-]+|blue-l\d+|r2|r4/gi) || []).map(function(x){return x.toLowerCase();}));
     if (toks.size < 2) errors.push("第 " + (i + 1) + " 个《可视化件声明》「风格规范」只写了档名或文件名，缺可执行 token（至少 2 个：glow-blue-s1 / bg-blue-wash / border-ghost / r2 …）");
     if (!/#[0-9A-Fa-f]{3,8}|rgba?\(|linear-gradient\(|\d+px/.test(styleCell)) errors.push("第 " + (i + 1) + " 个《可视化件声明》「风格规范」缺具体值（渐变 / rgba / hex / px 至少一项）");
   });
@@ -446,6 +446,17 @@ else
   is_bad
 fi
 
+# ---------- 11c. D-11 还原包索引对账（生成视图必须与件型落地契约一致；V8） ----------
+head_ "11c D-11 还原包索引对账（生成视图与契约一致，防手改漂移）"
+VX_RESULT=$(node "$ROOT/tools/viz-index.js" --check 2>&1)
+VX_STATUS=$(echo "$VX_RESULT" | cut -d'|' -f1)
+VX_MSG=$(echo "$VX_RESULT" | cut -d'|' -f2-)
+if [ "$VX_STATUS" = "PASS" ]; then
+  echo "  ✅ $VX_MSG"
+else
+  echo "  ❌ $VX_MSG"
+  is_bad
+fi
 # ---------- 附：线框数据完整度（提示项，不计入 11 项通过率） ----------
 head_ "附：线框数据完整度（提示项 · 不计入通过率）"
 PLACEHOLDER=$(grep -o '__' "$NOCKECK" 2>/dev/null | wc -l | tr -d ' ')

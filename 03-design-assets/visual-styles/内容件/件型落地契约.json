@@ -7,13 +7,20 @@
     "03-design-assets/visual-styles/token/基础-token.md（命名 token 的数值字典，本表只引用不重定义）"
   ],
   "rules": {
-    "root_class": "该件根元素的类名，必须出现在线框里（未打 data-viz 时用它探测“有件无声明”）",
+    "root_class": "该件根元素的类名，必须出现在线框里（未打 data-viz 时用它探测“有件无声明”）；类名只作结构对账标记，不自带任何样式——5.0 模板没有 .wf-kpi/.wf-segbar 等件的 CSS，视觉一律照该件 tokens 写成内联 style",
     "required": "该件块内必须出现的类名，缺一即形态不一致（声明 A2 却画成白卡，就是缺 wf-kpi--strip）",
     "min_items": "件内最小单元数，少于该值说明退化成简图",
     "tokens": "该件专属取值。命名 token 在前、真值在后（如 graphite-l50 #F7F9FC）；值为 null = 该项该件不适用；缺失项列在 missing，不许脑补",
     "tokens.status": "measured=有实测；partial=部分实测；pending=待实测（missing 列出缺哪几项）；resource=素材件无独立 token",
-    "style_must": "该件《可视化件声明·风格规范》里必须命中每组中的至少一个（正则），用于拦住“只写档 B”",
-    "strict": "true = 有可拼装片段且做完整结构校验；false = 仅校验 root_class 与 probe"
+    "style_must": "该件《可视化件声明·风格规范》里必须命中每组中的至少一个（正则）。只约束元素级值（色 / 字阶 / 元素尺寸），禁止把容器外廓尺寸写进必写项——容器自适应",
+    "strict": "true = 做完整结构校验（required 类名全在 + 单元数 ≥ min_items）；false = 仅校验 root_class 与 probe",
+    "icon": "件内图标必须按语义自绘内联 SVG（形 + 色双重编码），尺寸与对齐照该件 tokens.icon；【禁】用 <i> 空标签填 background 冒充图标——纯色块读不出语义，状态差异会被降级成装饰",
+    "geometry": "线框溯源三节：wire=形态线框节、geom=几何表节、state=状态矩阵节（件型线框.md §x.y；null=该件无专节）。取值以 tokens 为准，geometry 只回答\"值从哪测的\"",
+    "icon_rules": "语义→形→色；色值为 token 语义色。形若无实测出处即建议值，绘制时对齐 components/icon-map.md 的全局图标风格；null=该件无图标语义",
+    "fallback": "仅 pending 键持有：无实测值时的推定口径 + 声明必写标注；补测完成、tokens 填实后删除该字段",
+    "container": "容器尺寸一律自适应：宽随栅格 / 分栏 / 等分伸缩（flex / 百分比 / 等分），不写死像素；空间不富裕时只要内容放得下就自动适配。tokens 只约束元素尺寸与样式（项高 / 行高 / 图标 / 定宽区 / 最小宽）。容器实测读数进 evidence 仅作溯源。判据：换一个容器宽度，这个值还成立吗？不成立即不是规范。内容与容器上下留白 ≥12px；容器底取色见 rules.bg_policy 与各键 tokens.bg",
+    "bg_policy": "顶部统计概览（VIZ-01-*）容器底取色：SASE 产品 → bg-blue-wash 三段渐变 linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%)；其他产品 → 下方还有白底大容器时用 graphite-l50 #F7F9FC（拉开层次），顶部概览本身是独立容器时用 #FFFFFF。判据：容器底必须与它所在的父底不同层，否则件浮不起来",
+    "bd": "可视化件结构描边统一 graphite-l30 #E1E5EB 1px（容器 / 卡片 / 行 / 面板 / 图外框 / 分组框）；禁止用 graphite-l20 #D3D7DE、白边 #FFFFFF 或更深色。无描边的件写「无」。例外两类保留原口径：① 状态编码描边（拓扑节点按正常 / 异常着色）；② 内白高光描边（模拟厚度与浮起感，不是边界）"
   },
   "token_fields": {
     "bg": "容器底 / 行底",
@@ -36,28 +43,53 @@
       "form": "扁平单行指标条（图标+值+标签三行，通栏底）",
       "probe": "wf-kpi",
       "root_class": "wf-kpi--flat",
-      "required": ["wf-kpi--flat", "wf-kpi-item", "wf-kpi-item__icon", "wf-kpi-item__value"],
+      "required": [
+        "wf-kpi--flat",
+        "wf-kpi-item",
+        "wf-kpi-item__icon",
+        "wf-kpi-item__value"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §3.1 / §3.4",
+      "geometry": {
+        "wire": "3.1",
+        "geom": "3.4",
+        "state": "3.5"
+      },
       "snippet": null,
+      "icon_rules": "正常=对勾圆·turquoise-d10；告警=三角感叹·orange；严重=叉圆·red-d10；中性=圆点·graphite-l30；异常时图标与数值同色（§3.5）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §3.4（设计源 + 实现层实测并列）",
-        "bg": "graphite-l40（设计源）／graphite-l50（实现层实测，偏差已记）",
-        "bd": "graphite-l20 1px",
-        "shadow": "dropshadow-s1",
-        "radius": "4",
-        "pad": "0 12 0 32（左 32 / 右 12）",
-        "item": "项高 72±2",
+        "bg": "SASE：bg-blue-wash = linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%)（三段纵向、上深下浅）；非 SASE：下方还有白底大容器 → graphite-l50 #F7F9FC（拉开层次）；顶部概览为独立容器 → #FFFFFF",
+        "bd": "graphite-l30 #E1E5EB 1px",
+        "shadow": "glow-blue-s1 = 0 4px 20px rgba(117,157,218,.15)（档 B 默认；档 A 切 dropshadow-s1 = 0 2px 10px rgba(30,35,43,.16)）",
+        "radius": "r2（2）",
+        "pad": "12 12 12 32（左 32 / 右 12 / 上下 12）",
+        "item": "项高 92（图标 24 + 值 24 + 标签 20 = 68，上下各留 12）",
         "title": null,
-        "value": "24/700（无命名字阶，须写死）",
-        "label": "12/20 graphite-d10",
-        "icon": "24×24，业务图标按风格绘制",
-        "statusColor": "异常指标：图标 + 数值同时转 red-d10；正常 turquoise-d10；中性 graphite。禁止只改一项",
+        "value": "24/700 #2F3540（无命名字阶，须写死）",
+        "label": "12/20 #6F7785",
+        "icon": "24×24 业务专属渐变 SVG 素材型，按风格绘制（不套通用线性图标）",
+        "statusColor": "异常：图标 + 数值同转 #D9363E；正常 #12A679；中性 #A1A7B3；文字只随状态转一次，禁止只改一项",
         "special": "项间等距；单卡 = 图标 24 + 值 + 标签，纵向三行"
       },
-      "style_must": [["graphite-l40|graphite-l50|#F7F9FC"], ["24px|24/700"], ["dropshadow-s1|r4|4px"]]
+      "style_must": [
+        [
+          "bg-blue-wash|E1EFFF|#F7F9FC|#FFFFFF"
+        ],
+        [
+          "24px|24/700"
+        ],
+        [
+          "dropshadow-s1|r4|4px"
+        ]
+      ],
+      "evidence": {
+        "src_page": "SASE 应用管理 / 数据外发总览（设计源）＋ 实现层实测",
+        "readings": "实现层容器底 graphite-l40 #EDF1F7 或 graphite-l50 #F7F9FC（不同页面不一）；项高 72±2",
+        "note": "顶部概览容器底按「产品 + 位置」取色，见 rules.bg_policy；实现层灰底不作为规范，SASE 一律走 bg-blue-wash"
+      }
     },
     {
       "key": "VIZ-01-A2",
@@ -65,28 +97,53 @@
       "form": "扁平指标条（标签在上 / 值 24-700 / 内联图标 16 / 可点筛选 / 无框无阴影）",
       "probe": "wf-kpi",
       "root_class": "wf-kpi--strip",
-      "required": ["wf-kpi--strip", "wf-kpi-item", "wf-kpi-item__label", "wf-kpi-item__value"],
+      "required": [
+        "wf-kpi--strip",
+        "wf-kpi-item",
+        "wf-kpi-item__label",
+        "wf-kpi-item__value"
+      ],
       "min_items": 3,
       "strict": true,
-      "geometry": "件型线框.md §3.8",
-      "snippet": "件型片段/VIZ-01-A2.html",
+      "geometry": {
+        "wire": "3.8",
+        "geom": "3.8",
+        "state": "3.5"
+      },
+      "snippet": null,
+      "icon_rules": "全部=圆点·blue；健康=对勾圆·green；告警=三角感叹·orange-l10；严重=叉圆·red-l10；离线=空心圆·graphite；未纳管=虚线圆·graphite-l30；文字不变色（§3.8）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §3.8（A-实测）",
-        "bg": "条 1176×73；格底 graphite-l50 #F7F9FC；选中格 #FFFFFF",
+        "bg": "格底 graphite-l50 #F7F9FC；选中态不换底（保持 l50，仅底内线 2px #1C6EFF + 文字转主色），禁止整格反白",
         "bd": "无",
         "shadow": "无",
         "radius": "0",
-        "pad": "格内距 0 12 0 32；条 mb8；格宽 196×72，6 格等分",
-        "item": "196×72",
+        "pad": "格内距 0 12 0 32；条 mb8；6 格等分（flex:1 1 0，无 gap）",
+        "item": "格高 72（宽随容器等分，不写死）",
         "title": null,
-        "value": "24/700 graphite-d40，ml20（= 图标 16 + gap 4，对齐标签文字起点）",
-        "label": "12/400 graphite-d40，lh16，mb4",
+        "value": "24/700 #2F3540，ml20（= 图标 16 + gap 4，对齐标签文字起点）",
+        "label": "12/400 #2F3540，lh16，mb4",
         "icon": "16×16 内联，mr4",
         "statusColor": "标签前图标按状态语义着色（绿/橙/红/蓝/灰），文字不变色",
-        "special": "整条只铺一次底、各格 transparent（否则出现白缝）；默认不得预选任何一格；分组用 1px graphite-l20 竖线（h40、留白 16）而非拆卡"
+        "special": "整条只铺一次底、各格 transparent（否则出现白缝）；默认不得预选任何一格；分组用 1px graphite-l20 竖线（h40、留白 16）而非拆卡；格底为 graphite-l50，必须置于白底内容区（wf-shell）；页面底同为 l50 时会与底同色、件浮不起来"
       },
-      "style_must": [["graphite-l50|#F7F9FC|#f7f9fc"], ["24px|24/700"], ["16px"]]
+      "style_must": [
+        [
+          "graphite-l50|#F7F9FC|#f7f9fc"
+        ],
+        [
+          "24px|24/700"
+        ],
+        [
+          "16px|16×16"
+        ]
+      ],
+      "evidence": {
+        "src_page": "SASE 应用列表（A-实测）",
+        "readings": "条 1176×73；格 196×72",
+        "note": "容器与容器派生宽度仅溯源；实际按容器等分自适应"
+      }
     },
     {
       "key": "VIZ-01-B",
@@ -94,19 +151,28 @@
       "form": "分组（左维度树 + 右概览卡）",
       "probe": "wf-kpi",
       "root_class": "wf-kpi--group",
-      "required": ["wf-kpi--group", "wf-kpi-item", "wf-kpi-item__value"],
+      "required": [
+        "wf-kpi--group",
+        "wf-kpi-item",
+        "wf-kpi-item__value"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §3.2 / §3.4",
+      "geometry": {
+        "wire": "3.2",
+        "geom": "3.4",
+        "state": "3.5"
+      },
       "snippet": null,
+      "icon_rules": "同 VIZ-01-A；异常指标图标与数值同色 red-d10（§3.5）",
       "tokens": {
         "status": "partial",
         "src": "件型线框.md §3.4（概览卡部分实测；项内距 🚧）",
-        "bg": "概览卡 blue-l50（--color-primary-bg）",
-        "bd": null,
+        "bg": "概览卡组 非 SASE：graphite-l50 #F7F9FC（卡内指标块 #FFFFFF）；SASE：blue-l50 #E8F4FF（--color-primary-bg）或 bg-blue-wash；两者不混",
+        "bd": "维度树 graphite-l30 #E1E5EB 1px；概览卡无框",
         "shadow": null,
-        "radius": null,
-        "pad": "概览卡 pt12 / pb8",
+        "radius": "概览卡无圆角（树节点 r2）",
+        "pad": "概览卡 pt 12px / pb 8px",
         "item": "分组头 h130、总数块宽 16%、底距 8、白底",
         "title": null,
         "value": null,
@@ -114,9 +180,23 @@
         "icon": "按状态着色",
         "statusColor": "同 01-A 归位",
         "special": "左维度树 + 右概览卡；分组卡内不得再嵌卡（卡套卡）",
-        "missing": ["概览卡圆角", "指标项内距与 gap", "数值/标签字阶（A-实测值是否共用）"]
+        "missing": [
+          "概览卡圆角",
+          "指标项内距与 gap",
+          "数值/标签字阶（A-实测值是否共用）"
+        ]
       },
-      "style_must": [["blue-l50|primary-bg"], ["pt12|pt 12|12px"], ["h130|130|16%"]]
+      "style_must": [
+        [
+          "blue-l50|primary-bg"
+        ],
+        [
+          "pt12|pt 12|12px"
+        ],
+        [
+          "h130|130|16%"
+        ]
+      ]
     },
     {
       "key": "VIZ-01-B2",
@@ -124,20 +204,29 @@
       "form": "分区面板式（指标组 + 子状态小卡 + 装饰插画）",
       "probe": "wf-kpi",
       "root_class": "wf-kpi--panel",
-      "required": ["wf-kpi--panel", "wf-kpi-item", "wf-kpi-item__value"],
+      "required": [
+        "wf-kpi--panel",
+        "wf-kpi-item",
+        "wf-kpi-item__value"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §3.9",
+      "geometry": {
+        "wire": "3.9",
+        "geom": "3.9",
+        "state": "3.5"
+      },
       "snippet": null,
+      "icon_rules": "指标组图标 32×32 按指标语义自绘；子状态小卡图标 12×12 按状态语义色（正常 turquoise／异常 red-d10）（§3.9）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §3.9（A-实测）",
         "bg": "面板白底；子状态小卡白底；毛玻璃卡 backdrop-blur + 白底",
-        "bd": "1px #FFFFFF",
+        "bd": "graphite-l30 #E1E5EB 1px",
         "shadow": null,
-        "radius": "2",
+        "radius": "r2（2）",
         "pad": "面板 0 16 12；小卡 12 16；毛玻璃卡 16 24",
-        "item": "面板 394×180 / 774×180，间距 8；小卡 120×86；插画 201×126；毛玻璃卡 479×120",
+        "item": "小卡 120×86；面板宽随内容撑开（flex:0 0 auto，不拉伸铺满整行），面板与小卡间距 8，放不下自动换行",
         "title": "14/600，行高 40",
         "value": "20/600（指标组）；小卡值 12 graphite-d40 右对齐",
         "label": "12 graphite-d10；小卡标签 12",
@@ -145,7 +234,19 @@
         "statusColor": "小卡内状态点 + 数值按语义着色",
         "special": "子状态必须收进小卡，不散在组里；插画作背景层不承载信息，透明度足够低；毛玻璃上对比度 ≥4.5:1"
       },
-      "style_must": [["394|774|180"], ["14/600|14px"], ["32×32|32px"]]
+      "style_must": [
+        [
+          "14/600|14px"
+        ],
+        [
+          "32×32|32px"
+        ]
+      ],
+      "evidence": {
+        "src_page": "SASE GPT 事件分析",
+        "readings": "面板 394×180 / 774×180；装饰插画 201×126；毛玻璃卡 479×120",
+        "note": "面板与装饰块属容器，宽度随位置自适应；仅小卡 120×86 为元素尺寸"
+      }
     },
     {
       "key": "VIZ-01-C",
@@ -153,29 +254,54 @@
       "form": "分析型双区（图 + 数并置，图形转 CHART-*）",
       "probe": "wf-kpi",
       "root_class": "wf-kpi--dual",
-      "required": ["wf-kpi--dual", "wf-kpi-item", "wf-kpi-item__value"],
+      "required": [
+        "wf-kpi--dual",
+        "wf-kpi-item",
+        "wf-kpi-item__value"
+      ],
       "min_items": 1,
       "strict": false,
-      "geometry": "件型线框.md §3.3",
+      "geometry": {
+        "wire": "3.3",
+        "geom": "3.4",
+        "state": "3.5"
+      },
       "snippet": null,
+      "icon_rules": "指标图标同 VIZ-01-A；图区转 CHART-* 图表件，不在本件自绘（§3.3）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §3.3（设计源样本）",
         "bg": "graphite-l40",
-        "bd": null,
+        "bd": "graphite-l30 #E1E5EB 1px",
         "shadow": null,
-        "radius": null,
+        "radius": "r2（2；设计源未记，按档 B 通用值推定）",
         "pad": null,
-        "item": "容器 w1176 × h174",
-        "title": "区标题 14，行高 40，semibold",
+        "item": "图 + 数双区（宽度随容器；区标题行高 40px）",
+        "title": "区标题 14/600 #2F3540，行高 40px",
         "value": null,
         "label": null,
         "icon": null,
         "statusColor": "图形内语义色走图表件语义色板",
         "special": "图区必须是 CHART-* 可随数据变，不得贴位图",
-        "missing": ["容器圆角", "图区与数区比例", "数区指标字阶"]
+        "missing": [
+          "容器圆角",
+          "图区与数区比例",
+          "数区指标字阶"
+        ]
       },
-      "style_must": [["1176|174"], ["graphite-l40|#F7F9FC"], ["14px"]]
+      "style_must": [
+        [
+          "graphite-l40|#F7F9FC"
+        ],
+        [
+          "14px|区标题 14"
+        ]
+      ],
+      "evidence": {
+        "src_page": "SASE 数据外发分析 / 泄密事件分析",
+        "readings": "容器 w1176 × h174",
+        "note": "容器外廓仅溯源，实际按容器自适应；图区随剩余空间伸缩"
+      }
     },
     {
       "key": "VIZ-02",
@@ -183,16 +309,30 @@
       "form": "单对象身份摘要",
       "probe": "wf-objcard",
       "root_class": "wf-objcard",
-      "required": ["wf-objcard"],
+      "required": [
+        "wf-objcard"
+      ],
       "min_items": 1,
       "strict": false,
-      "geometry": "件型线框.md §4（几何 🚧 待实测）",
+      "geometry": {
+        "wire": "4.1",
+        "geom": "4.2",
+        "state": "4.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "pending",
         "src": "件型线框.md §4（仅骨架）",
-        "missing": ["容器底 / 描边 / 圆角", "身份字段区字阶与间距", "状态徽标形态", "窄屏退化"]
-      }
+        "missing": [
+          "容器底 / 描边 / 圆角",
+          "身份字段区字阶与间距",
+          "状态徽标形态",
+          "窄屏退化"
+        ],
+        "bg": "SASE：bg-blue-wash = linear-gradient(180deg,#E1EFFF 0%,#F2F8FF 40%,#F8FAFF 100%)；非 SASE：按父底分层（#FFFFFF 或 graphite-l50 #F7F9FC）"
+      },
+      "fallback": "无实测。按 VIZ-01-B2 子状态小卡字阶（label 12／value 14/22）＋ 档 B 容器推定；声明必须标注「无实测值，按通用值推定」，并在交付说明列为本期风险项"
     },
     {
       "key": "VIZ-03",
@@ -200,16 +340,28 @@
       "form": "链路 / 原理通栏图（单张 SVG 资源）",
       "probe": "wf-diagram",
       "root_class": "wf-diagram",
-      "required": ["wf-diagram"],
+      "required": [
+        "wf-diagram"
+      ],
       "min_items": 1,
       "strict": false,
-      "geometry": "件型线框.md §5",
+      "geometry": {
+        "wire": "5.1",
+        "geom": "5.2",
+        "state": "5.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "resource",
         "src": "件型线框.md §5.6（单张 SVG 资源，非位图）",
         "special": "配色随素材，不自造 token；重绘边界见 D-11 场景②",
-        "missing": ["素材宽高比", "嵌入容器的最大宽"]
+        "missing": [
+          "素材宽高比",
+          "嵌入容器的最大宽"
+        ],
+        "item": "通栏 1200×176（width:100% 等比缩放，高随宽变）",
+        "title": "分区标签 14/22、副标 12/20（图内文字随素材，不重绘）"
       }
     },
     {
@@ -218,16 +370,29 @@
       "form": "时间线（研判类，可参数化重绘）",
       "probe": "wf-timeline",
       "root_class": "wf-timeline",
-      "required": ["wf-timeline", "wf-timeline__node"],
+      "required": [
+        "wf-timeline",
+        "wf-timeline__node"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §5",
+      "geometry": {
+        "wire": "5.1",
+        "geom": "5.2",
+        "state": "5.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "pending",
         "src": "件型线框.md §5（变体，未单独实测）",
-        "missing": ["轴与节点的几何", "时间标签字阶", "节点状态色归位"]
-      }
+        "missing": [
+          "轴与节点的几何",
+          "时间标签字阶",
+          "节点状态色归位"
+        ]
+      },
+      "fallback": "无实测。结构照 VIZ-03（SVG 素材口径）；时间轴与节点几何按 VIZ-04 步骤件推定（轴 h2、节点 12、分区标签 14/22、副标 12/20）；声明必须标注「无实测值，按通用值推定」"
     },
     {
       "key": "VIZ-04",
@@ -235,29 +400,49 @@
       "form": "编号步骤引导（竖排）",
       "probe": "wf-steps",
       "root_class": "wf-steps",
-      "required": ["wf-steps", "wf-steps__item"],
+      "required": [
+        "wf-steps",
+        "wf-steps__item"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §6.1 / §6.2",
+      "geometry": {
+        "wire": "6.1",
+        "geom": "6.2",
+        "state": "6.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §6.2（A-实现层）",
         "bg": null,
-        "bd": null,
+        "bd": "graphite-l30 #E1E5EB 1px",
         "shadow": null,
         "radius": null,
-        "pad": "外层 pt8 / pb8；竖排间距 gap 8",
-        "item": "最小宽 400",
+        "pad": "外层 pt 8px / pb 8px；竖排间距 gap 8px",
+        "item": "最小宽 400px",
         "title": "步骤标题 14/24 bold graphite-d40",
         "value": null,
         "label": "步骤说明 12/20 graphite-d10",
         "icon": "序号方块：底 graphite-l40 系、字 graphite-d40（尺寸/圆角 🚧）",
         "statusColor": "不可用步骤 → 序号方块 + 标题转 graphite-l10；已完成建议 turquoise-d10 浅底",
         "special": "分隔符 » 居中、色 graphite；步骤 >4 必须分组或收起",
-        "missing": ["序号方块尺寸与圆角"]
+        "missing": [
+          "序号方块尺寸与圆角"
+        ]
       },
-      "style_must": [["gap 8|8px"], ["14/24|14px"], ["400"]]
+      "style_must": [
+        [
+          "gap 8|8px"
+        ],
+        [
+          "14/24|14px"
+        ],
+        [
+          "400"
+        ]
+      ]
     },
     {
       "key": "VIZ-04-B",
@@ -265,20 +450,28 @@
       "form": "横排三步卡（序号胶囊 + 蓝调柔光 + 末段原理小图）",
       "probe": "wf-steps",
       "root_class": "wf-steps--row",
-      "required": ["wf-steps--row", "wf-steps__item"],
+      "required": [
+        "wf-steps--row",
+        "wf-steps__item"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §6.6",
+      "geometry": {
+        "wire": "6.6",
+        "geom": "6.6",
+        "state": "6.3"
+      },
       "snippet": null,
+      "icon_rules": "序号胶囊 24×28 左平右圆 r 0 20 20 0、品牌色渐变底白字 12/700（§6.6 实测）；非状态图标",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §6.6（A-实测）",
         "bg": "卡白底",
-        "bd": "1px #FFFFFF",
+        "bd": "graphite-l30 #E1E5EB 1px",
         "shadow": "0 4px 20px rgba(117,157,218,.15)（glow-blue-s1）",
         "radius": "2",
         "pad": "卡内距 8 8 8 0",
-        "item": "整体 1176×74；步骤卡 400×74；序号胶囊 24×28；箭头 48×54",
+        "item": "步骤卡 400×74（等宽基准，空间不足时等分压缩）；序号胶囊 24×28；箭头 48×54",
         "title": "14/24 bold",
         "value": null,
         "label": "说明 12/20 graphite-d10；链接 12 blue",
@@ -286,7 +479,22 @@
         "statusColor": null,
         "special": "各卡等高（说明固定 2 行位）；步骤序列只允许带序号的卡，原理小图移出序列"
       },
-      "style_must": [["400|74"], ["0 20 20 0|20px"], ["14/24|14px"]]
+      "style_must": [
+        [
+          "400|74"
+        ],
+        [
+          "0 20 20 0|20px"
+        ],
+        [
+          "14/24|14px"
+        ]
+      ],
+      "evidence": {
+        "src_page": "SASE SSL 解密策略（A-实测）",
+        "readings": "整体 1176×74；步骤卡 400×74",
+        "note": "整体条宽仅溯源；三步等宽、随容器等分压缩，不写死 400"
+      }
     },
     {
       "key": "VIZ-05",
@@ -294,29 +502,54 @@
       "form": "左配置右图解（介绍与指引型，不含拓扑）",
       "probe": "wf-split",
       "root_class": "wf-split",
-      "required": ["wf-split", "wf-split__cfg", "wf-split__diagram"],
+      "required": [
+        "wf-split",
+        "wf-split__cfg",
+        "wf-split__diagram"
+      ],
       "min_items": 1,
       "strict": false,
-      "geometry": "件型线框.md §7.2",
+      "geometry": {
+        "wire": "7.1",
+        "geom": "7.2",
+        "state": "7.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "partial",
         "src": "件型线框.md §7.2（A-实现层两样本）",
         "bg": null,
-        "bd": "图外框 graphite-l30（一级分割线）",
+        "bd": "图外框 graphite-l30 #E1E5EB 1px",
         "shadow": null,
-        "radius": null,
-        "pad": null,
-        "item": "容器 1044×138 / 1092×132；右图档位 373×378 ～ 868×416；窄图档左栏 511",
+        "radius": "r2（2）",
+        "pad": "左右 16px；上下 16px",
+        "item": "右图档位 373×378 ～ 868×416（随素材等比缩放）；窄图档左栏宽随容器分栏",
         "title": "配置 label 14",
         "value": null,
         "label": "说明 12",
         "icon": null,
         "statusColor": null,
         "special": "左右同屏、左配置右图解，不得上下堆叠；图按档位取宽不拉伸；切配置整图替换",
-        "missing": ["左右分栏固定比例", "容器圆角", "素材缺失占位样式"]
+        "missing": [
+          "左右分栏固定比例",
+          "容器圆角",
+          "素材缺失占位样式"
+        ]
       },
-      "style_must": [["1044|1092"], ["graphite-l30|#E1E5EB"], ["373|868"]]
+      "style_must": [
+        [
+          "graphite-l30|#E1E5EB"
+        ],
+        [
+          "373|868"
+        ]
+      ],
+      "evidence": {
+        "src_page": "aTrust 升级配置 / 虚拟IP设置 / 扩展能力对接",
+        "readings": "容器 1044×138 / 1092×132；左栏 511",
+        "note": "容器与分栏宽仅溯源；左栏与图区按容器比例分配"
+      }
     },
     {
       "key": "VIZ-06",
@@ -324,29 +557,52 @@
       "form": "实时预览联动",
       "probe": "wf-preview",
       "root_class": "wf-preview",
-      "required": ["wf-preview"],
+      "required": [
+        "wf-preview"
+      ],
       "min_items": 1,
       "strict": false,
-      "geometry": "件型线框.md §8.2",
+      "geometry": {
+        "wire": "8.1",
+        "geom": "8.2",
+        "state": "8.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "partial",
         "src": "件型线框.md §8.2（A-实现层）",
         "bg": null,
-        "bd": null,
+        "bd": "graphite-l30 #E1E5EB 1px",
         "shadow": null,
-        "radius": null,
-        "pad": null,
-        "item": "预览区 ≈499×586",
+        "radius": "r2（2）",
+        "pad": "左右 16px；上下 16px",
+        "item": "右侧实时预览区（宽随容器分栏，与左配置区同屏对照）",
         "title": "配置项 14",
         "value": "预览内部字阶沿用被预览对象",
         "label": "说明 12",
         "icon": null,
         "statusColor": "变化项高亮 blue（描边或底色，形态 🚧）",
         "special": "改配置即时刷新、无二次确认；预览加载用骨架，禁止全灰假图",
-        "missing": ["联动高亮形态（描边 or 底色）", "左右比例", "容器圆角"]
+        "missing": [
+          "联动高亮形态（描边 or 底色）",
+          "左右比例",
+          "容器圆角"
+        ]
       },
-      "style_must": [["499|586"], ["blue|#1C6EFF"], ["14px"]]
+      "style_must": [
+        [
+          "blue|#1C6EFF"
+        ],
+        [
+          "14px|配置项 14"
+        ]
+      ],
+      "evidence": {
+        "src_page": "aTrust 门户设置",
+        "readings": "预览区 ≈499×586",
+        "note": "预览区属容器，宽度随分栏自适应"
+      }
     },
     {
       "key": "VIZ-07",
@@ -354,16 +610,30 @@
       "form": "流转阶段",
       "probe": "wf-flow",
       "root_class": "wf-flow",
-      "required": ["wf-flow", "wf-flow__stage"],
+      "required": [
+        "wf-flow",
+        "wf-flow__stage"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §9（几何 🚧 待实测）",
+      "geometry": {
+        "wire": "9.1",
+        "geom": "9.2",
+        "state": "9.3"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "pending",
         "src": "件型线框.md §9（仅 token 推定）",
-        "missing": ["阶段节点尺寸与间距", "连接线粗细与色", "当前/已完成/未开始三态归位", "阶段标签字阶"]
-      }
+        "missing": [
+          "阶段节点尺寸与间距",
+          "连接线粗细与色",
+          "当前/已完成/未开始三态归位",
+          "阶段标签字阶"
+        ]
+      },
+      "fallback": "无实测。按 VIZ-04 步骤件几何 ＋ 三态色（主色／turquoise／graphite）推定；声明必须标注「无实测值，按通用值推定」，交付列为本期风险项"
     },
     {
       "key": "VIZ-08-A",
@@ -371,16 +641,26 @@
       "form": "原理型链路拓扑（位图保留件）",
       "probe": "wf-topo",
       "root_class": "wf-topo--a",
-      "required": ["wf-topo--a"],
+      "required": [
+        "wf-topo--a"
+      ],
       "min_items": 1,
       "strict": false,
-      "geometry": "件型线框.md §10.1",
+      "geometry": {
+        "wire": "10.1",
+        "geom": "10.3",
+        "state": "10.4"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "resource",
         "src": "件型线框.md §10.1（位图保留件）",
         "special": "作为素材原样贴入，不自造节点样式",
-        "missing": ["素材宽高比", "嵌入容器最大宽"]
+        "missing": [
+          "素材宽高比",
+          "嵌入容器最大宽"
+        ]
       }
     },
     {
@@ -389,16 +669,30 @@
       "form": "研判型可重绘拓扑（数据驱动、节点带状态）",
       "probe": "wf-topo",
       "root_class": "wf-topo--b",
-      "required": ["wf-topo--b", "wf-topo__node"],
+      "required": [
+        "wf-topo--b",
+        "wf-topo__node"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §10.2 / §10.3",
+      "geometry": {
+        "wire": "10.2",
+        "geom": "10.3",
+        "state": "10.4"
+      },
       "snippet": null,
+      "icon_rules": "节点状态=色+图标双重编码：异常=red-d10＋异常形；无数据节点置灰不隐藏（§10.4）",
       "tokens": {
         "status": "pending",
         "src": "件型线框.md §10.3（节点尺寸 🚧）",
-        "missing": ["节点宽高与圆角", "层间距", "连线粗细与 dash", "异常节点取色"]
-      }
+        "missing": [
+          "节点宽高与圆角",
+          "层间距",
+          "连线粗细与 dash",
+          "异常节点取色"
+        ]
+      },
+      "fallback": "无实测。节点与段几何按 VIZ-08-C 推定；声明必须标注「无实测值，按通用值推定」"
     },
     {
       "key": "VIZ-08-C",
@@ -406,28 +700,47 @@
       "form": "链路分段态（单源→单宿线性路径 + 逐段健康）",
       "probe": "wf-topo",
       "root_class": "wf-topo--c",
-      "required": ["wf-topo--c", "wf-topo__node", "wf-topo__seg"],
+      "required": [
+        "wf-topo--c",
+        "wf-topo__node",
+        "wf-topo__seg"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §10.7 / §10.8",
+      "geometry": {
+        "wire": "10.7",
+        "geom": "10.8",
+        "state": "10.9"
+      },
       "snippet": null,
+      "icon_rules": "节点图标 20×20 线性 stroke1.8 按对象语义自绘；段徽标 20×20：正常=对勾·turquoise-d10／异常=叉·red-d10（§10.8/§10.9 实测）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §10.8（A-实测）",
         "bg": "区块总高 108（含上边框 1），图区 p20",
-        "bd": "节点圆描边 2；中性节点 graphite-l10 #CBD5E1",
+        "bd": "节点圆描边 2（状态描边：正常 turquoise-d10 / 异常 red-d10 / 中性 graphite-l10 #CBD5E1——状态编码，不走容器描边口径）",
         "shadow": "shadow-xs（节点圆）",
-        "radius": "节点圆 r full；段横线 r full；徽标 r full；胶囊 r4 / 端到端 r3",
+        "radius": "节点圆 r full；段横线 r full；徽标 r full；数值胶囊 r4",
         "pad": "段容器左右 mx12",
         "item": "节点圆 44×44；图标 20×20 stroke1.8；段容器高 28~29；段横线 h2；箭头 10×10；徽标 20×20；数值胶囊高 21 pad 2×6",
         "title": null,
-        "value": "数值胶囊字 10 等宽；端到端值 12/700 等宽",
+        "value": "数值胶囊字 10 等宽",
         "label": "节点名 12/500 lh16 graphite-d40，距圆 6",
         "icon": "20×20 线性，stroke 1.8",
         "statusColor": "正常段 turquoise-d10；异常段 red（应为 red-d10）；徽标正常 底#E6F8F2/边#B7EB8F/字turquoise-d10；异常 底#FFF1F0/边#FFA39E/字red",
-        "special": "节点态与段态独立，禁止一红到底；有异常才渲染数值胶囊，无数据不留空位；徽标在上、线在下，间距 6"
+        "special": "节点态与段态独立，禁止一红到底；有异常才渲染数值胶囊，无数据不留空位；徽标在上、线在下，间距 6；不提供端到端总时延胶囊（汇总口径属页面级，不属本件）；段容器 flex:1 + min-width 60，窄屏整条横向滚动"
       },
-      "style_must": [["44"], ["turquoise-d10|#2FBF9E"], ["h 2|2px"]]
+      "style_must": [
+        [
+          "44"
+        ],
+        [
+          "turquoise-d10|#12A679"
+        ],
+        [
+          "h 2|h2|2px"
+        ]
+      ]
     },
     {
       "key": "VIZ-08-D",
@@ -435,18 +748,27 @@
       "form": "分区容器型（节点装进分组卡 + 概览卡 + 图例列）",
       "probe": "wf-topo",
       "root_class": "wf-topo--d",
-      "required": ["wf-topo--d", "wf-topo__group", "wf-topo__node"],
+      "required": [
+        "wf-topo--d",
+        "wf-topo__group",
+        "wf-topo__node"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §10.13 / §10.14（实现层全量已测）",
+      "geometry": {
+        "wire": "10.13",
+        "geom": "10.14",
+        "state": "10.4"
+      },
       "snippet": null,
+      "icon_rules": "节点状态=色+角标计数双重编码；异常=red-d10（§10.14）",
       "tokens": {
         "status": "partial",
         "src": "件型线框.md §10.14（实现层实测；设计源另有口径，落地须二选一）",
         "bg": "分组卡白底；画布底见 §10.14",
-        "bd": "见 §10.14（设计源与实现层并列）",
+        "bd": "分组卡 / 概览卡 graphite-l30 #E1E5EB 1px",
         "shadow": null,
-        "radius": null,
+        "radius": "r2（2）",
         "pad": null,
         "item": "节点球 40（设计源）/ 32（实现层）；角标 18（设计源）/ 14（实现层）",
         "title": "组标题 + 计数（字阶见 §10.14）",
@@ -454,9 +776,24 @@
         "label": null,
         "icon": null,
         "statusColor": "节点状态色 + 角标计数，按 §10.14 实现层读数",
-        "special": "折叠态 / 空态 / 2 位角标仍待实测；球径与角标须先定口径（设计源 or 实现层）",
-        "missing": ["折叠后高度", "空路径占位表现", "2 位角标溢出规则"]
-      }
+        "special": "折叠态 / 空态 / 2 位角标仍待实测；球径与角标须先定口径（设计源 or 实现层）；资产组与资产组之间画 1px group-link（#A1A7B3 + 5×5 三角）的组间箭头，不是节点级连线；分组卡宽高随内容（width:max-content），列与卡间距 40，窄于 900 隐藏组间箭头",
+        "missing": [
+          "折叠后高度",
+          "空路径占位表现",
+          "2 位角标溢出规则"
+        ]
+      },
+      "style_must": [
+        [
+          "分组卡|白底"
+        ],
+        [
+          "40|32"
+        ],
+        [
+          "18|14"
+        ]
+      ]
     },
     {
       "key": "VIZ-08-E",
@@ -464,16 +801,31 @@
       "form": "分层链路型（按层铺排 + 贝塞尔曲线 + 区域框）",
       "probe": "wf-topo",
       "root_class": "wf-topo--e",
-      "required": ["wf-topo--e", "wf-topo__node", "wf-topo__layer"],
+      "required": [
+        "wf-topo--e",
+        "wf-topo__node",
+        "wf-topo__layer"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §10（B/E 几何 🚧）",
+      "geometry": {
+        "wire": null,
+        "geom": null,
+        "state": "10.4"
+      },
       "snippet": null,
+      "icon_rules": "节点状态=色+图标双重编码：异常=red-d10＋异常形；无数据置灰不隐藏（§10.4）",
       "tokens": {
         "status": "pending",
         "src": "件型线框.md §10（devMode 稿，未结构化）",
-        "missing": ["节点尺寸 / 层间距", "实线与虚线 dash 参数", "区域框描边与底色", "主轴高亮做法"]
-      }
+        "missing": [
+          "节点尺寸 / 层间距",
+          "实线与虚线 dash 参数",
+          "区域框描边与底色",
+          "主轴高亮做法"
+        ]
+      },
+      "fallback": "无实测。节点卡按 VIZ-08-D 推定，层与虚线区域框自绘；声明必须标注「无实测值，按通用值推定」"
     },
     {
       "key": "VIZ-08-F",
@@ -481,16 +833,29 @@
       "form": "等距立体型（六边形立体块 / 三圆堆叠 + 宽幅填充带）",
       "probe": "wf-topo",
       "root_class": "wf-topo--f",
-      "required": ["wf-topo--f", "wf-topo__node"],
+      "required": [
+        "wf-topo--f",
+        "wf-topo__node"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §10（F 几何 🚧）",
+      "geometry": {
+        "wire": null,
+        "geom": null,
+        "state": "10.4"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "pending",
         "src": "件型线框.md §10（SVG 稿，未结构化）",
-        "missing": ["立体块几何参数", "填充带高度与透明度", "堆叠间距"]
-      }
+        "missing": [
+          "立体块几何参数",
+          "填充带高度与透明度",
+          "堆叠间距"
+        ]
+      },
+      "fallback": "无实测。立体块为定制形态，建议按素材重绘；token 仅取状态色；声明必须标注「无实测值，按通用值推定」"
     },
     {
       "key": "VIZ-08-G",
@@ -498,18 +863,27 @@
       "form": "倾斜平面型 2.5D（matrix3d 等距投影 + 节点扶正）",
       "probe": "wf-topo",
       "root_class": "wf-topo--g",
-      "required": ["wf-topo--g", "wf-topo__plane", "wf-topo__node"],
+      "required": [
+        "wf-topo--g",
+        "wf-topo__node",
+        "wf-topo__plane"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §10.15",
+      "geometry": {
+        "wire": "10.15",
+        "geom": "10.15",
+        "state": "10.4"
+      },
       "snippet": null,
+      "icon_rules": "图标节点按对象语义自绘；节点状态编码见 §10.15",
       "tokens": {
         "status": "partial",
         "src": "件型线框.md §10.15（实现层实测：matrix3d 平面 + canvas 连线）",
         "bg": "平面底见 §10.15",
-        "bd": null,
+        "bd": "graphite-l30 #E1E5EB 1px",
         "shadow": null,
-        "radius": null,
+        "radius": "r2（2）",
         "pad": null,
         "item": "平面变换矩阵 / 节点逆矩阵扶正见 §10.15",
         "title": "节点两行文本，字阶见 §10.15",
@@ -518,8 +892,19 @@
         "icon": "图标节点",
         "statusColor": "节点状态编码见 §10.15",
         "special": "canvas 画连线；箭头与图例展开仍 🚧",
-        "missing": ["箭头形态", "图例展开样式"]
-      }
+        "missing": [
+          "箭头形态",
+          "图例展开样式"
+        ]
+      },
+      "style_must": [
+        [
+          "matrix3d|矩阵|平面"
+        ],
+        [
+          "canvas"
+        ]
+      ]
     },
     {
       "key": "VIZ-09-A",
@@ -527,16 +912,24 @@
       "form": "单列分页（按对象，一行一次决策，超出翻页）",
       "probe": "wf-rank",
       "root_class": "wf-rank--list",
-      "required": ["wf-rank--list", "wf-rank__row"],
+      "required": [
+        "wf-rank--list",
+        "wf-rank__row"
+      ],
       "min_items": 2,
       "strict": false,
-      "geometry": "件型线框.md §11.1 / §11.3",
+      "geometry": {
+        "wire": "11.1",
+        "geom": "11.3",
+        "state": "11.4"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §11.3（A-示例稿源码）",
         "bg": "卡白底；行底 graphite-l50",
-        "bd": "卡 1px graphite-l30；hover 行 white + 1px blue/40",
+        "bd": "卡 graphite-l30 #E1E5EB 1px；hover 行 white + 1px blue/40",
         "shadow": null,
         "radius": "卡 r4；行 r4",
         "pad": "卡 p16；列内距左右 20；行内距左右 10",
@@ -548,7 +941,17 @@
         "statusColor": "计数强调用 red-l10；状态点 red-l10",
         "special": "主文 12/500 不截断（nowrap + flex-shrink-0），说明区建议 truncate；聚合计数=1 时不显示“等 N 个”；超出翻页不滚动"
       },
-      "style_must": [["graphite-l50|#F7F9FC"], ["30"], ["12/500|12px"]]
+      "style_must": [
+        [
+          "graphite-l50|#F7F9FC"
+        ],
+        [
+          "30"
+        ],
+        [
+          "12/500|12px"
+        ]
+      ]
     },
     {
       "key": "VIZ-09-B",
@@ -556,20 +959,28 @@
       "form": "多列网格固定 N（按共性特征聚类，2×3 平铺）",
       "probe": "wf-rank",
       "root_class": "wf-rank--grid",
-      "required": ["wf-rank--grid", "wf-rank__cell"],
+      "required": [
+        "wf-rank--grid",
+        "wf-rank__cell"
+      ],
       "min_items": 4,
       "strict": false,
-      "geometry": "件型线框.md §11.2 / §11.3",
+      "geometry": {
+        "wire": "11.2",
+        "geom": "11.3",
+        "state": "11.4"
+      },
       "snippet": null,
+      "icon_rules": null,
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §11.3（A-示例稿源码）",
-        "bg": "卡白底；格子底 graphite-l50",
-        "bd": "卡 1px graphite-l30",
+        "bg": "卡白底；格子底 graphite-l50（与 ⑨A 行底同层）",
+        "bd": "卡 graphite-l30 #E1E5EB 1px",
         "shadow": null,
         "radius": "卡 r4；格子 r4",
         "pad": "卡 p16；格子左右 8；行内 gap 6",
-        "item": "卡高 184；2 列 × 3 行，gap-x 16；格子高 32",
+        "item": "卡高随内容（样本 184 = 标题行 24 + 下距 8 + 3 行 × 32）；2 列 × 3 行，gap-x 16；格子高 32；单元格四列定宽：chip 44 / 标题 80 / 竖线 1 / 计数 52，占比 1fr 右对齐",
         "title": "12/700，标题行 h24，下距 8",
         "value": "数字 11/500 graphite-d20 等宽",
         "label": "主文 12/400 graphite-d40 truncate；说明 11 graphite-d10",
@@ -577,7 +988,17 @@
         "statusColor": null,
         "special": "固定取前 N，第 N+1 起不进卡片；副标题与规模之间用 | 分隔（graphite-l20）"
       },
-      "style_must": [["184"], ["32"], ["16"]]
+      "style_must": [
+        [
+          "184"
+        ],
+        [
+          "32"
+        ],
+        [
+          "16"
+        ]
+      ]
     },
     {
       "key": "VIZ-09-C",
@@ -585,11 +1006,20 @@
       "form": "排行卡（双列 5 行、序号 18/700 按名次着色）",
       "probe": "wf-rank",
       "root_class": "wf-rank--board",
-      "required": ["wf-rank--board", "wf-rank__row", "wf-rank__no"],
+      "required": [
+        "wf-rank--board",
+        "wf-rank__row",
+        "wf-rank__no"
+      ],
       "min_items": 4,
       "strict": false,
-      "geometry": "件型线框.md §11.7",
+      "geometry": {
+        "wire": "11.7",
+        "geom": "11.7",
+        "state": "11.4"
+      },
       "snippet": null,
+      "icon_rules": "名次序号 18/700 按名次色阶：1=red-d10／2=orange／3=brown／4+=blue-l20；行底 tint 同系浅底（§11.7 实测）；非图标",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §11.7（A-实测）",
@@ -598,7 +1028,7 @@
         "shadow": "无",
         "radius": "卡 r2",
         "pad": "标题行内距 0 16；列表体 4 4 16 12；行内距 0 12，右距 8，行距 4",
-        "item": "卡 644×240；标题行高 40；行 249×32",
+        "item": "卡宽随栏宽（双列）；标题行高 40px；行高 32px",
         "title": "14/600",
         "value": "12 graphite-d40 右对齐",
         "label": "名称 12/400 graphite-d40 单行截断",
@@ -606,7 +1036,19 @@
         "statusColor": "名次色阶固定（红→橙→棕→蓝），行底 tint 必须与序号同系",
         "special": "序号比名称大两级；双列先列满再换列（1~5 左，6~10 右）；固定 N 不翻页"
       },
-      "style_must": [["18/700|18px"], ["red-d10|#F52727|#FF4D4F"], ["644|240"]]
+      "style_must": [
+        [
+          "18/700|18px"
+        ],
+        [
+          "red-d10|#F52727|#FF4D4F"
+        ]
+      ],
+      "evidence": {
+        "src_page": "SASE 软件统计 Top10",
+        "readings": "卡 644×240；行 249×32",
+        "note": "卡宽与行宽由栏宽派生，仅溯源"
+      }
     },
     {
       "key": "VIZ-10-A",
@@ -614,11 +1056,21 @@
       "form": "三态 + 数值行（类目 × 状态构成，行内分段条）",
       "probe": "wf-segbar",
       "root_class": "wf-segbar--a",
-      "required": ["wf-segbar--a", "wf-segbar-row", "wf-segbar-row__dist", "wf-segbar-row__track"],
+      "required": [
+        "wf-segbar--a",
+        "wf-segbar-row",
+        "wf-segbar-row__dist",
+        "wf-segbar-row__track"
+      ],
       "min_items": 2,
       "strict": true,
-      "geometry": "件型线框.md §12.1 / §12.3",
-      "snippet": "件型片段/VIZ-10-A.html",
+      "geometry": {
+        "wire": "12.1",
+        "geom": "12.3",
+        "state": "12.4"
+      },
+      "snippet": null,
+      "icon_rules": "类目图标 14×14 按类目语义自绘·graphite-d10；段色有序 green→orange-l10→red-l10，段宽=各状态数÷合计（§12.1/§12.3）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §12.3（A-示例稿源码）",
@@ -627,7 +1079,7 @@
         "shadow": null,
         "radius": "行 r4；条 r full（段无圆角）",
         "pad": "列左右 16；行内距左右 14；行距 8",
-        "item": "行高 36；类目区定宽 126；构成区 flex1 / ml16 / max216；条 h4；数值行三段定宽 70/52/44",
+        "item": "行高 36px；类目区定宽 127px（图标 14 / 名称 54 / 竖线 1 / 总数 40 + 间距 18）；构成区 flex:1 1 200px、min-width 160、ml16（不写死 max）；条 h4（4px）；数值行三段定宽 70/52/44px",
         "title": "12/700 graphite-d40，下距 8",
         "value": "数值行 12 graphite-d10，数字 d20/500 等宽右对齐",
         "label": "类目 13/400 graphite-d40；总数 13 d10；图标 14×14",
@@ -635,7 +1087,17 @@
         "statusColor": "有序段色 green → orange-l10 → red-l10，段间无 gap 无圆角；条距数值行 4",
         "special": "段宽 = 各状态数 ÷ 合计，与图例数字必须自洽；行内分段条不得跨行等高"
       },
-      "style_must": [["graphite-l50|#F7F9FC|#f7f9fc"], ["h 4|height:4px|4px"], ["green|绿|turquoise|#2FBF9E|#5DCF3A"]]
+      "style_must": [
+        [
+          "graphite-l50|#F7F9FC|#f7f9fc"
+        ],
+        [
+          "h 4|h4|height:4px|4px"
+        ],
+        [
+          "green|绿|turquoise|#12A679|#5DCF3A"
+        ]
+      ]
     },
     {
       "key": "VIZ-10-B",
@@ -643,28 +1105,47 @@
       "form": "两态 + 条右说明（极紧凑，状态 = 2）",
       "probe": "wf-segbar",
       "root_class": "wf-segbar--b",
-      "required": ["wf-segbar--b", "wf-segbar-row", "wf-segbar-row__track"],
+      "required": [
+        "wf-segbar--b",
+        "wf-segbar-row",
+        "wf-segbar-row__track"
+      ],
       "min_items": 3,
       "strict": false,
-      "geometry": "件型线框.md §12.2 / §12.3",
+      "geometry": {
+        "wire": "12.2",
+        "geom": "12.3",
+        "state": "12.4"
+      },
       "snippet": null,
+      "icon_rules": "类目图标 14×14 按类目语义自绘·graphite-d10；两态段色 green→red-l10（§12.2/§12.3）",
       "tokens": {
         "status": "measured",
         "src": "件型线框.md §12.3（A-实测）",
-        "bg": "行无底、无圆角（透明）",
-        "bd": null,
+        "bg": "行底 graphite-l50 #F7F9FC（h32、r4、内容垂直居中）",
+        "bd": "graphite-l30 #E1E5EB 1px（卡）",
         "shadow": null,
         "radius": "卡 r2",
         "pad": "卡 p16",
-        "item": "卡固定高 184；行 24（外层 30 网格居中）；类目区定宽 144；条 72×4",
+        "item": "卡高随内容（样本 184）；行 32px；类目区定宽 144px（名称 58 / 数值 34 右对齐）；条 72×4px",
         "title": "12/700，行高 24，下距 8",
         "value": "数值 12 graphite-d40 等宽 w16 右对齐",
         "label": "名称 58 定宽 12 graphite-d30",
         "icon": "圆点 6×6 orange",
         "statusColor": "turquoise-d10 → red-d10；“0 异常”用 graphite 弱化，不用红",
-        "special": "4 行等分、视觉留白 ≈6；第 4 行可留明细（h20，10px，标签 orange-d10）"
+        "special": "4 行等分；数字与单位「个」间距 4px；第 4 行可留明细（h20，10px，标签 orange-d10）"
       },
-      "style_must": [["184"], ["h 4|4px"], ["turquoise-d10|#2FBF9E"]]
+      "style_must": [
+        [
+          "184"
+        ],
+        [
+          "h 4|h4|4px|72×4"
+        ],
+        [
+          "turquoise-d10|#12A679"
+        ]
+      ]
     }
   ]
 }
