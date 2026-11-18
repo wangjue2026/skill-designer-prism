@@ -40,7 +40,7 @@ function structure(k) {
 
 function styleLine(k) {
   const t = k.tokens || {};
-  const segs = ['档 B（默认；切档只换容器语气 token，不动结构）', '底 ' + orNone(t.bg), '描边 ' + orNone(t.bd), '阴影 ' + orNone(t.shadow), '圆角 ' + orNone(t.radius), '内距 ' + orNone(t.pad), '项 ' + orNone(t.item)];
+  const segs = [k.tone || '档 B（默认；切档只换容器语气 token，不动结构）', '底 ' + orNone(t.bg), '描边 ' + orNone(t.bd), '阴影 ' + orNone(t.shadow), '圆角 ' + orNone(t.radius), '内距 ' + orNone(t.pad), '项 ' + orNone(t.item)];
   if (t.title) segs.push('标题 ' + t.title);
   if (t.value) segs.push('数值 ' + t.value);
   if (t.label) segs.push('标签 ' + t.label);

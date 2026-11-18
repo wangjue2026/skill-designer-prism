@@ -12,6 +12,18 @@
   },
   "keys": [
     {
+      "key": "VIZ-11-A",
+      "file": "pages/VIZ-11-AI内容输出容器.html",
+      "selector": "[data-viz=\"VIZ-11-A\"]",
+      "instances": 2,
+      "variants": [
+        { "selector": "[data-viz=\"VIZ-11-A\"]:nth-of-type(1)", "note": "默认态：结论句 + 要点 + 来源行" },
+        { "selector": "[data-viz=\"VIZ-11-A\"]:nth-of-type(2)", "note": "生成中：光晕与描边不动，标签转「生成中…」+ 骨架 3 行" }
+      ],
+      "slots": { "copy": ".wf-ai-block__lead, .wf-ai-block__src", "labels": ".wf-ai-block__label", "icons": ".wf-ai-block__mark" },
+      "note": "四层底（CSS 书写顺序即层叠顺序）缺一即脱形；光晕只编码「生成内容」身份，不随状态换色；失败不改色只在底部加红字"
+    },
+    {
       "key": "VIZ-01-A",
       "file": "pages/VIZ-01-顶部统计概览.html",
       "selector": "[data-viz=\"VIZ-01-A\"]",

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>件型参考库 · ⑪ AI 内容输出容器</title>
+<style>
+  :root{--blue:#1C6EFF;--red:#D9363E;--g-l50:#F7F9FC;--g-l40:#EDF1F7;--g-l30:#E1E5EB;--g-l20:#D3D7DE;
+    --g-l10:#BEC3CC;--g-d40:#2F3540;--g-d30:#454C59;--g-d20:#5E6573;--g-d10:#6F7785;
+    --ai-border:#E8F4FF}
+  body{margin:0;padding:24px;background:#FFFFFF;color:var(--g-d40);
+    font:13px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  h2{font-size:16px;margin:0 0 4px} h5{font-size:13px;margin:0 0 8px;color:var(--g-d10)}
+  .hint{font-size:12px;color:var(--g-d10);margin:0 0 10px}
+  .wf-container{background:#fff;border:1px solid var(--g-l30);border-radius:4px;padding:16px;margin:0 0 16px;
+    display:flex;flex-direction:column;gap:16px}
+  .wf-sub{font-size:12px;font-weight:700;color:var(--g-d30);margin:0}
+  .viz-decl{font-size:11px;color:var(--g-d10);background:#fff;border:1px dashed var(--g-l20);border-radius:4px;padding:12px;margin:12px 0;line-height:1.9}
+
+  /* ⑪A AI 内容输出容器：四层底（CSS 书写顺序 = 层叠顺序，先写者在上层） */
+  .wf-ai-block{display:flex;flex-direction:column;gap:8px;padding:4px 12px 8px 12px;box-sizing:border-box;
+    border-radius:6px;border:1px solid var(--ai-border);
+    background:
+      radial-gradient(29% 535% at 98% 100%, #20CC941A 0%, #FFFFFF00 100%),
+      radial-gradient(44% 195% at 49% 100%, #20CC941A 0%, #FFFFFF00 100%),
+      radial-gradient(29% 132% at 19% -11%, #2A78FF1F 0%, #2A78FF00 100%),
+      #FFFFFF;
+    min-width:0}
+
+  /* 头部行 h20：标识 14 + 标签 12/20 + 右侧操作 16 */
+  .wf-ai-block__head{display:flex;align-items:center;gap:4px;height:20px;flex-wrap:wrap;min-width:0}
+  .wf-ai-block__mark{width:14px;height:14px;flex:0 0 14px;color:var(--blue)}
+  .wf-ai-block__label{font-size:12px;line-height:20px;color:var(--g-d10);white-space:nowrap}
+  .wf-ai-block__ops{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .wf-ai-block__ops button{width:16px;height:16px;padding:0;border:0;background:transparent;cursor:pointer;
+    color:var(--g-d10);display:flex;align-items:center;justify-content:center}
+  .wf-ai-block__ops button:hover{color:var(--blue)}
+  .wf-ai-block__ops svg{width:14px;height:14px}
+
+  /* 内容块：结论句 14/22 d40 ≤2 行；要点 12/20 d30；块间 gap 8 */
+  .wf-ai-block__body{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .wf-ai-block__lead{font-size:14px;line-height:22px;color:var(--g-d40);margin:0}
+  .wf-ai-block__bullets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .wf-ai-block__bullets li{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:20px;color:var(--g-d30);min-width:0}
+  .wf-ai-block__bullets li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--g-l10);
+    flex:0 0 6px;margin-top:7px}
+  .wf-ai-block__src{font-size:12px;line-height:20px;color:var(--g-d10)}
+
+  /* 生成中：骨架 3 行（身份先立，不闪灰） */
+  .wf-ai-block__skel{display:flex;flex-direction:column;gap:8px}
+  .wf-ai-block__skel i{display:block;height:12px;border-radius:3px;background:var(--g-l40)}
+  .wf-ai-block__skel i:nth-child(1){width:100%}
+  .wf-ai-block__skel i:nth-child(2){width:86%}
+  .wf-ai-block__skel i:nth-child(3){width:64%}
+
+  @media (max-width:640px){
+    .wf-ai-block__head{height:auto;row-gap:4px}
+    .wf-ai-block__ops{margin-left:0}
+  }
+</style>
+</head>
+<body>
+
+<h2>件型参考库 · AI 内容输出容器</h2>
+<p class="hint">示例环境：管理端演示租户 ｜ 快照 2026-09-18 08:00 ｜ 规模：37 台终端 / 6 个部门（示例数据，可整块替换）</p>
+
+<h5 id="page-07">Page-07 ⑪ AI 内容输出容器（A · 默认态 / 生成中）</h5>
+<div class="wf-container">
+
+  <div class="wf-sub">VIZ-11-A 默认态（三层光晕 + #E8F4FF 边 + r6 · 内距 4 12 8 12 · gap 8 · 结论 14/22 + 要点 12/20 + 来源 12/20）</div>
+  <div class="wf-ai-block" data-viz="VIZ-11-A">
+    <div class="wf-ai-block__head">
+      <svg class="wf-ai-block__mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3l1.8 4.9L18.8 9.7l-5 1.8L12 16.4l-1.8-4.9-5-1.8 5-1.8z"/>
+        <path d="M18.5 15.5l.8 2.1 2.2.8-2.2.8-.8 2.1-.8-2.1-2.2-.8 2.2-.8z"/>
+      </svg>
+      <span class="wf-ai-block__label">AI 总结</span>
+      <span class="wf-ai-block__ops">
+        <button type="button" title="复制">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M15 5.5A1.5 1.5 0 0013.5 4H5.5A1.5 1.5 0 004 5.5v8A1.5 1.5 0 005.5 15"/></svg>
+        </button>
+        <button type="button" title="收起">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg>
+        </button>
+      </span>
+    </div>
+
+    <div class="wf-ai-block__body">
+      <p class="wf-ai-block__lead">近 24 小时共 37 台终端出现凭据异常，集中在财务部与研发二部。</p>
+      <ul class="wf-ai-block__bullets">
+        <li>财务部 14 台，占该部门终端 31%，最早出现在 09:12。</li>
+        <li>研发二部 11 台，集中在 2 个出口 IP（10.20.8.14 / 10.20.8.31）。</li>
+        <li>其余 12 台分散在 6 个部门，未发现共同出口。</li>
+      </ul>
+    </div>
+
+    <div class="wf-ai-block__src">基于 09-17 08:00 – 09-18 08:00 的终端行为聚合</div>
+  </div>
+
+  <div class="wf-sub">VIZ-11-A 生成中（光晕与描边不动 · 标签转「生成中…」 · 骨架 3 行 h12 r3 l40）</div>
+  <div class="wf-ai-block" data-viz="VIZ-11-A">
+    <div class="wf-ai-block__head">
+      <svg class="wf-ai-block__mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3l1.8 4.9L18.8 9.7l-5 1.8L12 16.4l-1.8-4.9-5-1.8 5-1.8z"/>
+      </svg>
+      <span class="wf-ai-block__label">AI 分析 · 生成中…</span>
+    </div>
+    <div class="wf-ai-block__body">
+      <div class="wf-ai-block__skel"><i></i><i></i><i></i></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="viz-decl">
+| 件型 | AI 内容输出容器 |
+| 件型键 | `VIZ-11-A`（partial） |
+| 线框与几何 | `件型线框.md` §13.1 线框 / §13.2 几何表 / §13.3 状态矩阵 |
+| 线框原语 | `class="wf-ai-block" data-viz="VIZ-11-A"`；必含 `wf-ai-block__body` ×≥1 |
+| 图形编码规则 | 光晕只编码「这是生成内容」的身份，不编码状态；生成方式标识 14×14 线性 SVG（星芒 / 对话 / 折线分析），色 `#1C6EFF`，禁纯色块或 emoji |
+| 风格规范 | 身份档（生成内容）：三层光晕 + 品牌色/选中背景 #E8F4FF 边 + r6；不随档 A / B 切换，也不与页内其他件混用第二套生成内容样式 ／ 底 四层叠底，自下而上：① 白底 品牌色/白色 #FFFFFF；② 左上蓝晕 radial-gradient(29% 132% at 19% -11%, #2A78FF1F 0%, #2A78FF00 100%)；③ 中下绿晕 radial-gradient(44% 195% at 49% 100%, #20CC941A 0%, #FFFFFF00 100%)；④ 右下绿晕 radial-gradient(29% 535% at 98% 100%, #20CC941A 0%, #FFFFFF00 100%)；两绿晕同色 @≈10%，蓝晕 @≈12%；蓝晕收尾 #2A78FF00 与绿晕收尾 #FFFFFF00 不可互换 ／ 描边 品牌色/选中背景 #E8F4FF 1px ／ 阴影 无 ／ 圆角 r6（6px） ／ 内距 4 12 8 12（上 4 / 右 12 / 下 8 / 左 12） ／ 项 块间距 gap 8；头部行 h20；正文块高随内容；容器宽 flex:1 1 auto 不写死 ／ 标题 生成方式标签 12/400 graphite-d10，与标识间距 4，不设大标题 ／ 数值 结论首句 14/22 graphite-d40 ≤2 行 ／ 标签 正文 / 要点 12/20 graphite-d30；来源 12/20 graphite-d10 ／ 图标 标识 14×14；操作位按钮 16×16、图标 14×14 贴右 ／ 状态色 不承载状态，光晕与描边恒定 ／ 特有 三层光晕缺一即脱形；上 4 下 8 不得拉平；正文块 ≤5 超则折叠 |
+| 交互与退化 | 头部操作位：复制 / 重新生成 / 收起（16×16，hover 转 #1C6EFF，无底无边）。**自适应**：容器宽随父栏，正文自动折行不横向滚动；窄屏操作位折到下一行。**四条状态**见 §13.3：生成中保留光晕 + 骨架；失败不改色只在底部加红字；空态降级为无光晕提示条；超长折叠为「展开全部」 |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+<div class="viz-decl">
+| 件型 | AI 内容输出容器 |
+| 件型键 | `VIZ-11-A`（partial · 生成中变体） |
+| 线框与几何 | `件型线框.md` §13.1 线框 / §13.2 几何表 / §13.3 状态矩阵 |
+| 线框原语 | `class="wf-ai-block" data-viz="VIZ-11-A"`；必含 `wf-ai-block__body` ×≥1 |
+| 图形编码规则 | 生成中态**不换底、不转灰**：光晕与描边保持默认，只把标签改为「生成中…」并在内容区放骨架 3 行（h12 / r3 / graphite-l40，宽度 100% / 86% / 64%） |
+| 风格规范 | 身份档（生成内容）：三层光晕 + 品牌色/选中背景 #E8F4FF 边 + r6 ／ 底 白底 品牌色/白色 #FFFFFF + 左上蓝晕 radial-gradient(29% 132% at 19% -11%, #2A78FF1F 0%, #2A78FF00 100%) + 中下绿晕 radial-gradient(44% 195% at 49% 100%, #20CC941A 0%, #FFFFFF00 100%) + 右下绿晕 radial-gradient(29% 535% at 98% 100%, #20CC941A 0%, #FFFFFF00 100%)；绿晕基色 #20CC94 @≈10%，蓝晕 @≈12% ／ 描边 品牌色/选中背景 #E8F4FF 1px ／ 阴影 无 ／ 圆角 r6（6px） ／ 内距 4 12 8 12；块间距 gap 8 ／ 项 头部行 h20；骨架 3 行 h12 r3 ／ 标题 生成方式标签 12/400 graphite-d10 ／ 数值 结论首句 14/22 graphite-d40 ／ 标签 正文 12/20 graphite-d30；来源 12/20 graphite-d10 ／ 图标 标识 14×14；操作位按钮 16×16、图标 14×14 ／ 状态色 不承载状态，光晕与描边恒定 ／ 特有 生成中不闪灰、不换底；三层光晕缺一即脱形 |
+| 交互与退化 | 生成中不给取消按钮（避免空点击），只有头部标签变化 + 骨架；骨架行宽按 100/86/64 递减，暗示文末收尾。生成结束后同一容器原地替换为正文，不重建容器（避免光晕闪断） |
+| 可替代性 | 可参数化重绘（DOM 组件） |
+</div>
+
+</body>
+</html>

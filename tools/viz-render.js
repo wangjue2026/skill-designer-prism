@@ -30,7 +30,7 @@ const orNone = (v) => (v === null || v === undefined || v === '' ? '无' : v);
 function styleLine(k) {
   const t = k.tokens || {};
   const segs = [
-    '档 B（默认；切档只换容器语气 token，不动结构）',
+    k.tone || '档 B（默认；切档只换容器语气 token，不动结构）',
     '底 ' + orNone(t.bg),
     '描边 ' + orNone(t.bd),
     '阴影 ' + orNone(t.shadow),
