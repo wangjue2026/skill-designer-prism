@@ -126,6 +126,14 @@
     details.sketch-fold[open] > summary::before { content: "▾ "; }
     details.sketch-fold[open] > summary { border-bottom: 1px solid #E1E5EB; border-radius: 6px 6px 0 0; }
     details.sketch-fold .sketch-body { padding: 12px 14px; }
+    details.sec-fold { border: 1px solid #E1E5EB; border-radius: 6px; background: #FFFFFF; margin: 10px 0 14px; }
+    details.sec-fold > summary { cursor: pointer; padding: 8px 14px; font-size: 12px; font-weight: 600;
+      color: #1C6EFF; background: #F7F9FC; border-radius: 6px; list-style: none; }
+    details.sec-fold > summary::-webkit-details-marker { display: none; }
+    details.sec-fold > summary::before { content: "▸ "; }
+    details.sec-fold[open] > summary::before { content: "▾ "; }
+    details.sec-fold[open] > summary { border-bottom: 1px solid #E1E5EB; border-radius: 6px 6px 0 0; }
+    details.sec-fold > .sec-fold-body { padding: 10px 14px 4px; }
   </style></head>
 <body>
 <div class="wrap">
@@ -382,7 +390,9 @@
       <li><b>与草图的一致性</b>：对应草图 P1；主结构与分区完整继承。</li>
     </ul>
 
-    <p><b>Page-01 设计经验与组件选型映射清单</b></p>
+    <details class="sec-fold" data-purpose="appendix">
+      <summary>🧾 Page-01 设计经验与组件选型映射清单（点开查看：组件 / 规范引用 / 硬指标 / 决策域经验）</summary>
+      <div class="sec-fold-body">
     <table>
       <thead>
         <tr><th style="width:14%;">区域</th><th style="width:18%;">组件</th><th style="width:18%;">规范出处</th><th style="width:34%;">硬指标</th><th style="width:16%;">来源</th></tr>
@@ -397,6 +407,8 @@
         <tr><td>新增 / 编辑容器</td><td><code>IxDrawer</code></td><td>comp-drawer.md</td><td>宽 <code>800px</code>，字段多超一屏；提交后关闭并刷新</td><td><span class="tag-exp">D02-EP02</span></td></tr>
       </tbody>
     </table>
+      </div>
+    </details>
 
     <div class="wf-container">
       <div class="wf-label">📐 台账页界面结构线框示意图 (Table Overview)</div>
@@ -439,7 +451,9 @@
       <li><b>与草图的一致性</b>：对应草图 P2；「来源追溯」为本方案新增分区。</li>
     </ul>
 
-    <p><b>Page-02 设计经验与组件选型映射清单</b></p>
+    <details class="sec-fold" data-purpose="appendix">
+      <summary>🧾 Page-02 设计经验与组件选型映射清单（点开查看：组件 / 规范引用 / 硬指标 / 决策域经验）</summary>
+      <div class="sec-fold-body">
     <table>
       <thead>
         <tr><th style="width:14%;">区域</th><th style="width:18%;">组件</th><th style="width:18%;">规范出处</th><th style="width:34%;">硬指标</th><th style="width:16%;">来源</th></tr>
@@ -450,6 +464,8 @@
         <tr><td>类型标签</td><td><code>IxTag</code></td><td>comp-tag.md</td><td>浅底深字浅边框，附"归入理由"Popover</td><td><span class="tag-exp">D04-EP04</span></td></tr>
       </tbody>
     </table>
+      </div>
+    </details>
 
     <div class="wf-container">
       <div class="wf-label">📐 详情抽屉结构线框示意图 (Detail Drawer)</div>
