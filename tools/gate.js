@@ -181,7 +181,9 @@ function runEX() {
     else ok('EX-1.4-04', '图下标号说明 ' + notes + ' 段');
     // 05 禁用内部词（先剥掉 style/script，避免色值误判）
     const plain = html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
-    const banned = ['采信', '回执', '留痕', '处置', '裁决', '认领'];
+    // 2026-11-20：移出「留痕 / 处置」（安全运维专业词，写进草图是正常的）、移出「认领」
+    // （工单语境是行话、资产语境是自造，同词不同义，机检判不了，交人检）
+    const banned = ['采信', '回执', '裁决'];
     const hit = banned.filter(function (w) { return plain.indexOf(w) >= 0; });
     const bx = plain.match(/\bB[1-5]\b/g) || [];
     if (bx.length) hit.push(bx.join('、'));
@@ -223,8 +225,11 @@ function runEX() {
     if (badgeMiss.length) bad('EX-1.4-07', '图上标号与图下说明编号不一致：' + badgeMiss.join('；'));
     if (tooLong.length) wr('EX-1.4-07', '这些页面的单条说明过长（>200 字），拆成两句：' + Array.from(new Set(tooLong)).join('、'));
     // 空洞词 / 营销词（「已闭环」是 PRD 状态枚举名而非营销话术，扫描前先剔除，否则合法状态名被误拦）
-    var hollow = ['提升体验', '优化体验', '更清晰', '更高效', '更智能', '更省心', '大幅提升', '赋能', '极致', '闭环', '收口', '影响面', '态势'];
-    var plainForHollow = plain.replace(/已闭环/g, '');
+    // 2026-11-20：移出「闭环 / 收口 / 影响面 / 态势」——这些是安全运营专业术语（"告警收敛率""影响面 3 个部门""态势总览"），
+    // 一刀切禁会把专业表达逼成外行话。仅保留"纯自我评价"类（说了好、没说是什么）。
+    // 原 `已闭环` 兜底补丁随之删除（词已不在列表里，不再需要特例）。
+    var hollow = ['提升体验', '优化体验', '更清晰', '更高效', '更智能', '更省心', '大幅提升', '赋能', '极致'];
+    var plainForHollow = plain;
     var hollowHit = hollow.filter(function (w) { return plainForHollow.indexOf(w) >= 0; });
     if (hollowHit.length) bad('EX-1.4-07', '出现空洞词 / 营销词：' + hollowHit.join('、') + '（换成"能看见什么、能做什么"）');
     // 主按钮文案必须说明做什么，不许只写"确定/提交/保存"
@@ -422,7 +427,14 @@ function runEX() {
         panes.push(s.replace(/^data-pane="/, '').replace(/"$/, '').trim());
       });
       var altHit = (b2.match(ALT_PANE) || [])[0];
-      if (!tabs.length) { if (altHit) paneLack.push(pid2 + '：用「' + altHit + '」代替面板内容'); return; }
+      if (!tabs.length) {
+        if (altHit) paneLack.push(pid2 + '：用「' + altHit + '」代替面板内容');
+        // 2026-11-20 堵自证豁免：没有 tabbar 不等于"本页没有视图"。
+        // 页面里出现视图切换语义（多 pane / 分段 / 切换控件 / 左树右表）却没立账 → 判缺内容。
+        var multiHint = (b2.match(/data-pane="|class="[^"]*\b(seg|segbar|view-switch|switch-group|left-tree)\b/g) || []).length;
+        if (multiHint >= 1) paneLack.push(pid2 + '：页面有视图切换语义（' + multiHint + ' 处 pane/分段/切换控件），但没有 tabbar、也没登记视图');
+        return;
+      }
       if (!panes.length) { paneLack.push(pid2 + '：有 ' + tabs.length + ' 个页内 Tab（' + tabs.join(' / ') + '），但一块面板内容都没画'); return; }
       var missPane = tabs.filter(function (t) { return panes.indexOf(t) < 0; });
       if (missPane.length) paneLack.push(pid2 + '：缺面板「' + missPane.join('」「') + '」（Tab ' + tabs.length + ' 个 / 面板 ' + panes.length + ' 块）');
@@ -572,17 +584,129 @@ function runEX() {
       ok('EX-1.4-22', '主图完整：每个非占位页均有数据主图（≥2 数据单元、≥2 处真实数字），语法与美观由执行时能力决定');
     }
 
-    // 24 框内解释句禁令
+    // 30 视图声明（EX-1.4-30）：每页必须显式声明"几面"，不声明判未完成
+    // 根因：旧口径只在有 tabbar 时检查视图，不画切换条 = 全部跳过且判绿（自证豁免）。
+    var viewDeclLack = [];
+    blocks.forEach(function (blk4, idx4) {
+      var b4 = blk4.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      if (/class="same"/.test(b4)) return;
+      var hd4 = (b4.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid4 = (hd4.match(/class="pid">([^<]+)</) || [, 'P' + (idx4 + 1)])[1];
+      if (!/data-single-view="[^"]+"|data-view-count="\d+"/.test(b4)) viewDeclLack.push(pid4);
+    });
+    if (viewDeclLack.length) {
+      bad('EX-1.4-30', '这些页面没有声明"几面"：' + viewDeclLack.join('、') + '（每页必须写 data-single-view="原因" 或 data-view-count="N"；不声明就无法判断页内视图漏没漏画）');
+    } else {
+      ok('EX-1.4-30', '每页都已声明视图数（单视图给原因 / 多视图给数量）');
+    }
+
+    // 31 高保真区可交接（EX-1.4-31）：data-dx 与 dx-ledger 对账，Token 必须写图下
+    var dxIds = [];
+    (html.match(/data-dx="([^"]+)"/g) || []).forEach(function (s) { dxIds.push(s.replace(/^data-dx="/, '').replace(/"$/, '').trim()); });
+    var dxLedger = (html.match(/<table[^>]*class="[^"]*dx-ledger[\s\S]*?<\/table>/) || [''])[0];
+    var dx31 = [];
+    (html.match(/<[^>]+data-dx="[^"]+"[^>]*>/g) || []).forEach(function (tag) {
+      if (/data-ph="/.test(tag)) dx31.push('同一块既标 data-dx 又标 data-ph（身份冲突）：' + strip(tag).slice(0, 24));
+    });
+    if (dxIds.length) {
+      if (!dxLedger) dx31.push('有 ' + dxIds.length + ' 个 data-dx 但缺 dx-ledger 清单');
+      else {
+        var dxMiss = dxIds.filter(function (id) { return dxLedger.indexOf(id) < 0; });
+        if (dxMiss.length) dx31.push('这些高保真区没登记进 dx-ledger：' + dxMiss.join('、'));
+      }
+      if (!/Token[:：]/.test(html)) dx31.push('有高保真区但全篇找不到 `Token：` 行（Token 必须写图下）');
+    }
+    if (dx31.length) bad('EX-1.4-31', '高保真区不可交接：' + dx31.join('；'));
+    else ok('EX-1.4-31', dxIds.length ? ('高保真区可交接：' + dxIds.length + ' 个区域已登记，Token 在图下') : '无高保真区（全按占位处理；若本需求有创新点子，确认是否漏画）');
+
+    // 24 框内解释句禁令（结构化判据：词表命中 OR 图框内成句的"操作→结论 / 极值解读"口语式）
+    // 词表法追不上口语变体（实测漏检：「按状态筛一下就知道有没有压着的事」「最久压了 3 小时 12 分」），
+    // 故升级为结构法：只扫 .frame 图框内的可见文本，按句判"操作→结论"或"极值口语解读"句式。
     var frameZone = html
       .replace(/<ul class="notes">[\s\S]*?<\/ul>/g, '')
       .replace(/<details[^>]*class="[^"]*handoff[^"]*"[\s\S]*?<\/details>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
     var explainPat = /(做法[:：]|为什么[:：]|即可|当场|越[\u4e00-\u9fa5]{0,4}越|放大\s*[\d.]+\s*倍|粘贴原文)/g;
-    var explainHit = frameZone.match(explainPat);
-    if (explainHit) {
-      bad('EX-1.4-24', '框内出现解释句：' + Array.from(new Set(explainHit)).slice(0, 5).join('、') + '（解释一律放图下 notes）');
+    var explainHit = frameZone.match(explainPat) || [];
+    var frameSegs = frameZone.match(/<div[^>]*class="[^"]*\bframe\b[^"]*"[\s\S]*?(?=<div[^>]*class="[^"]*(?:\bframe\b|\bpanel\b)|<ul[^>]*class="[^"]*notes|<details|<h2)/g) || [];
+    var STRUCT_EXPLAIN = [
+      /(按|通过|点|选|切|筛)[^，。；]{0,14}(筛|选|点|切|查|看)[^，。；]{0,14}(就|便|即可)[^，。；]{0,14}(知道|看出|发现|清楚|明白)/,
+      /(最久|最快|最多|最少|最长|最短)[^，。；]{0,10}(压了|等了|花了|用了|拖了|卡了|滞留)/,
+      /就知道(有没有|是不是|为什么|为不为)|就能(看出|知道|判断)(你|有没有|是不是)/
+    ];
+    var structHit = [];
+    frameSegs.forEach(function (seg) {
+      // 文本节点按闭合标签断开，避免 span/div 粘连成一句导致命中点显示错位
+      var flat = seg.replace(/<\/(span|div|b|li|p|i|h[2-6]|td|th)>/gi, '\u0001')
+        .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/[ \t]+/g, ' ')
+        .replace(/\u0001/g, '\n');
+      flat.split(/[。；\n]/).forEach(function (sent) {
+        var mt = null;
+        for (var ri = 0; ri < STRUCT_EXPLAIN.length; ri++) { mt = STRUCT_EXPLAIN[ri].exec(sent); if (mt) break; }
+        if (mt && strip(sent).length >= 6) {
+          var at = mt.index;
+          structHit.push(strip(sent.slice(Math.max(0, at - 6), at + mt[0].length + 6)));
+        }
+      });
+    });
+    if (explainHit.length || structHit.length) {
+      var showHit = Array.from(new Set(explainHit)).slice(0, 5).concat(Array.from(new Set(structHit)).slice(0, 5));
+      bad('EX-1.4-24', '框内出现解释句：' + showHit.join('、') + '（解释一律放图下 notes；判据 = 已知词表 或 图框内成句的"操作→结论/极值解读"结构式）');
     } else {
-      ok('EX-1.4-24', '框内文案纯净：无解释句泄漏');
+      ok('EX-1.4-24', '框内文案纯净：无解释句泄漏（词表 + 结构双重判据通过）');
+    }
+
+    // 32 图内禁规格值（EX-1.4-32）：色值 / 尺寸一律写图下 Token 行
+    // 根因：图内写 #1C6EFF / 14px 会把画面弄脏，也让人误以为这是定稿尺寸；Token 属于图下 notes。
+    // 只扫"可见文本"里的值，不扫属性（fill="#1C6EFF" 是实现手段，不是图内标注；
+    // 判的是"把色值/尺寸当文字写在图上"这件事）
+    // 剔除图下 Token 行（它本来就该有值），再剥标签扫可见文本
+    var frameText = frameZone
+      .replace(/<p[^>]*class="[^"]*tkn[^"]*"[\s\S]*?<\/p>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ');
+    var valueHit = (frameText.match(/#[0-9A-Fa-f]{3,8}\b|\b\d+(?:\.\d+)?px\b/g) || []);
+    if (valueHit.length) {
+      bad('EX-1.4-32', '图框内出现规格值 ' + valueHit.length + ' 处（' + Array.from(new Set(valueHit)).slice(0, 3).join(' / ') + '）：色值 / 尺寸一律写图下 Token 行，图内只放内容');
+    } else {
+      ok('EX-1.4-32', '图框内无规格值（色值与尺寸均在图下）');
+    }
+
+    // 26 跨方案切换面板完整（EX-1.4-26）：方案一 / 方案二两级切换的每个 tab 必须指向同 id 的非空 panel
+    // 盲区根因：EX-1.4-18 只查页内 Tab（tabbar/data-pane），跨方案切换（.tab[data-tab] → .panel#id）零检查，
+    // 实测方案二整块点开空白仍门禁全绿。本条专堵此洞——tab 有面板、面板有真页、默认选中唯一。
+    var planTabs = [];
+    (html.match(/<div[^>]*class="[^"]*\btab\b[^"]*"[^>]*data-tab="[^"]+"[^>]*>[^<]+<\/div>/g) || []).forEach(function (el) {
+      var mid = el.match(/data-tab="([^"]+)"/);
+      var nm = strip(el);
+      if (mid && nm) planTabs.push({ id: mid[1], name: nm, at: html.indexOf(el) });
+    });
+    var planIssues = [];
+    if (planTabs.length < 2) {
+      planIssues.push('未识别出跨方案切换条（须有 ≥2 个 <div class="tab" data-tab="…">方案一/方案二</div>）');
+    } else {
+      planTabs.forEach(function (tp) {
+        var re = new RegExp('<div[^>]*id="' + tp.id + '"[^>]*>');
+        var pm = re.exec(html);
+        if (!pm) { planIssues.push('方案「' + tp.name + '」data-tab="' + tp.id + '" 无同 id 面板（点开必空白）'); return; }
+        var rest = html.slice(pm.index + pm[0].length);
+        var em = /<div[^>]*class="[^"]*\bpanel\b|<script|<details|交接清单（不渲染）/.exec(rest);
+        var panelHtml = em ? rest.slice(0, em.index) : rest;
+        var pages = (panelHtml.match(/<div[^>]*class="[^"]*\bpage\b[^"]*"/g) || []).length;
+        var same = (panelHtml.match(/class="same"/g) || []).length;
+        var titles = (panelHtml.match(/class="t"/g) || []).length;
+        if (pages - same < 1) planIssues.push('方案「' + tp.name + '」面板无真画页面（page ' + pages + ' / same 占位 ' + same + '，只有占位条=点开空白）');
+        if (titles < 1) planIssues.push('方案「' + tp.name + '」面板无命名区块（class="t"），实质为空');
+      });
+      var onCount = planTabs.filter(function (x) { return /class="[^"]*\bon\b/.test(html.slice(Math.max(0, x.at - 20), x.at + 120)); }).length;
+      if (onCount === 0) planIssues.push('切换条无默认选中项');
+      if (onCount > 1) planIssues.push('切换条有 ' + onCount + ' 个默认选中项（只能一个）');
+      // 交付形态提醒：纯 JS 切换在无 JS 预览器里非默认方案不可见——只提示，不阻断（有面板内容即达标）
+      if (/display:\s*none/.test(html) && !/<noscript/.test(html)) wr('EX-1.4-26', '方案面板靠 display:none + JS 切换：无 JS 预览器（邮件/PDF/部分工具）里非默认方案不可见，交付时确认用户端能正常切换；如需静态可读可补 <noscript> 兜底');
+    }
+    if (planIssues.length) {
+      bad('EX-1.4-26', '跨方案切换面板不完整：' + planIssues.join('；') + '（每个方案 tab 须有同 id panel，panel 内 ≥1 真画页面 + ≥1 命名区块，相同页占位不算真页）');
+    } else {
+      ok('EX-1.4-26', '跨方案切换面板完整：' + planTabs.length + ' 个方案各有非空面板、含真画页面与命名区块，默认选中唯一');
     }
 
     // 25 页面内禁止说明文字（EX-1.4-25）：动线行 / 职责句 / 主图元说明 一律不进页面
@@ -596,6 +720,67 @@ function runEX() {
       bad('EX-1.4-25', '页面内出现说明文字：' + Array.from(new Set(noteHit)).slice(0, 6).join('、') + '（动线「进入/去向」写进交接区 flow-ledger；职责句删掉；主图只放图形与数据，"一眼看出"等解读放图下 notes）');
     } else {
       ok('EX-1.4-25', '页面内无说明文字：无动线行/职责句/主图元说明');
+    }
+
+    // 27 浮层页层级闭合（EX-1.4-27）：抽屉/弹窗页 = 灰化背景页 + 单一浮层，内容不许留在浮层外
+    var layerIssues = [];
+    blocks.forEach(function (blk4, idx4) {
+      var b4 = blk4.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      if (/class="same"/.test(b4)) return;
+      var hd4 = (b4.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid4 = (hd4.match(/class="pid">([^<]+)</) || [, 'P' + (idx4 + 1)])[1];
+      var form4 = (hd4.match(/class="form">([^<]+)</) || [, ''])[1];
+      var isLayer = /(抽屉|弹窗)/.test(form4) || /class="[^"]*wf-(drawer|modal)/.test(b4);
+      if (!isLayer) return;
+      if (!/class="[^"]*ghost/.test(b4)) layerIssues.push(pid4 + ' 浮层页缺「灰化背景页」轮廓');
+      if (!/class="[^"]*\btrig\b/.test(b4)) layerIssues.push(pid4 + ' 背景页上没标触发锚点（哪一行 / 哪个按钮点开的）');
+      var drawerAt = b4.search(/class="[^"]*wf-(drawer|modal)/);
+      var contentAt = b4.search(/class="(?:blk|sec)\b|class="[^"]*\bhero\b/);
+      if (drawerAt >= 0 && contentAt >= 0 && contentAt < drawerAt) {
+        layerIssues.push(pid4 + ' 有内容块画在浮层容器之前（会被读成「页面里又套了一个抽屉」）');
+      }
+    });
+    if (layerIssues.length) {
+      bad('EX-1.4-27', '浮层页层级不闭合：' + layerIssues.join('；') + '（抽屉/弹窗页须 = 灰化背景页（带触发锚点）+ 单一浮层，浮层外不许有内容块）');
+    } else {
+      ok('EX-1.4-27', '浮层页层级闭合：抽屉/弹窗页均有灰化背景页与触发锚点，内容全部在浮层内');
+    }
+
+    // 28 序列关系不换行（EX-1.4-28）：链路 / 流程 >=4 段，不许用会自动折行的容器承载
+    var wrapIssues = [];
+    if (/\.chain[^{]*\{[^}]*flex-wrap\s*:\s*wrap/.test(html)) wrapIssues.push('.chain 被声明为 flex-wrap:wrap（链路会被折断）');
+    blocks.forEach(function (blk5, idx5) {
+      var b5 = blk5.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      var hd5 = (b5.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid5 = (hd5.match(/class="pid">([^<]+)</) || [, 'P' + (idx5 + 1)])[1];
+      var stepC = (b5.match(/class="step"/g) || []).length;
+      if (stepC >= 4) wrapIssues.push(pid5 + ' 用 .steps 承载 ' + stepC + ' 段序列（该容器按宽度折行，链路会断成两排）');
+    });
+    if (wrapIssues.length) {
+      bad('EX-1.4-28', '序列关系会换行：' + wrapIssues.join('；') + '（>=4 段的链路 / 流程必须一条轴排完：.chain + min-width:0 + nowrap）');
+    } else {
+      ok('EX-1.4-28', '序列关系不换行：链路 / 流程均为单轴承载，无折行容器');
+    }
+
+    // 29 主图不得是卡片墙（EX-1.4-29）：主图必须有共享承载空间；页内指标卡不许堆成墙
+    var vizWall = [];
+    blocks.forEach(function (blk6, idx6) {
+      var b6 = blk6.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      if (/class="same"/.test(b6)) return;
+      var hd6 = (b6.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid6 = (hd6.match(/class="pid">([^<]+)</) || [, 'P' + (idx6 + 1)])[1];
+      var kpiC = (b6.match(/class="kpi"/g) || []).length;
+      if (kpiC >= 6) vizWall.push(pid6 + ' 页内 ' + kpiC + ' 个指标卡（卡片墙）');
+      var heroAt = b6.search(/data-hero/);
+      if (heroAt < 0) return;
+      var heroSeg = b6.slice(heroAt, heroAt + 4000);
+      var hasSpace = /class="[^"]*(chart|chain|\bmx\b|rank|stack|tl|steps|track|bars)/.test(heroSeg);
+      if (!hasSpace) vizWall.push(pid6 + ' 主图只有卡片 / 数字，没有共享承载空间（轴 / 网格 / 链路 / 构成条）');
+    });
+    if (vizWall.length) {
+      bad('EX-1.4-29', '主图退化：' + vizWall.join('；') + '（主图必须把数据之间的关系编码进同一承载空间）');
+    } else {
+      ok('EX-1.4-29', '主图未退化：每张主图都有共享承载空间，页内无指标卡墙');
     }
 
   }

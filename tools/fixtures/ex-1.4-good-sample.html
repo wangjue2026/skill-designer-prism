@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>需求草图示意（正例夹具）</title>
+<style>
+body{font:14px/1.7 -apple-system,"PingFang SC",sans-serif;color:#2F3540;margin:24px;background:#fff}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:#6F7785;font-size:13px}
+.tabs{position:sticky;top:0;background:#fff;display:flex;gap:8px;padding:10px 0;z-index:9}
+.tab{padding:6px 14px;border:1px solid #E1E5EB;border-radius:6px;cursor:pointer;font-size:13px}
+.tab.on{background:#1C6EFF;color:#fff;border-color:#1C6EFF}
+.panel{display:block}
+.page{border:1px solid #E1E5EB;border-radius:8px;margin:16px 0;padding:14px}
+.page-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pid{background:#4E5969;color:#fff;border-radius:4px;padding:1px 6px;font-size:12px}
+.page-hd h3{margin:0;font-size:15px}
+.form{color:#6F7785;font-size:12px}
+.frame{border:1px solid #DCE2EA;border-radius:6px;padding:12px;margin:8px 0}
+.hero{border:1px dashed #B9C4D2;border-radius:6px;padding:10px;margin:8px 0}
+.tabbar{display:flex;gap:16px;border-bottom:1px solid #E1E5EB;margin:10px 0 6px}
+.tabx{padding:4px 0;color:#6F7785;font-size:13px}
+.tabx.on{color:#1C6EFF;border-bottom:2px solid #1C6EFF}
+.pane{padding:6px 0}
+.box{margin:4px 0}
+.t{font-weight:600}
+.cap,.ph{background:#F2F4F7;color:#6F7785;font-style:italic;font-size:12px;padding:4px 8px;border-radius:4px;display:inline-block}
+.same{background:#F2F4F7;color:#6F7785;padding:8px 10px;border-radius:6px;margin:8px 0;font-size:13px}
+.notes{color:#4E5969;font-size:12px;padding-left:0;list-style:none}
+.n{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;background:#1C6EFF;color:#fff;border-radius:50%;font-size:11px;margin-right:4px}
+.pt{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;background:#1C6EFF;color:#fff;border-radius:50%;font-size:11px;font-style:normal;margin-left:4px}
+.btn{display:inline-block;padding:5px 12px;border:1px solid #C9D0DA;border-radius:6px;font-size:12px}
+.btn.p{background:#1C6EFF;color:#fff;border-color:#1C6EFF}
+.tkn{color:#6F7785;font-size:12px}
+.go{font-style:normal;color:#1C6EFF;font-size:12px}
+table{border-collapse:collapse;margin:8px 0}
+td,th{border:1px solid #E1E5EB;padding:4px 8px;font-size:12px;text-align:left}
+details.handoff{margin-top:28px}
+</style>
+</head>
+<body>
+
+<h1>需求草图示意</h1>
+<p class="sub">基于需求理解之后进行的设计思考草图：关键设计点已给出设计表达，常规能力以占位交代。</p>
+<p class="sub">示例环境：演示租户 · 快照时间 2026-11-20 10:00 · 09:34 越线 / 10:07 报障 / 10:20 快照 · 规模 38 台终端。仿真数据，不构成客户事实。</p>
+<p>本次需求一共 2 个页面。</p>
+
+<h2>信息架构与页面清单</h2>
+<p>模块定位：挂在「数字体验」下，与体验观测并列，只读消费资产台账。</p>
+<pre>
+数字体验            一级菜单
+├─ 体验观测        二级菜单
+│  └─ 访问诊断     三级菜单
+└─ 监测配置        二级菜单
+   └─ 证据交接     三级菜单
+</pre>
+<table>
+<tr><th>编号</th><th>页面名称</th><th>类型</th><th>说明</th></tr>
+<tr><td>P1</td><td><b>访问诊断</b></td><td>三级菜单页面</td><td>看一条链路断在哪段</td></tr>
+<tr><td>P2</td><td><b>证据交接</b></td><td>三级菜单页面</td><td>把一段证据交给处理方</td></tr>
+</table>
+
+<h2>方案对比</h2>
+<table>
+<tr><th>对比项</th><th>方案一</th><th>方案二</th></tr>
+<tr><td>整体设计说明</td><td>把「逐台翻表格」变成「只看待处理的 3 件」。代价：运维要改看清单的习惯，每轮多花 2 分钟确认。</td><td>把「读表格」变成「看一片分布」。代价：要先学会看图，每轮多花 5 分钟定位。</td></tr>
+<tr><td>who · 谁来做</td><td>系统判完，人只确认</td><td>人先说范围，系统再判</td></tr>
+<tr><td>what · 靠什么办成</td><td>待处理清单</td><td>部门分布图</td></tr>
+<tr><td>how · 人怎么操作</td><td>进页两步办完</td><td>先看图再点格，四步</td></tr>
+<tr><td>wow · 哪一刻意外</td><td>点完检测 2 秒后直接告诉你「3 台会被拦下」</td><td>一眼看见哪片红，点开就是名单</td></tr>
+<tr><td>一句话区别</td><td>系统先判完，人只确认</td><td>人先说范围，再看哪片红</td></tr>
+<tr><td>本期不做</td><td>批量下发（线下通知，人工台账登记）</td><td>同方案一</td></tr>
+</table>
+
+<h3>设计思考点</h3>
+<table>
+<tr><th>方案</th><th>编号</th><th>思考点</th><th>为什么这么想</th></tr>
+<tr><td>方案一</td><td>1</td><td>先给要办的三件，不给全量</td><td>现状里人要从 38 行里自己挑</td></tr>
+<tr><td>方案二</td><td>1</td><td>先看哪片红，再进具体对象</td><td>现状里人不知道问题集中在哪个部门</td></tr>
+</table>
+
+<div class="tabs">
+  <div class="tab on" data-tab="pa">方案一</div>
+  <div class="tab" data-tab="pb">方案二</div>
+</div>
+
+<div id="pa" class="panel">
+  <div class="page">
+    <div class="page-hd"><span class="pid">P1</span><h3>访问诊断</h3><span class="form">整页 · 两面</span></div>
+    <div class="frame" data-view-count="2">
+      <div class="dx" data-dx="DX-A-P1-01">
+        <div class="hero viz chart" data-hero>
+          <svg class="chart" width="440" height="130" viewBox="0 0 440 130" role="img" aria-label="三段链路耗时">
+            <rect x="10" y="44" width="90" height="24" rx="4" fill="#E1E5EB"></rect>
+            <rect x="110" y="34" width="150" height="44" rx="4" fill="#FA8C16"></rect>
+            <rect x="270" y="44" width="80" height="24" rx="4" fill="#E1E5EB"></rect>
+            <text x="18" y="38">入口段</text>
+            <text x="118" y="28">排队 1.8 秒</text>
+            <text x="278" y="38">响应段</text>
+            <text x="150" y="110">总耗时 2.2 秒</text>
+            <text x="330" y="110">基线 0.9 秒</text>
+          </svg>
+        </div>
+        <div class="tabbar"><span class="tabx on">路径依据</span><span class="tabx">影响范围</span></div>
+        <div class="pane" data-pane="路径依据" data-view="P1-V1">
+          <div class="box"><b class="t">判定结论</b>　27 条路径里 3 条断在入口段，影响 38 人<i class="pt">1</i></div>
+          <div class="box"><b class="t">证据分段</b>　四段证据线，入口段缺 1 条</div>
+          <p class="cap" data-ph="CAP" data-ph-id="PH-A-P1-01">筛选区：时间 / 对象 / 状态</p>
+        </div>
+        <div class="pane" data-pane="影响范围" data-view="P1-V2">
+          <div class="box"><b class="t">影响分布</b>　按部门看受影响人数，研发部 21 人</div>
+          <div class="box"><b class="t">受影响清单</b>　VU-2041 张伟 · 研发部 · 39.6 秒</div>
+        </div>
+      </div>
+      <p><span class="btn p">开始检测</span><span class="btn">取消</span>
+         <i class="go" data-go="P2">查看路径 →</i></p>
+    </div>
+    <ul class="notes">
+      <li><span class="n">1</span><b>做法</b>：主图用三段链路，断点段加粗着色。<b>为什么</b>：现状里人要在表格里自己比三段耗时。</li>
+    </ul>
+    <p class="tkn">Token：主色 #1C6EFF ｜ 风险 #FA8C16 ｜ 卡片圆角 8 ｜ 正文 14px ｜ 数字 24px 600</p>
+  </div>
+
+  <div class="page">
+    <div class="page-hd"><span class="pid">P2</span><h3>证据交接</h3><span class="form">整页 · 单视图</span></div>
+    <div class="frame" data-single-view="本页只有一个判断：这段证据交给谁">
+      <div class="hero viz chart" data-hero>
+        <svg class="chart" width="360" height="90" viewBox="0 0 360 90" role="img" aria-label="证据完整度">
+          <rect x="10" y="30" width="120" height="20" rx="4" fill="#E1E5EB"></rect>
+          <rect x="140" y="30" width="90" height="20" rx="4" fill="#E1E5EB"></rect>
+          <text x="16" y="24">已采到 3 段</text>
+          <text x="146" y="24">缺 1 段</text>
+          <text x="250" y="46">完整度 75%</text>
+        </svg>
+      </div>
+      <div class="box"><b class="t">交接材料清单</b>　四段证据 + 判定结论 + 把握程度<i class="pt">1</i></div>
+      <div class="box"><b class="t">责任方向建议</b>　入口段问题，建议交网络组</div>
+    </div>
+    <ul class="notes">
+      <li><span class="n">1</span><b>做法</b>：先给材料清单，再给建议方向。<b>为什么</b>：现状里人要把四段证据手工贴进工单。</li>
+    </ul>
+    <p class="tkn">Token：主色 #1C6EFF ｜ 圆角 8 ｜ 正文 14px</p>
+  </div>
+</div>
+
+<div id="pb" class="panel">
+  <div class="page">
+    <div class="page-hd"><span class="pid">P1</span><h3>访问诊断</h3><span class="form">整页 · 单视图</span></div>
+    <div class="frame" data-single-view="本页只有一个判断：哪片红">
+      <div class="dx" data-dx="DX-B-P1-01">
+        <div class="hero viz chart" data-hero>
+          <svg class="chart" width="420" height="110" viewBox="0 0 420 110" role="img" aria-label="部门分布">
+            <rect x="20" y="30" width="60" height="56" rx="4" fill="#FA8C16"></rect>
+            <rect x="100" y="56" width="60" height="30" rx="4" fill="#E1E5EB"></rect>
+            <rect x="180" y="66" width="60" height="20" rx="4" fill="#E1E5EB"></rect>
+            <text x="24" y="24">研发 21</text>
+            <text x="104" y="50">市场 9</text>
+            <text x="184" y="60">其他 8</text>
+            <text x="270" y="90">累计 38 人</text>
+          </svg>
+        </div>
+        <div class="box"><b class="t">部门分布</b>　研发部 21 人最集中<i class="pt">1</i></div>
+        <div class="box"><b class="t">受影响清单</b>　APP-07 CRM · 研发部 · 38 人</div>
+      </div>
+      <p><span class="btn p">按部门看</span></p>
+    </div>
+    <ul class="notes">
+      <li><span class="n">1</span><b>做法</b>：一屏铺部门分布，红格点开才是名单。<b>为什么</b>：现状里人不知道问题集中在哪个部门。</li>
+    </ul>
+    <p class="tkn">Token：主色 #1C6EFF ｜ 风险 #FA8C16 ｜ 圆角 8 ｜ 正文 14px</p>
+  </div>
+
+  <div class="same" data-ph="SAME" data-ph-id="PH-B-P2-01">〔占位〕P2 证据交接 与方案一相同</div>
+</div>
+
+<details class="handoff">
+<summary>交接件：台账与留档（给下游 4.1 / 5.0 读，不参与方案阅读）</summary>
+
+<table class="view-ledger">
+<tr><th>视图编号</th><th>所属页面</th><th>视图名</th><th>这一面回答什么</th><th>主导图形</th><th>关键区块</th><th>该面能力位</th><th>两套差异</th></tr>
+<tr><td>P1-V1</td><td>P1</td><td>路径依据</td><td>断在哪一段</td><td>链路轨道</td><td>判定结论 / 证据分段</td><td>筛选：时间 / 对象 / 状态</td><td>两套相同</td></tr>
+<tr><td>P1-V2</td><td>P1</td><td>影响范围</td><td>影响了谁、影响多少</td><td>分布 + 清单</td><td>影响分布 / 受影响清单</td><td>本面无筛选</td><td>两套相同</td></tr>
+</table>
+
+<table class="flow-ledger">
+<tr><th>场景</th><th>步骤</th><th>页面</th><th>触发元素</th><th>到哪</th><th>到这步看到什么</th><th>末态判定</th></tr>
+<tr><td>S1</td><td>1</td><td>P1</td><td>行末「查看路径 →」</td><td>P2</td><td>四段证据与交接材料清单</td><td>是，走到这里算办完</td></tr>
+</table>
+
+<table class="ph-ledger">
+<tr><th>占位编号</th><th>方案</th><th>页面</th><th>类型</th><th>位置</th><th>占位文案</th><th>能力项</th><th>下游动作</th></tr>
+<tr><td>PH-A-P1-01</td><td>方案一</td><td>P1</td><td>CAP</td><td>路径依据 · 面板首行</td><td>筛选区：时间 / 对象 / 状态</td><td>时间 / 对象 / 状态</td><td>展开为三个可点筛选，位置不变</td></tr>
+<tr><td>PH-B-P2-01</td><td>方案二</td><td>P2</td><td>SAME</td><td>方案二面板内占位条</td><td>P2 与方案一相同</td><td>—</td><td>从方案一 P2 取完整设计</td></tr>
+</table>
+
+<table class="dx-ledger">
+<tr><th>编号</th><th>方案</th><th>页面</th><th>区域</th><th>来源</th><th>图下 Token</th><th>下游动作</th></tr>
+<tr><td>DX-A-P1-01</td><td>方案一</td><td>P1</td><td>主图 + 两个面板</td><td>本页主体内容</td><td>有</td><td>继承图表形态与配色，只补字段与异常态</td></tr>
+<tr><td>DX-B-P1-01</td><td>方案二</td><td>P1</td><td>部门分布</td><td>本页主体内容</td><td>有</td><td>继承分布形态与配色，只补字段</td></tr>
+</table>
+
+</details>
+</body>
+</html>

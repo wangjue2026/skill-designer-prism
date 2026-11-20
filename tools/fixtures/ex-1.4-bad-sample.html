@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><title>回归坏例</title>
+<style>
+body{font-family:sans-serif;padding:20px}
+.steps{display:flex;flex-wrap:wrap;gap:8px}
+.step{flex:1 1 150px;border:1px solid #ccc;padding:8px}
+.wf-drawer{border:1px solid #999;margin-left:auto;width:70%}
+.wf-drawer-ft{display:flex;justify-content:flex-start;gap:6px;padding:6px}
+.hero{border:1px dashed #ccc;padding:8px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kpi{border:1px solid #ddd;padding:6px}
+.pt{color:#1C6EFF}
+</style></head><body>
+<div class="tabs"><div class="tab on" data-tab="plan-a">方案一</div><div class="tab" data-tab="plan-b">方案二</div></div>
+
+<div class="panel on" id="plan-a">
+  <div class="page">
+    <div class="page-hd"><span class="pid">P1</span><h3>路径详情</h3><span class="form">右侧抽屉</span></div>
+    <div class="frame">
+      <div class="blk"><i class="pt">1</i> 抽屉外的内容块</div>
+      <div class="wf-drawer">
+        <div class="wf-drawer-hd">PT-2087 路径详情</div>
+        <div class="wf-drawer-body"><div class="hero" data-hero><div class="bars"><div class="bar-track"><div class="bar-fill" style="width:40%">9</div></div></div></div></div>
+        <div class="wf-drawer-ft"><span class="btn p">关闭</span></div>
+      </div>
+    </div>
+    <ul class="notes"><li><span class="n">1</span><span class="txt"><b>做法</b>：内容画在抽屉外。<br><b>为什么</b>：验证浮层判据。</span></li></ul>
+  </div>
+  <div class="page">
+    <div class="page-hd"><span class="pid">P2</span><h3>计算记录</h3><span class="form">三级菜单页面</span></div>
+    <div class="frame">
+      <div class="hero" data-hero>
+        <div class="steps">
+          <div class="step">段 1</div><div class="step">段 2</div><div class="step">段 3</div><div class="step">段 4</div><div class="step">段 5</div>
+        </div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="v">1</div></div><div class="kpi"><div class="v">2</div></div><div class="kpi"><div class="v">3</div></div>
+        <div class="kpi"><div class="v">4</div></div><div class="kpi"><div class="v">5</div></div><div class="kpi"><div class="v">6</div></div>
+      </div>
+    </div>
+    <ul class="notes"><li><span class="n">1</span><span class="txt"><b>做法</b>：五段用 steps。<br><b>为什么</b>：验证换行判据。</span></li></ul>
+  </div>
+</div>
+
+<div class="panel" id="plan-b">
+  <div class="page">
+    <div class="page-hd"><span class="pid">P3</span><h3>路径全景</h3><span class="form">三级菜单页面</span></div>
+    <div class="frame">
+      <div class="hero" data-hero>
+        <div class="kpis"><div class="kpi"><div class="v">486</div></div><div class="kpi"><div class="v">96</div></div></div>
+      </div>
+    </div>
+    <ul class="notes"><li><span class="n">1</span><span class="txt"><b>做法</b>：主图只有卡片。<br><b>为什么</b>：验证卡片墙判据。</span></li></ul>
+  </div>
+</div>
+</body></html>
