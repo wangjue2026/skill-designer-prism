@@ -3,7 +3,7 @@
 # 草图交付前轻量门禁 (Sketch Self-Check)
 #
 # 检查对象：1.4 输出的草图 HTML（草图-<业务名>.html）
-# 检查范围：只查"结构级规范"5 条，不查精度级（像素/字段名/图标/星号占位）
+# 检查范围：只查"结构级规范"6 条，不查精度级（像素/字段名/图标/星号占位）
 #
 #   ① 主按钮用主题蓝        —— 页面主操作必须用主题色实心按钮，不能全灰
 #   ② 按钮顺序主左取右      —— 页脚双按钮，主按钮在前、取消/关闭在后
@@ -27,12 +27,12 @@ is_bad() { FAIL=$((FAIL + 1)); }
 head_() { echo; echo "🔎 $1"; }
 
 echo "============================================================"
-echo " 织雨草图 · 交付前轻量门禁（只查结构级规范 5 条）"
+echo " 织雨草图 · 交付前轻量门禁（只查结构级规范 6 条）"
 echo " 目标文件: $SKETCH"
 echo "============================================================"
 
 # ---------- 1. 主按钮用主题蓝 ----------
-head_ "1/5 主按钮用主题蓝（主操作必须用主题色实心）"
+head_ "1/6 主按钮用主题蓝（主操作必须用主题色实心）"
 BTN_TOTAL=$(grep -oE 'class="btn( p)?"' "$SKETCH" | wc -l | tr -d ' ')
 BTN_PRIMARY=$(grep -oE 'class="btn p"' "$SKETCH" | wc -l | tr -d ' ')
 if [ "$BTN_TOTAL" -eq 0 ]; then
@@ -45,7 +45,7 @@ else
 fi
 
 # ---------- 2. 按钮顺序：主在左、取消在右 ----------
-head_ "2/5 按钮顺序（主按钮在前，取消/关闭在后）"
+head_ "2/6 按钮顺序（主按钮在前，取消/关闭在后）"
 BAD_ORDER=$(grep -oE '<span class="btn">(取消|关闭|返回)</span>[[:space:]]*<span class="btn p">' "$SKETCH" || true)
 if [ -z "$BAD_ORDER" ]; then
   echo "  ✅ 未检出「取消在前、主按钮在后」"
@@ -55,7 +55,7 @@ else
 fi
 
 # ---------- 3. 页脚按钮对齐：抽屉贴左、弹窗贴右 ----------
-head_ "3/5 页脚按钮对齐（抽屉 flex-start / 弹窗 flex-end）"
+head_ "3/6 页脚按钮对齐（抽屉 flex-start / 弹窗 flex-end）"
 # 抽屉容器内的页脚不应右对齐
 BAD_DRAWER=$(printf '%s' "$(grep -n 'wf-drawer-body' "$SKETCH" || true)" )
 DRAWER_FOOT_RIGHT=$(grep -nE 'justify-content:flex-end' "$SKETCH" | wc -l | tr -d ' ')
@@ -73,7 +73,7 @@ else
 fi
 
 # ---------- 4. 容器形态不混用 ----------
-head_ "4/5 容器形态不混用（抽屉/弹窗不同时承载同一页脚）"
+head_ "4/6 容器形态不混用（抽屉/弹窗不同时承载同一页脚）"
 if grep -q 'wf-drawer-body' "$SKETCH" && grep -q 'wf-modal-body' "$SKETCH"; then
   echo "  ℹ️ 本图同时含抽屉与弹窗（正常：不同页面各自形态），请人工确认无同一页脚混用"
 else
@@ -81,7 +81,7 @@ else
 fi
 
 # ---------- 5. 草图不出现规范语义件 ----------
-head_ "5/5 草图不出现规范语义件（Ix* 组件名 / px 像素 / 表单规范结构件）"
+head_ "5/6 草图不出现规范语义件（Ix* 组件名 / px 像素 / 表单规范结构件）"
 # 注：BSD grep 不支持 \b，用 [^A-Za-z] 兼容写法
 N_IX=$(grep -oE '(^|[^A-Za-z])Ix[A-Z][A-Za-z]+' "$SKETCH" | grep -oE 'Ix[A-Z][A-Za-z]+' | sort -u | tr '\n' ' ')
 N_FORM=$(grep -oE 'wf-form-item|wf-form-label|class="req"' "$SKETCH" | sort -u | tr '\n' ' ')
@@ -94,11 +94,24 @@ else
   is_bad
 fi
 
+# ---------- 6. 切换条吸顶 ----------
+head_ "6/6 切换条吸顶（方案一/方案二 tab 随滚动冻结）"
+STICKY=$(grep -oE "position:[[:space:]]*sticky" "$SKETCH" | wc -l | tr -d " ")
+TABSEL=$(grep -oE "class=\"[^\"]*(tabs|tabbar)[^\"]*\"" "$SKETCH" | wc -l | tr -d " ")
+if [ "$TABSEL" -eq 0 ]; then
+  echo "  ⚠️ 未检出方案切换条（单页草图或采用其它承载，跳过）"
+elif [ "$STICKY" -eq 0 ]; then
+  echo "  ❌ 有方案切换条但没有 position:sticky；规范三处要求吸顶，滚动时 tab 会滚走"
+  is_bad
+else
+  echo "  ✅ 切换条已声明 position:sticky（$STICKY 处）；是否真正吸住需滚动人检"
+fi
+
 # ---------- 结论 ----------
 echo
 echo "============================================================"
 if [ "$FAIL" -eq 0 ]; then
-  echo "🎉 草图门禁通过（5/5）：可交付给用户做方案确认。"
+  echo "🎉 草图门禁通过（6/6）：可交付给用户做方案确认。"
   exit 0
 else
   echo "🚫 草图门禁未通过（$FAIL 项）：修完再交付，别带病给用户看。"

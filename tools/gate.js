@@ -255,12 +255,12 @@ function runEX() {
     else if (badName.length) bad('EX-1.4-08', '页面名不合规（须名词化 / ≤6 字 / 无问句与指示代词）：' + badName.join('、'));
     else ok('EX-1.4-08', '页面名合规 ' + nm.length + ' 个：' + nm.join(' / '));
 
-    // 09 信息架构四件套（先 IA 后页面）
-    var iaNeed = ['模块定位', '功能域', '映射'];
+    // 09 信息架构四件套（先 IA 后页面）：模块定位 / 信息架构树 / 页面清单 5 列 / 页内视图清单
+    var iaNeed = ['模块定位', '信息架构', '页面清单'];
     if (/class="[^"]*tabbar/.test(html)) iaNeed.push('view-ledger');
     var iaMiss = iaNeed.filter(function (k) { return plain.indexOf(k) < 0; });
-    if (iaMiss.length) bad('EX-1.4-09', '缺信息架构件：' + iaMiss.join('、') + '（四件套：模块定位 / 功能域树 / 页面×对象×动作映射 / 页内视图清单 view-ledger）');
-    else ok('EX-1.4-09', '信息架构件齐（模块定位 / 功能域树 / 映射表' + (iaNeed.length > 3 ? ' / 页内视图清单' : '') + '）');
+    if (iaMiss.length) bad('EX-1.4-09', '缺信息架构件：' + iaMiss.join('、') + '（四件套：模块定位 / 信息架构树 / 页面清单 5 列 / 页内视图清单 view-ledger）');
+    else ok('EX-1.4-09', '信息架构件齐（模块定位 / 信息架构树 / 页面清单 5 列' + (iaNeed.length > 3 ? ' / 页内视图清单' : '') + '）');
 
     // 10 不线上化的能力必须写线下承接
     if (/本期不做|不线上化/.test(plain) && !/线下/.test(plain)) bad('EX-1.4-10', '声明了本期不做 / 不线上化，但没写线下承接方式');
@@ -532,6 +532,72 @@ function runEX() {
     } else {
       ok('EX-1.4-20', hasTabbar ? ('页内视图清单闭合：' + viewIds.length + ' 个视图，面板与清单一一对应') : '无页内 Tab，本项不适用');
     }
+
+    // 21 交付面纯净：台账不得泄漏进正文，必须进文末 <details class="handoff">
+    var body = html
+      .replace(/<details[^>]*class="[^"]*handoff[^"]*"[\s\S]*?<\/details>/gi, '')
+      .replace(/<details[^>]*class="[^"]*notes-more[^"]*"[\s\S]*?<\/details>/gi, '');
+    var bodyPlain = body.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+    var ledgerPat = /class="[^"]*(view-ledger|flow-ledger|ph-ledger|g05|闭环覆盖|覆盖矩阵|动作覆盖)[^"]*"|页内视图清单|场景链路表|清单\s*[×x]\s*草图覆盖|闭环覆盖校验|动作覆盖表|占位清单[（(]?/g;
+    var ledgerHit = bodyPlain.match(ledgerPat);
+    if (ledgerHit) {
+      bad('EX-1.4-21', '台账泄漏进正文：' + Array.from(new Set(ledgerHit)).slice(0, 6).join('、') + '（须移进文末 <details class="handoff"> 折叠区）');
+    } else {
+      ok('EX-1.4-21', '交付面纯净：正文无台账表，交接件均在文末折叠区');
+    }
+
+    // 22 主图存在性：每个非占位页须有 data-hero 图形区
+    var heroLack = [];
+    blocks.forEach(function (blk3, idx3) {
+      var b3 = blk3.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      if (/class="same"/.test(b3)) return;
+      var hd3 = (b3.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var pid3 = (hd3.match(/class="pid">([^<]+)</) || [, 'P' + (idx3 + 1)])[1];
+      if (/data-thin="sys"/.test(b3)) return;
+      // 语法无关：抓住整个 data-hero 区块（HTML/CSS 组件到最近 </div>，或在 SVG 内到 </svg>）
+      var heroStart = b3.search(/class="[^"]*hero[^"]*"[^>]*data-hero|data-hero[^>]*class="[^"]*hero/);
+      if (heroStart < 0) { heroLack.push(pid3 + '（无 data-hero 主图区）'); return; }
+      var seg = b3.slice(heroStart, heroStart + 4000);
+      // 数据呈现单元：SVG 几何元素 或 HTML 语义块（seg/stage/bar-fill/dot/card-v/step）
+      var units = (seg.match(/<(rect|circle|path|line|polyline|polygon)\b/g) || []).length
+                + (seg.match(/class="[^"]*(seg|stage|bar-fill|dot|card-v|step)\b/g) || []).length;
+      // 数字标签：>文本< 里含数字（SVG 的 <text> 或 HTML 的元素文本）
+      var nums = (seg.match(/>[^<>]*\d[^<>]*</g) || []).length;
+      if (units < 2) heroLack.push(pid3 + '（仅 ' + units + ' 个数据单元，疑似示意色块）');
+      else if (nums < 2) heroLack.push(pid3 + '（主图仅 ' + nums + ' 处数字，缺真实数据呈现）');
+    });
+    if (heroLack.length) {
+      bad('EX-1.4-22', '主图不合格：' + heroLack.join('、') + '（每页须有 data-hero 主图区 + ≥2 数据单元 + ≥2 处真实数字；语法不限——HTML/CSS/SVG/动态 demo 均可，但不能是示意色块；画法与美观由执行时能力决定）');
+    } else {
+      ok('EX-1.4-22', '主图完整：每个非占位页均有数据主图（≥2 数据单元、≥2 处真实数字），语法与美观由执行时能力决定');
+    }
+
+    // 24 框内解释句禁令
+    var frameZone = html
+      .replace(/<ul class="notes">[\s\S]*?<\/ul>/g, '')
+      .replace(/<details[^>]*class="[^"]*handoff[^"]*"[\s\S]*?<\/details>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+    var explainPat = /(做法[:：]|为什么[:：]|即可|当场|越[\u4e00-\u9fa5]{0,4}越|放大\s*[\d.]+\s*倍|粘贴原文)/g;
+    var explainHit = frameZone.match(explainPat);
+    if (explainHit) {
+      bad('EX-1.4-24', '框内出现解释句：' + Array.from(new Set(explainHit)).slice(0, 5).join('、') + '（解释一律放图下 notes）');
+    } else {
+      ok('EX-1.4-24', '框内文案纯净：无解释句泄漏');
+    }
+
+    // 25 页面内禁止说明文字（EX-1.4-25）：动线行 / 职责句 / 主图元说明 一律不进页面
+    var pageZone = html
+      .replace(/<details[^>]*class="[^"]*handoff[^"]*"[\s\S]*?<\/details>/gi, '')
+      .replace(/<ul class="notes">[\s\S]*?<\/ul>/g, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+    var notePat = /进入：|去向：|这一页管什么|·\s*这一页|画法示意|一眼看出|实际由模型|选形不设限|说明选形|选哪种不规定/g;
+    var noteHit = pageZone.match(notePat);
+    if (noteHit) {
+      bad('EX-1.4-25', '页面内出现说明文字：' + Array.from(new Set(noteHit)).slice(0, 6).join('、') + '（动线「进入/去向」写进交接区 flow-ledger；职责句删掉；主图只放图形与数据，"一眼看出"等解读放图下 notes）');
+    } else {
+      ok('EX-1.4-25', '页面内无说明文字：无动线行/职责句/主图元说明');
+    }
+
   }
 
   if (stage === '4.1') {
