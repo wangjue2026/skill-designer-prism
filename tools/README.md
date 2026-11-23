@@ -102,8 +102,8 @@
 ```bash
 bash tools/gate-ex.sh 1.1 _output/<业务名>/01-主场景-<业务名>.md
 bash tools/gate-ex.sh 1.2 _output/<业务名>/02-体验目标-<业务名>.md _output/<业务名>/01-主场景-<业务名>.md
-bash tools/gate-ex.sh 1.3 _output/<业务名>/03-突破点-<业务名>.md
-bash tools/gate-ex.sh 1.4 _output/<业务名>/草图-<业务名>.html   # 额外调 sketch-selfcheck（结构级 5 条）
+bash tools/gate-ex.sh 1.3 _output/<业务名>/03-突破点-<业务名>.md _output/<业务名>/01-主场景-<业务名>.md   # 传上游做骨架对账
+bash tools/gate-ex.sh 1.4 _output/<业务名>/草图-<业务名>.html _output/<业务名>/01-主场景-<业务名>.md   # 传上游做步骤对账；额外调 sketch-selfcheck
 bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html   # 定稿页面清单前：覆盖率 + 继承对账（静默）
 ```
 
@@ -114,8 +114,8 @@ bash tools/gate-ex.sh 4.1 _output/<业务名>/草图-<业务名>.html   # 定稿
 | :--- | :--- |
 | EX-1.1 | 场景切碎 / 名称带阶段词或缺职责词 / 主场景写成一次操作 / 子事项少于 3 项 / 编号外泄 |
 | EX-1.2 | 条数 ≠ 场景数 / 标题自造短语（"说得清""敢信"）/ 界面痕迹（控件·交互路径·渠道）/ 虚词与绝对词 / "不用…"脚手架开头 / 缺门槛跃迁 / 缺可测锚 / 语域幼稚（代词与动补超量）/ 缺三件证据 |
-| EX-1.3 | 突破点超 5 处、无来源、落不到场景 |
-| EX-1.4 | 单套方案 / 共性页被省 / 无"两方案相同"标注 / 结构级 5 条 / 选定未留档 / **占位无类型无编号、无占位清单、CAP 缺能力项** |
+| EX-1.3 | 方向数与 1.1 旅程步骤数不符、无来源、落不到场景 |
+| EX-1.4 | 单套方案 / 结构级 5 条 / 选定未留档 / **占位无类型无编号、无占位清单、CAP 缺能力项** / **四层结构缺层（方案→场景→步骤→页面）** / **页面按编号裸列、步骤对不上 1.1** / **入口不在首步、末步无末态** / **同页多副本结构不一致** / **页面清单与剧本覆盖不一致** / **两套剧本步名对不齐** / **监控/概览页只有单块可视化（`EX-1.4-39`，`D11-EP10`）** |
 
 **B 类 · 说明书整体准出（出稿后跑一次）**
 
@@ -132,6 +132,19 @@ bash tools/gate-sp.sh _output/<业务名>/design-spec-<业务名>.html [_output/
 | SP-D 自包含 | 六节编码契约（状态机 / 数据口径 / Token / 固定文案 / 验收 / 边界） |
 
 **配套**：`sketch-selfcheck.sh`（EX-1.4-04）、`design-spec-selfcheck.sh`（SP-A / SP-W）。
+
+### 草图装配器：`sketch-build.js`（母版 + 矩阵 → 静态终稿）
+
+```bash
+node tools/sketch-build.js _output/<业务名>/sketch-src/dem.json _output/<业务名>/草图-<业务名>.html
+bash tools/gate-ex.sh 1.4 _output/<业务名>/草图-<业务名>.html _output/<业务名>/01-主场景-<业务名>.md
+```
+
+- **输入**：`shell.html`（页头 / IA / 清单 / 对比表 / 交接区，含 `<!--SKETCH:PLANS-->` 与 `<!--SKETCH:PH-->` 两个占位）+ `pages/<方案>/<页>.html` 母版 + `dem.json`（方案 → 场景 → 步骤 → 页面）。
+- **做什么**：按矩阵展开**每处出现一份完整页面**，写 `data-plan / scene / step / page / occ / state`；`data-ph-id` 追加 `@<实例>`；生成场景 tab、步骤头、末态块；按页面合并生成 `ph-ledger` 行（带「出现于」列）。
+- **不做**：不做视觉生成、不改文案、不推断步骤；缺母版或字段直接报错。
+- **规矩**：**改母版 + 重生成**，不许只改某个副本；生成后立刻跑门禁，不过 = 生成失败。
+- 样例：`tools/fixtures/sketch-src/`（正例夹具）与 `_output/DEM卡慢定位/sketch-src/`（实测重建）。
 
 ### `internal-reverse-proxy.js` —— 内网系统访问通道
 

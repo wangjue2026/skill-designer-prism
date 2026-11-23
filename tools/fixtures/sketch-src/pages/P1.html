@@ -1,0 +1,33 @@
+<div class="page">
+  <div class="page-hd"><span class="pid">P1</span><h3>访问诊断</h3><span class="form">整页 · 两面</span></div>
+  <div class="frame" data-view-count="2">
+    <div class="hero viz chart" data-hero>
+      <svg class="chart" width="440" height="120" viewBox="0 0 440 120" role="img" aria-label="三段链路耗时">
+        <rect x="10" y="44" width="90" height="24" rx="4" fill="#E1E5EB"></rect>
+        <rect x="110" y="34" width="150" height="44" rx="4" fill="#FA8C16"></rect>
+        <rect x="270" y="44" width="80" height="24" rx="4" fill="#E1E5EB"></rect>
+        <text x="18" y="38">入口段</text>
+        <text x="118" y="28">排队 1.8 秒</text>
+        <text x="278" y="38">响应段</text>
+        <text x="150" y="104">总耗时 2.2 秒</text>
+        <text x="330" y="104">基线 0.9 秒</text>
+      </svg>
+    </div>
+    <div class="tabbar"><span class="tabx on">路径依据</span><span class="tabx">影响范围</span></div>
+    <div class="pane" data-pane="路径依据" data-view="P1-V1">
+      <div class="box"><b class="t">判定结论</b><i class="pt">1</i>　27 条路径里 3 条断在入口段，影响 38 人</div>
+      <div class="box"><b class="t">证据分段</b>　四段证据线，入口段缺 1 条</div>
+      <p class="cap" data-ph="CAP" data-ph-id="PH-A-P1-01">筛选区：时间 / 对象</p>
+    </div>
+    <div class="pane" data-pane="影响范围" data-view="P1-V2">
+      <div class="box"><b class="t">影响分布</b>　按部门看受影响人数，研发部 21 人</div>
+      <div class="box"><b class="t">受影响清单</b>　VU-2041 张伟 · 研发部 · 39.6 秒</div>
+    </div>
+    <p><span class="btn p">开始检测</span><span class="btn">取消</span>
+      <i class="go" data-go="P2">交给网络组 →</i></p>
+  </div>
+  <ul class="notes">
+    <li><span class="n">1</span><b>做法</b>：主图用三段链路，断点段加粗着色。<b>为什么</b>：现状里人要在表格里自己比三段耗时。</li>
+  </ul>
+  <p class="tkn">Token：主色 #1C6EFF ｜ 风险 #FA8C16 ｜ 圆角 8 ｜ 正文 14px</p>
+</div>

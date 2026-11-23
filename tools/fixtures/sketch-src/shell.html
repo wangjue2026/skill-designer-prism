@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>需求草图示意（正例夹具）</title>
+<style>
+body{font:14px/1.7 -apple-system,"PingFang SC",sans-serif;color:#2F3540;margin:24px;background:#fff}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:#6F7785;font-size:13px}
+.plan-tabs{position:sticky;top:0;background:#fff;display:flex;gap:8px;padding:10px 0;z-index:9}
+.tab{padding:6px 14px;border:1px solid #E1E5EB;border-radius:6px;cursor:pointer;font-size:13px;background:#fff}
+.tab.on{background:#1C6EFF;color:#fff;border-color:#1C6EFF}
+.panel{display:none}
+.panel.on{display:block}
+.scene-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.scene-tab{padding:6px 12px;border:1px solid #E1E5EB;border-radius:6px;background:#fff;cursor:pointer;font-size:13px}
+.scene-tab.on{background:#1C6EFF;color:#fff;border-color:#1C6EFF}
+.scene{display:none;margin:24px 0;padding-top:12px;border-top:2px solid #1C6EFF}
+.scene.on{display:block}
+.step-hd{border-left:3px solid #1C6EFF;background:#F7FAFF;padding:8px 12px;margin:16px 0 8px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline}
+.step-name{font-size:15px}
+.step-intent,.step-pages,.step-see{font-size:12px;color:#5C6675}
+.page{border:1px solid #E1E5EB;border-radius:8px;margin:16px 0;padding:14px}
+.page-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pid{background:#4E5969;color:#fff;border-radius:4px;padding:1px 6px;font-size:12px}
+.page-hd h3{margin:0;font-size:15px}
+.form{color:#6F7785;font-size:12px}
+.frame{border:1px solid #DCE2EA;border-radius:6px;padding:12px;margin:8px 0}
+.hero{border:1px dashed #B9C4D2;border-radius:6px;padding:10px;margin:8px 0}
+.tabbar{display:flex;gap:16px;border-bottom:1px solid #E1E5EB;margin:10px 0 6px}
+.tabx{padding:4px 0;color:#6F7785;font-size:13px}
+.tabx.on{color:#1C6EFF;border-bottom:2px solid #1C6EFF}
+.pane{padding:6px 0}
+.box{margin:4px 0}
+.t{font-weight:600}
+.cap,.ph{background:#F2F4F7;color:#6F7785;font-style:italic;font-size:12px;padding:4px 8px;border-radius:4px;display:inline-block}
+.notes{color:#4E5969;font-size:12px;padding-left:0;list-style:none}
+.n{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;background:#1C6EFF;color:#fff;border-radius:50%;font-size:11px;margin-right:4px}
+.pt{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;background:#1C6EFF;color:#fff;border-radius:50%;font-size:11px;font-style:normal;margin-left:4px}
+.btn{display:inline-block;padding:5px 12px;border:1px solid #C9D0DA;border-radius:6px;font-size:12px}
+.btn.p{background:#1C6EFF;color:#fff;border-color:#1C6EFF}
+.tkn{color:#6F7785;font-size:12px}
+.go{font-style:normal;color:#1C6EFF;font-size:12px}
+.scene-close{border-left:3px solid #1C6EFF;background:#F5F8FF;padding:8px 12px;margin:10px 0;font-size:13px}
+table{border-collapse:collapse;margin:8px 0}
+td,th{border:1px solid #E1E5EB;padding:4px 8px;font-size:12px;text-align:left}
+details.handoff{margin-top:28px}
+</style>
+</head>
+<body>
+
+<h1>需求草图示意</h1>
+<p class="sub">基于需求理解之后进行的设计思考草图：关键设计点已给出设计表达，常规能力以占位交代。</p>
+<p class="sub">示例环境：演示租户 · 快照时间 2026-11-23 10:00 · 09:34 越线 / 10:07 报障 / 10:20 快照 · 规模 38 台终端。仿真数据，不构成客户事实。</p>
+<p>本次需求一共 4 个页面。</p>
+
+<h2>模块定位与信息架构</h2>
+<p>模块定位：挂在「数字体验」下，与体验观测并列，只读消费资产台账。</p>
+<pre>
+数字体验            一级菜单
+├─ 体验观测        二级菜单
+│  ├─ 体验诊断     三级菜单
+│  └─ 证据交接     三级菜单
+└─ 异常处置        二级菜单
+   └─ 异常台账     三级菜单
+</pre>
+
+<h2>页面清单</h2>
+<table>
+<tr><th>编号</th><th>所属菜单</th><th>页面名称</th><th>类型</th><th>说明</th></tr>
+<tr><td>P1</td><td>体验诊断</td><td><b>访问诊断</b></td><td>三级菜单页面</td><td>看一条链路断在哪段</td></tr>
+<tr><td>P2</td><td>证据交接</td><td><b>证据交接</b></td><td>三级菜单页面</td><td>把一段证据交给责任方</td></tr>
+<tr><td>P3</td><td>异常台账</td><td><b>异常台账</b></td><td>三级菜单页面</td><td>把已交接的事记成可回查记录</td></tr>
+<tr><td>P4</td><td>体验观测</td><td><b>体验概览</b></td><td>三级菜单页面</td><td>当天整体好坏与最差两处</td></tr>
+</table>
+
+<h2>方案一和方案二的设计对比</h2>
+<table>
+<tr><th>对比项</th><th>方案一</th><th>方案二</th></tr>
+<tr><td>整体设计说明</td><td>把「逐台翻表格」变成「只看待处理的 3 件」。代价：运维要改看清单的习惯，每轮多花 2 分钟确认。</td><td>把「读表格」变成「看一片分布」。代价：要先学会看图，每轮多花 5 分钟定位。</td></tr>
+<tr><td>who · 谁来做</td><td>系统判完，人只确认</td><td>人先说范围，系统再判</td></tr>
+<tr><td>what · 靠什么办成</td><td>待处理清单</td><td>部门分布图</td></tr>
+<tr><td>how · 人怎么操作</td><td>进页两步办完</td><td>先看图再点格，四步</td></tr>
+<tr><td>wow · 哪一刻意外</td><td>点完检测 2 秒后直接告诉你「3 台会被拦下」</td><td>一眼看见哪片红，点开就是名单</td></tr>
+<tr><td>一句话区别</td><td>系统先判完，人只确认</td><td>人先说范围，再看哪片红</td></tr>
+</table>
+
+<h3>设计思考点</h3>
+<table>
+<tr><th>方案</th><th>编号</th><th>思考点</th><th>为什么这么想</th></tr>
+<tr><td>方案一</td><td>1</td><td>先给要办的三件，不给全量</td><td>现状里人要从 38 行里自己挑</td></tr>
+<tr><td>方案二</td><td>1</td><td>先看哪片红，再进具体对象</td><td>现状里人不知道问题集中在哪个部门</td></tr>
+</table>
+
+<h2>草图思路发散</h2>
+
+<!--SKETCH:PLANS-->
+
+<details class="handoff">
+<summary>交接件：台账与留档（给下游 4.1 / 5.0 读，不参与方案阅读）</summary>
+
+<table class="view-ledger">
+<tr><th>视图编号</th><th>所属页面</th><th>视图名</th><th>这一面回答什么</th><th>主导图形</th><th>关键区块</th><th>该面能力位</th><th>两套差异</th></tr>
+<tr><td>P1-V1</td><td>P1</td><td>路径依据</td><td>断在哪一段</td><td>链路轨道</td><td>判定结论 / 证据分段</td><td>筛选：时间 / 对象</td><td>两套相同</td></tr>
+<tr><td>P1-V2</td><td>P1</td><td>影响范围</td><td>影响了谁、影响多少</td><td>分布 + 清单</td><td>影响分布 / 受影响清单</td><td>本面无筛选</td><td>两套相同</td></tr>
+</table>
+
+<table class="flow-ledger">
+<tr><th>场景</th><th>步骤</th><th>页面</th><th>触发元素</th><th>到哪</th><th>到这步看到什么</th><th>末态判定</th></tr>
+<tr><td>S1</td><td>1</td><td>P1</td><td>行末「查看路径 →」</td><td>P1</td><td>三段链路与断点段</td><td>未到末态</td></tr>
+<tr><td>S1</td><td>2</td><td>P1</td><td>Tab「影响范围」</td><td>P1</td><td>23 人同源分布</td><td>未到末态</td></tr>
+<tr><td>S1</td><td>3</td><td>P2</td><td>页脚「交给网络组」</td><td>P2</td><td>材料清单与方向</td><td>是，已交接</td></tr>
+<tr><td>S2</td><td>1</td><td>P3</td><td>行末「回看」</td><td>P1</td><td>该记录的原始判定</td><td>未到末态</td></tr>
+<tr><td>S2</td><td>2</td><td>P1</td><td>Tab「影响范围」</td><td>P1</td><td>23 人同源分布</td><td>未到末态</td></tr>
+<tr><td>S2</td><td>3</td><td>P2</td><td>页脚「交给网络组」</td><td>P2</td><td>材料清单与方向</td><td>是，已回查并落记录</td></tr>
+</table>
+
+<table class="ph-ledger">
+<tr><th>占位编号</th><th>方案</th><th>页面</th><th>类型</th><th>位置（图上锚点）</th><th>占位文案（逐字）</th><th>能力项（/ 分隔）</th><th>下游动作（线框怎么落）</th><th>出现于</th></tr>
+<!--SKETCH:PH-->
+</table>
+
+</details>
+
+<script>
+(function () {
+  var planTabs = document.querySelectorAll('.tab[data-tab]');
+  var panels = document.querySelectorAll('.panel[data-plan]');
+  function showScene(panel, id, doScroll) {
+    panel.querySelectorAll('.scene').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-scene') === id); });
+    panel.querySelectorAll('.scene-tab').forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-scene-tab') === id); });
+    if (!doScroll) return;
+    var scene = panel.querySelector('.scene.on');
+    if (!scene) return;
+    var step = scene.querySelector('.step-hd') || scene;
+    window.scrollTo({ top: step.getBoundingClientRect().top + window.pageYOffset - 8, behavior: 'smooth' });
+  }
+  function showPlan(id, doScroll) {
+    panels.forEach(function (p) { p.classList.toggle('on', p.id === id); });
+    planTabs.forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-tab') === id); });
+    var panel = document.getElementById(id);
+    if (!panel) return;
+    var first = panel.querySelector('.scene-tab');
+    if (first) showScene(panel, first.getAttribute('data-scene-tab'), false);
+    if (doScroll) {
+      var step = panel.querySelector('.scene.on .step-hd');
+      window.scrollTo({ top: (step || panel).getBoundingClientRect().top + window.pageYOffset - 8, behavior: 'smooth' });
+    }
+  }
+  planTabs.forEach(function (t) {
+    t.addEventListener('click', function () { showPlan(t.getAttribute('data-tab'), true); });
+  });
+  document.querySelectorAll('.scene-tab').forEach(function (t) {
+    t.addEventListener('click', function () { showScene(t.closest('.panel'), t.getAttribute('data-scene-tab'), true); });
+  });
+  showPlan(planTabs[0].getAttribute('data-tab'), false);
+})();
+</script>
+</body>
+</html>

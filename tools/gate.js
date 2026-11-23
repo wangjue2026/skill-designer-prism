@@ -139,20 +139,30 @@ function runEX() {
   }
 
   if (stage === '1.3') {
-    const md = readOrDie(file, 'node tools/gate.js ex 1.3 <03-突破点.md>');
-    head('EX-1.3 体验突破点');
+    const md = readOrDie(file, 'node tools/gate.js ex 1.3 <03-突破方向.md> [01-主场景.md]');
+    head('EX-1.3 体验突破方向');
     const ids = [...new Set((md.match(/B\d+/g) || []))];
-    if (ids.length < 2 || ids.length > 5) bad('EX-1.3-01', '突破点 ' + ids.length + ' 处，应为 2~5 处');
-    else ok('EX-1.3-01', '突破点 ' + ids.length + ' 处：' + ids.join(' / '));
+    if (ids.length < 2 || ids.length > 5) bad('EX-1.3-01', '突破方向 ' + ids.length + ' 条，应为 2~5 条（= 1.1 该场景旅程任务块数）');
+    else ok('EX-1.3-01', '突破方向 ' + ids.length + ' 条：' + ids.join(' / '));
     const lines = md.split(/\r?\n/);
     ids.forEach((b) => {
       const idx = lines.findIndex((l) => l.indexOf(b) !== -1);
       if (idx < 0) return;
-      // 突破点与设计点子 1 对 1 合并后，来源可能写在紧随其后的一行，按块取
+      // 方向与设计点子 1 对 1 合并后，来源可能写在紧随其后的一行，按块取
       const block = lines.slice(idx, idx + 6).join("\n");
-      if (!/(目标|入口\s*[12]|D\d\d-EP|EP-)/.test(block)) bad("EX-1.3-02", b + " 没有标来源（目标 / 入口 1 / 入口 2）");
+      if (!/(目标|入口\s*[12]|感受点|经验|原则|配置运维|运营分析|排障闭环|价值感知|D\d\d-EP|EP-)/.test(block)) bad("EX-1.3-02", b + " 没有标来源（感受点 / 经验类别 · 原则编号）");
       if (!/(场景|S[1-9])/.test(block) && !/场景/.test(md)) bad("EX-1.3-03", b + " 落不到具体场景");
     });
+    // EX-1.3-05 骨架对账：方向数应等于 1.1 该场景的任务旅程步骤数（启发式：数圈号）
+    if (upstream) {
+      try {
+        const up = fs.readFileSync(upstream, 'utf8');
+        const seg = (up.split(/主场景任务旅程/)[1] || '').split(/\n### /)[0];
+        const steps = [...new Set((seg.match(/[①②③④⑤⑥⑦⑧⑨]/g) || []))].length;
+        if (steps && steps !== ids.length) wr('EX-1.3-05', '骨架对账：1.1 旅程 ' + steps + ' 步，本步 ' + ids.length + ' 条方向，应相等（有槽位本期不做请在产物里写明理由）');
+        else if (steps) ok('EX-1.3-05', '骨架对账：1.1 旅程 ' + steps + ' 步 = ' + ids.length + ' 条方向');
+      } catch (e) { /* 上游不可读则跳过，不阻断 */ }
+    }
     if (!/档/.test(md)) wr('EX-1.3-04', '未见三档点子（常规/优化/创新），人检是否真拉开');
     if (!fail) ok('EX-1.3-02/03', '每条有来源且可落场景');
   }
@@ -362,22 +372,24 @@ function runEX() {
     else ok('EX-1.4-14', '列表类页面筛选/排序能力位齐且位置正确（或本文件无列表页）');
 
     // 15 占位可交接（EX-1.4-17）：五类语义标记 + 占位清单 + 编号闭合
-    var phEls = html.match(/<[a-z]+[^>]*class="(?:[^"]*\s)?(?:ph|cap|same)(?:\s[^"]*)?"[^>]*>/g) || [];
+    var phEls = html.match(/<[a-z]+[^>]*class="(?:[^"]*\s)?(?:ph|cap)(?:\s[^"]*)?"[^>]*>/g) || [];
     var noType = [], noId = [], dupId = [], allIds = [], seenPh = {};
     phEls.forEach(function (tag) {
-      if (!/data-ph="(CAP|KEEP|SAME|OFF|DATA)"/.test(tag)) noType.push(tag.replace(/[<>]/g, '').slice(0, 50));
+      if (!/data-ph="(CAP|KEEP|OFF|DATA)"/.test(tag)) noType.push(tag.replace(/[<>]/g, '').slice(0, 50));
       if (!/data-ph-id="[^"]+"/.test(tag)) noId.push(tag.replace(/[<>]/g, '').slice(0, 50));
     });
     (html.match(/data-ph-id="([^"]+)"/g) || []).forEach(function (s) {
       var id = s.replace(/^data-ph-id="/, '').replace(/"$/, '');
       if (seenPh[id]) dupId.push(id); else { seenPh[id] = 1; allIds.push(id); }
     });
-    var typeNoId = (html.match(/<[a-z]+[^>]*data-ph="(CAP|KEEP|SAME|OFF|DATA)"[^>]*>/g) || []).filter(function (t) { return !/data-ph-id="[^"]+"/.test(t); });
+    var typeNoId = (html.match(/<[a-z]+[^>]*data-ph="(CAP|KEEP|OFF|DATA)"[^>]*>/g) || []).filter(function (t) { return !/data-ph-id="[^"]+"/.test(t); });
+    var sameLeft = (html.match(/class="[^"]*\bsame\b[^"]*"|data-ph="SAME"/g) || []);
     var ledger = (html.match(/<table[^>]*class="[^"]*ph-ledger[^"]*"[\s\S]*?<\/table>/) || [''])[0];
-    var ledgerIds = ledger ? Array.from(new Set(ledger.match(/PH-[A-Za-z0-9-]+/g) || [])) : [];
-    var missInLedger = allIds.filter(function (id) { return ledgerIds.indexOf(id) < 0; });
-    var missOnFig = ledgerIds.filter(function (id) { return allIds.indexOf(id) < 0; });
-    var typesUsed = ['CAP', 'KEEP', 'SAME', 'OFF', 'DATA'].filter(function (t) { return new RegExp('\\b' + t + '\\b').test(ledger); });
+    var ledgerIds = ledger ? Array.from(new Set((ledger.match(/PH-[A-Za-z0-9_@-]+/g) || []).map(function (x) { return x.split('@')[0]; }))) : [];
+    var figBase = allIds.map(function (id) { return id.split('@')[0]; });
+    var missInLedger = figBase.filter(function (id) { return ledgerIds.indexOf(id) < 0; });
+    var missOnFig = ledgerIds.filter(function (id) { return figBase.indexOf(id) < 0; });
+    var typesUsed = ['CAP', 'KEEP', 'OFF', 'DATA'].filter(function (t) { return new RegExp('\\b' + t + '\\b').test(ledger); });
     // 交接件位置：必须在所有页面之后（放文末折叠区），不许夹在方案前面/中间干扰阅读
     var ledgerAt = html.search(/<table[^>]*class="[^"]*ph-ledger/);
     var lastPageAt = html.lastIndexOf('<div class="page"');
@@ -388,7 +400,9 @@ function runEX() {
     if (noType.length) bad('EX-1.4-17', '这些占位没有类型（data-ph=CAP/KEEP/SAME/OFF/DATA）：' + noType.slice(0, 3).join('；'));
     if (noId.length) bad('EX-1.4-17', '这些占位没有唯一编号（data-ph-id）：' + noId.slice(0, 3).join('；'));
     if (typeNoId.length) bad('EX-1.4-17', '这些元素写了类型但没写编号：' + typeNoId.slice(0, 3).join('；'));
-    if (dupId.length) bad('EX-1.4-17', '占位编号重复：' + Array.from(new Set(dupId)).join('、'));
+    if (dupId.length) bad('EX-1.4-17', '占位编号重复：' + Array.from(new Set(dupId)).join('、') + '（同一页多次出现时，编号要加 __<实例> 后缀）');
+    if (sameLeft.length) bad('EX-1.4-17', '出现已退役的 SAME 占位（' + sameLeft.length + ' 处）：新结构要求每处出现都画全，不许"与另一套相同"');
+    if (ledger && !/出现于/.test(ledger)) wr('EX-1.4-17', '占位清单缺「出现于」列：同一页多次出现时，下游看不出这个能力在哪几处生效');
     if (ledger && missInLedger.length) bad('EX-1.4-17', '图上占位未登记进清单：' + missInLedger.join('、'));
     if (ledger && missOnFig.length) bad('EX-1.4-17', '清单里的编号在图上找不到对应占位：' + missOnFig.join('、'));
     if (ledger && typesUsed.indexOf('CAP') < 0) bad('EX-1.4-17', '占位清单里没有 CAP（能力位）：本需求至少应有一处能力位占位');
@@ -463,47 +477,35 @@ function runEX() {
       ok('EX-1.4-18', '页内 Tab 面板齐全且逐面拆到块：每个 Tab 都有对应 data-pane 面板，面板内 ≥2 个命名区块，无替代句');
     }
 
-    // 19 场景链路可走通（EX-1.4-19）：flow-ledger + 图上 data-go/data-from + 连通性
+    // 19 场景链路账（EX-1.4-19）：flow-ledger 覆盖每条场景；data-go 目标页必须存在
+    // 2026-11-23 改：页面会按场景重复出现，"全篇 E ≥ N-1"在重复实例下无意义，连通性交给 34/35 按场景判
     var flowLedger = (html.match(/<table[^>]*class="[^"]*flow-ledger[\s\S]*?<\/table>/) || [''])[0];
-    var pidPos = [], pidRe2 = /<span class="pid">\s*(P\d+)\s*<\/span>/g, pm3;
-    while ((pm3 = pidRe2.exec(html))) pidPos.push({ id: pm3[1], at: pm3.index });
     var pidSet = [];
-    pidPos.forEach(function (p) { if (pidSet.indexOf(p.id) < 0) pidSet.push(p.id); });
+    (html.match(/<span class="pid">\s*(P\d+)\s*<\/span>/g) || []).forEach(function (s) {
+      var id = s.replace(/[^P\d]/g, '');
+      if (pidSet.indexOf(id) < 0) pidSet.push(id);
+    });
     var edges = [], goRe2 = /data-go="\s*(P\d+)\s*"/g, gm2;
-    while ((gm2 = goRe2.exec(html))) {
-      var src = '';
-      pidPos.forEach(function (p) { if (p.at <= gm2.index) src = p.id; });
-      edges.push({ from: src, to: gm2[1], at: gm2.index });
-    }
+    while ((gm2 = goRe2.exec(html))) edges.push({ to: gm2[1] });
     var flow19 = [];
-    if (!flowLedger) flow19.push('缺场景链路表（<table class="flow-ledger">）');
-    else if (!/S\d/.test(flowLedger)) flow19.push('flow-ledger 里没有 S1~Sn 场景行');
+    var flowSceneIds = [];
+    if (!flowLedger) {
+      flow19.push('缺场景链路表（<table class="flow-ledger">）');
+    } else {
+      (flowLedger.match(/S\d+/g) || []).forEach(function (s) { if (flowSceneIds.indexOf(s) < 0) flowSceneIds.push(s); });
+      if (!flowSceneIds.length) flow19.push('flow-ledger 里没有 S1~Sn 场景行');
+      flowSceneIds.forEach(function (sc) {
+        if (!new RegExp('<td>\\s*' + sc + '\\s*</td>').test(flowLedger)) flow19.push('flow-ledger 缺 ' + sc + ' 的步骤行');
+      });
+    }
     if (!pidSet.length) flow19.push('未识别到页面（<span class="pid">Pn</span>）');
     if (!edges.length) flow19.push('全篇没有跨页入口锚点（data-go），页面之间只能靠文字讲');
-    var badTarget = edges.filter(function (e) { return pidSet.indexOf(e.to) < 0; }).map(function (e) { return e.from + '→' + e.to; });
+    var badTarget = edges.filter(function (e) { return pidSet.indexOf(e.to) < 0; }).map(function (e) { return '→' + e.to; });
     if (badTarget.length) flow19.push('这些锚点指向不存在的页：' + Array.from(new Set(badTarget)).join('、'));
-    // 入边：被 data-go 指向 / 根页 / 显式声明 data-entry="root"
-    var root = pidSet[0];
-    var inbound = {};
-    edges.forEach(function (e) { inbound[e.to] = true; });
-    var noIn = pidSet.filter(function (p) { return p !== root && !inbound[p]; });
-    if (noIn.length) flow19.push('这些页面没有入边（凭空出现）：' + noIn.join('、'));
-    // 连通性
-    if (pidSet.length) {
-      var seen = {}, queue = [root];
-      seen[root] = true;
-      while (queue.length) {
-        var cur = queue.shift();
-        edges.forEach(function (e) { if (e.from === cur && !seen[e.to]) { seen[e.to] = true; queue.push(e.to); } });
-      }
-      var unreach = pidSet.filter(function (p) { return !seen[p]; });
-      if (unreach.length) flow19.push('从 ' + root + ' 走不到这些页：' + unreach.join('、'));
-      if (edges.length && edges.length < pidSet.length - 1) flow19.push('锚点边数 ' + edges.length + ' 少于页面数 ' + pidSet.length + ' 所要求的 ' + (pidSet.length - 1) + '，链路不完整');
-    }
     if (flow19.length) {
-      bad('EX-1.4-19', '场景链路走不通：' + flow19.join('；') + '（每条 Sx 要能在图上从第一屏点到末态屏：页头写"进入/去向"、图上标 data-go / data-from、并交 flow-ledger）');
+      bad('EX-1.4-19', '场景链路账不成立：' + flow19.join('；') + '（flow-ledger 每条场景要有行；data-go 只能指向已画页面）');
     } else {
-      ok('EX-1.4-19', '场景链路可走通：' + pidSet.length + ' 页 / ' + edges.length + ' 条跨页锚点，从 ' + root + ' 可达全部页面，flow-ledger 有场景行');
+      ok('EX-1.4-19', '场景链路账成立：flow-ledger 覆盖 ' + flowSceneIds.length + ' 条场景，' + edges.length + ' 条锚点目标均存在（全篇连通性改由 34/35 按场景判）');
     }
 
     // 20 页内视图清单闭合（EX-1.4-20）：view-ledger 一视图一行，面板 data-view 与表对应
@@ -611,7 +613,7 @@ function runEX() {
     if (dxIds.length) {
       if (!dxLedger) dx31.push('有 ' + dxIds.length + ' 个 data-dx 但缺 dx-ledger 清单');
       else {
-        var dxMiss = dxIds.filter(function (id) { return dxLedger.indexOf(id) < 0; });
+        var dxMiss = dxIds.map(function (id) { return id.split('@')[0]; }).filter(function (id) { return dxLedger.indexOf(id) < 0; });
         if (dxMiss.length) dx31.push('这些高保真区没登记进 dx-ledger：' + dxMiss.join('、'));
       }
       if (!/Token[:：]/.test(html)) dx31.push('有高保真区但全篇找不到 `Token：` 行（Token 必须写图下）');
@@ -678,18 +680,18 @@ function runEX() {
     (html.match(/<div[^>]*class="[^"]*\btab\b[^"]*"[^>]*data-tab="[^"]+"[^>]*>[^<]+<\/div>/g) || []).forEach(function (el) {
       var mid = el.match(/data-tab="([^"]+)"/);
       var nm = strip(el);
-      if (mid && nm) planTabs.push({ id: mid[1], name: nm, at: html.indexOf(el) });
+      if (mid && nm) planTabs.push({ id: mid[1], name: nm, at: html.indexOf(el), el: el });
     });
     var planIssues = [];
     if (planTabs.length < 2) {
       planIssues.push('未识别出跨方案切换条（须有 ≥2 个 <div class="tab" data-tab="…">方案一/方案二</div>）');
     } else {
       planTabs.forEach(function (tp) {
-        var re = new RegExp('<div[^>]*id="' + tp.id + '"[^>]*>');
+        var re = new RegExp('<(?:section|div)[^>]*id="' + tp.id + '"[^>]*>');
         var pm = re.exec(html);
         if (!pm) { planIssues.push('方案「' + tp.name + '」data-tab="' + tp.id + '" 无同 id 面板（点开必空白）'); return; }
         var rest = html.slice(pm.index + pm[0].length);
-        var em = /<div[^>]*class="[^"]*\bpanel\b|<script|<details|交接清单（不渲染）/.exec(rest);
+        var em = /<(?:section|div)[^>]*class="[^"]*\bpanel\b|<script|<details|交接清单（不渲染）/.exec(rest);
         var panelHtml = em ? rest.slice(0, em.index) : rest;
         var pages = (panelHtml.match(/<div[^>]*class="[^"]*\bpage\b[^"]*"/g) || []).length;
         var same = (panelHtml.match(/class="same"/g) || []).length;
@@ -697,7 +699,7 @@ function runEX() {
         if (pages - same < 1) planIssues.push('方案「' + tp.name + '」面板无真画页面（page ' + pages + ' / same 占位 ' + same + '，只有占位条=点开空白）');
         if (titles < 1) planIssues.push('方案「' + tp.name + '」面板无命名区块（class="t"），实质为空');
       });
-      var onCount = planTabs.filter(function (x) { return /class="[^"]*\bon\b/.test(html.slice(Math.max(0, x.at - 20), x.at + 120)); }).length;
+      var onCount = planTabs.filter(function (x) { return /class="[^"]*\bon\b/.test(x.el); }).length;
       if (onCount === 0) planIssues.push('切换条无默认选中项');
       if (onCount > 1) planIssues.push('切换条有 ' + onCount + ' 个默认选中项（只能一个）');
       // 交付形态提醒：纯 JS 切换在无 JS 预览器里非默认方案不可见——只提示，不阻断（有面板内容即达标）
@@ -781,6 +783,312 @@ function runEX() {
       bad('EX-1.4-29', '主图退化：' + vizWall.join('；') + '（主图必须把数据之间的关系编码进同一承载空间）');
     } else {
       ok('EX-1.4-29', '主图未退化：每张主图都有共享承载空间，页内无指标卡墙');
+    }
+
+    // 33 跨方案切换后落到 P1（EX-1.4-33）
+    var hasPlanTab = /<div[^>]*class="[^"]*\btab\b[^"]*"[^>]*data-tab="/.test(html);
+    if (hasPlanTab) {
+      var hasScroll = /scrollTo\s*\(|scrollIntoView\s*\(/.test(html);
+      if (!hasScroll) bad('EX-1.4-33', '有方案切换条但切换后没有定位逻辑：缺 scrollTo / scrollIntoView，点开另一套会停在半空，用户得自己往下找 P1');
+      else ok('EX-1.4-33', '方案切换后自动定位到 P1 起点');
+      if (/href="#"/.test(html)) wr('EX-1.4-33', '页内 Tab 出现 href="#" 锚点：切换会把页面拉回顶部，该用按钮语义');
+    } else {
+      ok('EX-1.4-33', '无跨方案切换条，本项不适用');
+    }
+
+    // ===== 四层结构：方案 → 场景 → 步骤 → 页面（EX-1.4-34 ~ 38）=====
+    function attrOf(tag, name) {
+      var m = tag.match(new RegExp('\\b' + name + '="([^"]*)"'));
+      return m ? m[1] : '';
+    }
+    function sliceFrom(markRe, text) {
+      var out = [], m;
+      var re = new RegExp(markRe.source, 'g');
+      while ((m = re.exec(text))) out.push({ at: m.index, end: m.index + m[0].length, id: m[2] || m[1], tag: m[0] });
+      return out.map(function (o, i) {
+        return { id: o.id, tag: o.tag, seg: text.slice(o.end, (i + 1 < out.length) ? out[i + 1].at : text.length) };
+      });
+    }
+    // 方案层
+    var planTabs = (html.match(/<(?:div|button|section)[^>]*data-tab="[^"]+"[^>]*>/g) || []).filter(function (t) { return /data-plan="/.test(t); });
+    var planIds = planTabs.map(function (t) { return { tab: attrOf(t, 'data-tab'), plan: attrOf(t, 'data-plan'), on: /class="[^"]*\bon\b/.test(t) }; });
+    function panelOf(id) {
+      var t = null;
+      ['class="[^"]*panel[^"]*"[^>]*id="' + id, 'id="' + id + '"[^>]*class="[^"]*panel[^"]*"'].forEach(function (p) {
+        if (t) return;
+        var m = html.match(new RegExp('<(?:section|div)[^>]*' + p + '[^>]*>'));
+        if (m) t = m;
+      });
+      if (!t) return '';
+      var start = html.indexOf(t[0]) + t[0].length;
+      var rest = html.slice(start);
+      var next = rest.search(/<(?:section|div)[^>]*class="[^"]*panel[^"]*"/);
+      return rest.slice(0, next > 0 ? next : rest.length);
+    }
+    var sceneRe = /<section[^>]*class="(?:[^"]*\s)?scene(?:\s[^"]*)?"[^>]*data-scene="(S\d+)"[^>]*>/;
+    var stepRe = /<div[^>]*class="[^"]*\bstep-hd\b[^"]*"[^>]*data-step="(S\d+-\d+)"[^>]*>/;
+    var pageRe = /<div[^>]*class="page"[^>]*>/g;
+    var plansData = [], allOcc = [], allPageBlocks = [];
+    planIds.forEach(function (p) {
+      var panel = panelOf(p.tab);
+      if (!panel) return;
+      var scTabs = (panel.match(/<[a-z]+[^>]*data-scene-tab="(S\d+)"[^>]*>/g) || []).map(function (t) { return { id: attrOf(t, 'data-scene-tab'), on: /class="[^"]*\bon\b/.test(t) }; });
+      var scenes = sliceFrom(sceneRe, panel);
+      scenes.forEach(function (s) {
+        var steps = sliceFrom(stepRe, s.seg).map(function (st) {
+          var pages = [];
+          var pm;
+          var pre = new RegExp(pageRe.source, 'g');
+          while ((pm = pre.exec(st.seg))) {
+            var tag = pm[0];
+            pages.push({
+              page: attrOf(tag, 'data-page'), occ: attrOf(tag, 'data-occ'), state: attrOf(tag, 'data-state'),
+              scene: attrOf(tag, 'data-scene'), plan: attrOf(tag, 'data-plan'), step: attrOf(tag, 'data-step'),
+              tag: tag
+            });
+          }
+          return {
+            id: attrOf(st.tag, 'data-step'), tag: st.tag, seg: st.seg,
+            pages: pages,
+            names: ['step-name', 'step-intent', 'step-pages', 'step-see'].map(function (cls) {
+              var m = st.seg.match(new RegExp('class="[^"]*\\b' + cls + '\\b[^"]*"[^>]*>([\\s\\S]*?)<\\/(?:b|span|div)>'));
+              return m ? strip(m[1]) : '';
+            })
+          };
+        });
+        s.steps = steps;
+        s.pages = [];
+        steps.forEach(function (st) { st.pages.forEach(function (pg) { s.pages.push(pg); allOcc.push(pg); allPageBlocks.push(pg); }); });
+      });
+      plansData.push({ plan: p.plan, tab: p.tab, on: p.on, panel: panel, sceneTabs: scTabs, scenes: scenes });
+    });
+    // 上游 1.1 步骤（可选）：| S1-1 | 步名 | … |
+    var upSteps = {};
+    var upProvided = false;
+    if (upstream && fs.existsSync(upstream)) {
+      upProvided = true;
+      var um, upRe = /^\|\s*\**\s*(S\d+)-(\d+)\s*\**\s*\|\s*\**\s*([^|*]+)/gm;
+      var upTxt = fs.readFileSync(upstream, 'utf8');
+      while ((um = upRe.exec(upTxt))) {
+        var sid = um[1];
+        (upSteps[sid] = upSteps[sid] || []).push({ n: parseInt(um[2], 10), name: um[3].trim() });
+      }
+    }
+
+    var s34 = [];
+    if (planTabs.length < 2) s34.push('没有方案层：缺少带 data-plan 的 data-tab（至少两个）');
+    var defTabs = planIds.filter(function (p) { return p.on; }).length;
+    if (defTabs !== 1) s34.push('方案 tab 默认选中 ' + defTabs + ' 个（应恰好 1 个）');
+    if (plansData.length < 2) s34.push('方案面板没有都找到（data-tab 与面板 id 必须成对）');
+    var sceneSets = [];
+    plansData.forEach(function (p) {
+      if (!p.sceneTabs.length) s34.push('方案 ' + p.plan + ' 没有场景 tab（data-scene-tab）');
+      var tabIds = p.sceneTabs.map(function (t) { return t.id; });
+      var scIds = p.scenes.map(function (s) { return s.id; });
+      if (tabIds.join(',') !== scIds.join(',')) s34.push('方案 ' + p.plan + ' 的场景 tab 与场景段不一致（tab：' + tabIds.join('/') + '；段：' + scIds.join('/') + '）');
+      if (p.sceneTabs.filter(function (t) { return t.on; }).length !== 1) s34.push('方案 ' + p.plan + ' 的场景 tab 默认选中不是恰好 1 个');
+      else if (p.sceneTabs[0] && !p.sceneTabs[0].on) s34.push('方案 ' + p.plan + ' 的默认场景不是第一个（应默认 S1）');
+      sceneSets.push(tabIds.join(','));
+      var onScenes = p.scenes.filter(function (s) { return /class="[^"]*\bon\b/.test(s.tag); });
+      if (onScenes.length !== 1) s34.push('方案 ' + p.plan + ' 同时显示 ' + onScenes.length + ' 个场景（一次只能显示一个：场景是互斥面板，不是长页）');
+      else if (p.scenes[0] && !/class="[^"]*\bon\b/.test(p.scenes[0].tag)) s34.push('方案 ' + p.plan + ' 的默认场景不是 S1');
+      p.scenes.forEach(function (s) {
+        if (!s.steps.length) { s34.push('场景 ' + s.id + ' 没有 step-hd（步骤头）'); return; }
+        var seq = s.steps.map(function (st) { return st.id; });
+        var expect = [];
+        for (var i = 1; i <= s.steps.length; i++) expect.push(s.id + '-' + i);
+        if (seq.join(',') !== expect.join(',')) s34.push('场景 ' + s.id + ' 的步骤号不连续：' + seq.join(' / ') + '（应为 ' + expect.join(' / ') + '）');
+        var up = upSteps[s.id];
+        if (upProvided) {
+          if (!up || !up.length) s34.push('1.1 里找不到场景 ' + s.id + ' 的步骤卡（| Sx-n | 步名 | … |）');
+          else {
+            if (up.length !== s.steps.length) s34.push('场景 ' + s.id + ' 步骤数 ' + s.steps.length + ' ≠ 1.1 的 ' + up.length + ' 步');
+            s.steps.forEach(function (st, k) {
+              var nm = st.names[0].replace(/^Step\s*\d+\s*[:：]?\s*/, '').replace(/[【】]/g, '').trim();
+              if (up[k] && nm && up[k].name.indexOf(nm) < 0 && nm.indexOf(up[k].name) < 0) {
+                s34.push('场景 ' + s.id + ' 第 ' + (k + 1) + ' 步步名「' + nm + '」与 1.1 的「' + up[k].name + '」不一致');
+              }
+            });
+          }
+        }
+      });
+    });
+    if (sceneSets.length > 1 && sceneSets[0] !== sceneSets[1]) s34.push('两套方案的场景集合/顺序不一致：' + sceneSets.join(' vs '));
+    // 页面必须在场景内（不许裸列）
+    var totalPageBlocks = (html.match(/<div[^>]*class="page"/g) || []).length;
+    if (allPageBlocks.length < totalPageBlocks) s34.push('有 ' + (totalPageBlocks - allPageBlocks.length) + ' 个页面块不在任何「场景 → 步骤」下（按编号裸列）');
+    s34 = Array.from(new Set(s34));
+    if (s34.length) {
+      bad('EX-1.4-34', '四层结构不成立：' + s34.slice(0, 6).join('；') + (s34.length > 6 ? ' 等 ' + s34.length + ' 处' : '') + '（结构：方案 tab → 场景 tab → Step 步骤头 → 页面块；步数与步名必须对得上 1.1）');
+    } else {
+      ok('EX-1.4-34', '四层结构成立：' + plansData.length + ' 套方案 × ' + (plansData[0] ? plansData[0].scenes.length : 0) + ' 条场景，步骤连续' + (upProvided ? '且与 1.1 对齐' : '（未传 1.1，步名未对账）'));
+    }
+
+    // 35 步骤头与页面承接（EX-1.4-35）
+    var s35 = [];
+    var occSeen = {};
+    plansData.forEach(function (p) {
+      p.scenes.forEach(function (s) {
+        s.steps.forEach(function (st) {
+          var labels = ['步名', '意图', '关联界面', '看到'];
+          st.names.forEach(function (v, i) { if (!v) s35.push('场景 ' + s.id + ' 的 ' + st.id + ' 步骤头缺「' + labels[i] + '」'); });
+          var declared = (attrOf(st.tag, 'data-pages') || '').trim().split(/\s+/).filter(Boolean);
+          var actual = st.pages.map(function (pg) { return pg.page; });
+          if (!declared.length) s35.push(st.id + ' 没写 data-pages（这一步关联哪些页面）');
+          else if (declared.join(',') !== actual.join(',')) s35.push(st.id + ' 的 data-pages（' + declared.join('/') + '）与下面页面（' + actual.join('/') + '）不一致');
+          if (!st.pages.length) s35.push(st.id + ' 下面没有页面块');
+          st.pages.forEach(function (pg) {
+            ['page', 'occ', 'scene', 'plan', 'step'].forEach(function (k) {
+              if (!pg[k]) s35.push(st.id + ' 下的页面缺 data-' + k);
+            });
+            if (pg.scene && pg.scene !== s.id) s35.push(pg.occ + ' 的 data-scene 与所在场景 ' + s.id + ' 不一致');
+            if (pg.plan && p.plan && pg.plan !== p.plan) s35.push(pg.occ + ' 的 data-plan 与所在方案 ' + p.plan + ' 不一致');
+            if (pg.step && pg.step !== st.id) s35.push(pg.occ + ' 的 data-step 与所在步骤 ' + st.id + ' 不一致');
+            if (pg.occ) {
+              if (occSeen[pg.occ]) s35.push('实例编号重复：' + pg.occ);
+              occSeen[pg.occ] = 1;
+            }
+          });
+        });
+        var first = s.steps[0], last = s.steps[s.steps.length - 1];
+        var enter = attrOf(first.tag, 'data-enter');
+        if (!enter) s35.push(s.id + ' 首步没写 data-enter（从哪一屏开始）');
+        else if (first.pages[0] && enter !== first.pages[0].page) s35.push(s.id + ' 的 data-enter=' + enter + '，但首步第一块页面是 ' + first.pages[0].page + '（入口页必须提到首步）');
+        var close = attrOf(last.tag, 'data-close');
+        if (!close) s35.push(s.id + ' 末步没写 data-close（到哪一屏算完）');
+        else if (!last.pages.some(function (pg) { return pg.page === close; })) s35.push(s.id + ' 的 data-close=' + close + ' 不在末步页面里');
+        var cm = last.seg.match(/class="[^"]*scene-close[^"]*"[^>]*>([\s\S]*?)<\/div>/);
+        if (!cm || strip(cm[1]).length < 8) s35.push(s.id + ' 末步缺 scene-close（写清办成了什么 / 记录在哪 / 交给谁）');
+      });
+    });
+    var hasScroll2 = /scrollTo\s*\(|scrollIntoView\s*\(/.test(html);
+    if (!hasScroll2) s35.push('缺切换定位脚本（scrollTo / scrollIntoView）：切方案或切场景会停在半空');
+    if (!/data-scene-tab/.test(html)) s35.push('场景 tab 没有绑定 data-scene-tab');
+    if (!/\.scene\s*\{[^}]*display\s*:\s*none/.test(html) || !/\.scene\.on\s*\{[^}]*display\s*:\s*block/.test(html)) {
+      s35.push('场景没有做成互斥面板：CSS 必须 `.scene{display:none}` + `.scene.on{display:block}`，否则一个方案下会无限滚动');
+    }
+    if (!/step-hd/.test(html.slice(html.indexOf('<script'))) || !/scene-tab/.test(html.slice(html.indexOf('<script')))) {
+      s35.push('切换脚本没有处理场景：切方案要回到 S1 并滚到 Step1，切场景要换面板并定位到该场景首个步骤头');
+    }
+    s35 = Array.from(new Set(s35));
+    if (s35.length) {
+      bad('EX-1.4-35', '步骤-页面承接不成立：' + s35.slice(0, 6).join('；') + (s35.length > 6 ? ' 等 ' + s35.length + ' 处' : '') + '（步骤头四要素齐、data-pages 与页块一致、首步入口、末步末态、实例号唯一）');
+    } else {
+      ok('EX-1.4-35', '步骤-页面承接成立：' + allOcc.length + ' 个页面实例，首步入口与末步末态齐');
+    }
+
+    // 36 重复副本一致（EX-1.4-36）
+    var byPage = {};
+    // 只在同一方案内比：两套方案对同一页可以是不同设计（方案差异），跨套比必然误伤
+    allPageBlocks.forEach(function (pg) { if (pg.page) { var k = (pg.plan || 'A') + ':' + pg.page; (byPage[k] = byPage[k] || []).push(pg); } });
+    var s36 = [];
+    Object.keys(byPage).forEach(function (pid) {
+      var list = byPage[pid];
+      if (list.length < 2) return;
+      var sigs = list.map(function (pg) {
+        var titles = (pg.tag + pgSegment(pg)).match(/<b class="t">([^<]+)<\/b>/g) || [];
+        return {
+          occ: pg.occ,
+          titles: titles.map(function (x) { return strip(x); }).sort().join('|'),
+          views: ((pg.tag + pgSegment(pg)).match(/data-view="([^"]+)"/g) || []).map(function (x) { return x.replace(/[^A-Za-z0-9-]/g, ''); }).sort().join('|'),
+          heroes: ((pg.tag + pgSegment(pg)).match(/data-hero/g) || []).length,
+          ph: ((pg.tag + pgSegment(pg)).match(/data-ph="([^"]+)"/g) || []).map(function (x) { return x.replace(/[^A-Z]/g, ''); }).sort().join('|')
+        };
+      });
+      var base = sigs[0];
+      sigs.slice(1).forEach(function (sg) {
+        ['titles', 'views', 'heroes', 'ph'].forEach(function (k) {
+          if (sg[k] !== base[k]) s36.push(pid.replace(':', ' / ') + ' 的 ' + sg.occ + ' 与 ' + base.occ + ' 结构不一致（' + k + '）');
+        });
+      });
+    });
+    function pgSegment(pg) {
+      var at = html.indexOf(pg.tag);
+      if (at < 0) return '';
+      var rest = html.slice(at + pg.tag.length);
+      var next = rest.search(/<div[^>]*class="page"|<div[^>]*class="step-hd"|<\/section>/);
+      return rest.slice(0, next > 0 ? next : Math.min(rest.length, 6000));
+    }
+    s36 = Array.from(new Set(s36));
+    if (s36.length) {
+      bad('EX-1.4-36', '同一页的多个副本结构不一致：' + s36.slice(0, 5).join('；') + '（改母版重生成，不许只改一个副本）');
+    } else {
+      var dupN = Object.keys(byPage).filter(function (k) { return byPage[k].length > 1; }).length;
+      ok('EX-1.4-36', '重复副本一致：' + dupN + ' 个页面有多次出现，命名区块/视图/主图/占位类型一致');
+    }
+
+    // 37 覆盖（EX-1.4-37）：页头资产数、页面清单、实际出现三者对账
+    var s37 = [];
+    var assetIds = [];
+    allPageBlocks.forEach(function (pg) { if (pg.page && assetIds.indexOf(pg.page) < 0) assetIds.push(pg.page); });
+    var declaredN = (html.match(/本次需求一共\s*(\d+)\s*个页面/) || [, ''])[1];
+    if (!declaredN) s37.push('页头缺「本次需求一共 N 个页面」声明');
+    else if (parseInt(declaredN, 10) !== assetIds.length) s37.push('页头声明 ' + declaredN + ' 个页面，实际出现 ' + assetIds.length + ' 个页面资产（按资产算，不按块算）');
+    assetIds.forEach(function (pid) {
+      if (!/^P\d+$/.test(pid)) s37.push('页面编号不合规：' + pid);
+    });
+    var listStart = html.search(/页面清单/);
+    var listEnd = html.search(/方案一和方案二的设计对比|## 方案对比|草图思路发散/);
+    var listSeg = (listStart >= 0 && listEnd > listStart) ? html.slice(listStart, listEnd) : '';
+    if (listSeg) {
+      assetIds.forEach(function (pid) {
+        var nm = '';
+        allPageBlocks.some(function (pg) { if (pg.page === pid) { var m = pgSegment(pg).match(/<h3>([^<]+)<\/h3>/); nm = m ? m[1].trim() : ''; return !!nm; } });
+        if (nm && listSeg.indexOf(nm) < 0) s37.push('页面清单里找不到 ' + pid + '「' + nm + '」');
+      });
+    }
+    var listed = (listSeg.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) || []).filter(function (r) { return /P\d+/.test(r); }).length;
+    if (listed && listed < assetIds.length) s37.push('页面清单只有 ' + listed + ' 行带编号，少于实际 ' + assetIds.length + ' 个页面');
+    s37 = Array.from(new Set(s37));
+    if (s37.length) {
+      bad('EX-1.4-37', '页面覆盖对不上：' + s37.slice(0, 6).join('；') + '（清单、页头资产数、剧本里实际出现的页面必须三者一致）');
+    } else {
+      ok('EX-1.4-37', '页面覆盖一致：' + assetIds.length + ' 个页面资产均在清单内且至少出现 1 次');
+    }
+
+    // 38 两套剧本对齐（EX-1.4-38）
+    var s38 = [];
+    if (plansData.length >= 2) {
+      var a = plansData[0], b = plansData[1];
+      a.scenes.forEach(function (sa) {
+        var sb = b.scenes.filter(function (x) { return x.id === sa.id; })[0];
+        if (!sb) { s38.push('方案二缺场景 ' + sa.id); return; }
+        var na = sa.steps.map(function (x) { return x.names[0]; }).join('|');
+        var nb = sb.steps.map(function (x) { return x.names[0]; }).join('|');
+        if (na !== nb) s38.push(sa.id + ' 两套步骤/步名不一致');
+        if (!sb.pages.length) s38.push(sa.id + ' 在方案二里一个页面都没画');
+      });
+    }
+    s38 = Array.from(new Set(s38));
+    if (s38.length) {
+      bad('EX-1.4-38', '两套剧本对不齐：' + s38.slice(0, 5).join('；') + '（同一场景的步骤号与步名必须一致；页面集合可不同）');
+    } else {
+      ok('EX-1.4-38', '两套剧本对齐：场景/步骤/步名一致，方案二各场景均有页面');
+    }
+
+    // 39 监控 / 概览页的可视化块数（EX-1.4-39）：禁止单块通栏；顶部统计条不计
+    var s39 = [];
+    var MON = /监控|概览|总览|大盘|驾驶舱|看板|观察|overview|dashboard/i;
+    blocks.forEach(function (blk) {
+      var b = blk.split(/<hr[^>]*>|<h2[^>]*>/)[0];
+      if (/class="same"/.test(b)) return;
+      var hd = (b.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
+      var nm = (hd.match(/<h3>([^<]+)<\/h3>/) || [, ''])[1];
+      var form = (hd.match(/class="form">([^<]+)</) || [, ''])[1];
+      var pid = (hd.match(/class="pid">([^<]+)</) || [, ''])[1];
+      if (!MON.test(nm + ' ' + form)) return;
+      if (/data-single-viz="[^"]+"/.test(b)) return; // 页面声明"只做一个判断"
+      var vizMarks = (b.match(/data-viz="/g) || []).length;
+      var heroes = (b.match(/data-hero/g) || []).length;
+      var n = vizMarks > 0 ? vizMarks : heroes;
+      if (n === 1) s39.push(pid + ' ' + nm + '（只有 1 块可视化）');
+      else if (n === 0) wr('EX-1.4-39', pid + ' ' + nm + ' 是监控 / 概览页，但一块可视化都没有（人检：纯表格是否够支撑判断链）');
+    });
+    s39 = Array.from(new Set(s39));
+    if (s39.length) {
+      bad('EX-1.4-39', '监控 / 概览页只有单块可视化：' + s39.join('、') + '（必须按页面意图拆 ≥2 块，各回答一个"3 秒内要回答的问题"，顶部统计条不计；单块 = 用拉满凑版面，打回重新思考页面意图与呈现内容。规则见 D11-EP10）');
+    } else {
+      ok('EX-1.4-39', '监控 / 概览页可视化块数合规：无单块通栏（或已声明单判断）');
     }
 
   }
@@ -933,7 +1241,7 @@ function runSP() {
   const pageCnt = pageH5 || pageH4old;
   if (pIds.size >= 1 && pageCnt >= 1 && pIds.size === pageCnt) ok('SP-S-02', '页面清单 ' + pIds.size + ' 页 = 分页面小节 ' + pageCnt + ' 个');
   else bad('SP-S-02', '页面清单 ' + pIds.size + ' 页 ≠ 第 7 节页面小节 ' + pageCnt + ' 个（页面小节写成 <h5 id="page-0x">Page-0x …</h5>）');
-  wr('SP-S-05', '人检内容预算：目标 ≤5 / 突破点 ≤5 / 每页映射 ≤8 行 / 无废列');
+  wr('SP-S-05', '人检内容预算：目标 ≤5 / 突破方向 = 旅程步骤数（不额外裁剪）/ 每页映射 ≤8 行 / 无废列');
   // SP-S-06 IA 单一来源：5.1 页面清单必须带「所属功能域」列（继承 1.4 草图，不重拆）
   if (!/所属功能域/.test(sec5only)) bad('SP-S-06', '5.1 页面清单缺「所属功能域」列：IA 唯一来源是 1.4 草图，缺此列会让功能域在说明书断链、第 7 节失去章节骨架');
   else ok('SP-S-06', '页面清单带「所属功能域」列（继承 1.4 的 IA）');
@@ -1211,7 +1519,7 @@ function runSP() {
     scenes.forEach((s) => { if (seen.indexOf(s.name) === -1) bad('SP-C-01', '场景「' + s.name + '」没有对应目标'); });
   }
   const bx = [...new Set((html.match(/<td>\s*B\d+\s*<\/td>/g) || []).map((x) => x.replace(/[^B0-9]/g, '')))];
-  if (bx.length < 2 || bx.length > 5) bad('SP-C-03', '突破点 ' + bx.length + ' 处，应为 2~5');
+  if (bx.length < 2 || bx.length > 5) bad('SP-C-03', '突破方向 ' + bx.length + ' 条，应为 2~5（= 1.1 该场景旅程任务块数）');
   const rows = (html.match(/<tr>[\s\S]*?<\/tr>/g) || []);
   bx.forEach((b) => {
     const row = rows.find((r) => r.indexOf('<td>' + b + '</td>') !== -1);
