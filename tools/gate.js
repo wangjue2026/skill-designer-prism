@@ -1066,30 +1066,16 @@ function runEX() {
       ok('EX-1.4-38', '两套剧本对齐：场景/步骤/步名一致，方案二各场景均有页面');
     }
 
-    // 39 监控 / 概览页的可视化块数（EX-1.4-39）：禁止单块通栏；顶部统计条不计
-    var s39 = [];
-    var MON = /监控|概览|总览|大盘|驾驶舱|看板|观察|overview|dashboard/i;
-    blocks.forEach(function (blk) {
-      var b = blk.split(/<hr[^>]*>|<h2[^>]*>/)[0];
-      if (/class="same"/.test(b)) return;
-      var hd = (b.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
-      var nm = (hd.match(/<h3>([^<]+)<\/h3>/) || [, ''])[1];
-      var form = (hd.match(/class="form">([^<]+)</) || [, ''])[1];
-      var pid = (hd.match(/class="pid">([^<]+)</) || [, ''])[1];
-      if (!MON.test(nm + ' ' + form)) return;
-      if (/data-single-viz="[^"]+"/.test(b)) return; // 页面声明"只做一个判断"
-      var vizMarks = (b.match(/data-viz="/g) || []).length;
-      var heroes = (b.match(/data-hero/g) || []).length;
-      var n = vizMarks > 0 ? vizMarks : heroes;
-      if (n === 1) s39.push(pid + ' ' + nm + '（只有 1 块可视化）');
-      else if (n === 0) wr('EX-1.4-39', pid + ' ' + nm + ' 是监控 / 概览页，但一块可视化都没有（人检：纯表格是否够支撑判断链）');
-    });
-    s39 = Array.from(new Set(s39));
-    if (s39.length) {
-      bad('EX-1.4-39', '监控 / 概览页只有单块可视化：' + s39.join('、') + '（必须按页面意图拆 ≥2 块，各回答一个"3 秒内要回答的问题"，顶部统计条不计；单块 = 用拉满凑版面，打回重新思考页面意图与呈现内容。规则见 D11-EP10）');
-    } else {
-      ok('EX-1.4-39', '监控 / 概览页可视化块数合规：无单块通栏（或已声明单判断）');
+    // 39 监控 / 概览页的可视化布局（EX-1.4-39）：交由 viz-split-audit 做契约审计，不再只数字符串
+    //   旧实现只数 data-viz=" 个数，导致「加一条全宽横条 + 造三个数」即可骗过机检；
+    //   现按 1.4 §43 自含口径逐块验 q / kind / w / src、块间问题互异、关系声明、数据非换皮；
+    //   full 只放行核心主图（topo/sankey/mx/scatter），普通件单块 full 判违规；等高对齐人检。
+    var vizSplit = require('./viz-split-audit').audit(html);
+    vizSplit.errors.forEach(function (e) { bad('EX-1.4-39', e); });
+    if (!vizSplit.errors.length) {
+      ok('EX-1.4-39', '监控 / 概览页可视化布局合规：' + vizSplit.pages.length + ' 页均满足块数 / 问题互异 / 载体 / 宽度角色 / 关系 / 真源锚点契约');
     }
+    vizSplit.warnings.forEach(function (w) { wr('EX-1.4-39', w); });
 
   }
 
