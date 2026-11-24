@@ -107,10 +107,11 @@ function audit(html, opts) {
     while ((dm = declRe.exec(body)) !== null) {
       const raw = dm[1];
       // 优先取「件型键」那一格，取不到再退化为块内第一个 VIZ 键
-      let key = null;
+      let key;
       const cell = raw.match(/<b>\s*件型键\s*<\/b>[\s\S]{0,120}?<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/);
-      if (cell) key = firstVizKey(stripTags(cell[1]));
-      if (!key) key = firstVizKey(stripTags(raw));
+      const cellText = cell ? stripTags(cell[1]) : '';
+      if (cellText.indexOf('REF') === 0 || cellText.indexOf('REF / 资产未覆盖') >= 0) key = 'REF';
+      else key = firstVizKey(cellText) || firstVizKey(stripTags(raw));
       decls.push({ key, text: stripTags(raw) });
     }
 
@@ -120,7 +121,8 @@ function audit(html, opts) {
     let vm;
     while ((vm = dvRe.exec(wf)) !== null) {
       const cls = ((vm[2] || '') + ' ' + (vm[4] || '')).match(/class="([^"]*)"/);
-      vizes.push({ key: vm[3].trim(), cls: cls ? cls[1] : '' });
+      const vk = vm[3].trim();
+      vizes.push({ key: vk.indexOf('REF') === 0 ? 'REF' : vk, cls: cls ? cls[1] : '' });
     }
 
     if (!decls.length && !vizes.length && !probes.some((p) => new RegExp('\\b' + p + '\\b').test(wf))) return;
@@ -128,13 +130,20 @@ function audit(html, opts) {
     const rec = { page: pid, keys: vizes.map((v) => v.key), decls: decls.map((d) => d.key) };
     pages.push(rec);
 
-    // 1 键在册
+    // 1 键在册（REF 不查契约，改查语义 / 依据 / 映射出处）
     vizes.forEach((v) => {
-      if (!byKey[v.key]) errors.push(pid + ' 线框里的件型键 `' + v.key + '` 不在册（件型落地契约.json 查无此键，属杜撰）');
+      if (v.key !== 'REF' && !byKey[v.key]) errors.push(pid + ' 线框里的件型键 `' + v.key + '` 不在册（件型落地契约.json 查无此键，属杜撰）');
     });
     decls.forEach((d) => {
-      if (!d.key) errors.push(pid + ' 有一份《可视化件声明》没写件型键（须 VIZ-xx-<形态>）');
-      else if (!byKey[d.key]) errors.push(pid + ' 声明的件型键 `' + d.key + '` 不在册（件型落地契约.json 查无此键，属杜撰）');
+      if (!d.key) errors.push(pid + ' 有一份《可视化件声明》没写件型键（须 VIZ-xx-<形态>，或 REF / 资产未覆盖）');
+      else if (d.key !== 'REF' && !byKey[d.key]) errors.push(pid + ' 声明的件型键 `' + d.key + '` 不在册（件型落地契约.json 查无此键，属杜撰）');
+    });
+    // REF 件：不查契约，改查「语义 + 依据 + 色值映射出处」齐全
+    decls.forEach((d) => {
+      if (d.key !== 'REF') return;
+      if (d.text.indexOf('语义') < 0) errors.push(pid + ' REF 声明缺「语义」：先写清这块可视化内容是什么语义（指标 / 身份 / 摘要 / 分布 / 关系 / 趋势 / 构成 / 时序）');
+      if (d.text.indexOf('语义不符') < 0 && d.text.indexOf('资产未覆盖') < 0) errors.push(pid + ' REF 声明缺依据：写「语义不符」或「资产未覆盖」二选一');
+      if (d.text.indexOf('color-map') < 0 && d.text.indexOf('1.6.2') < 0 && d.text.indexOf('映射') < 0) errors.push(pid + ' REF 声明缺色值映射出处：写 color-map 行号或 4.1 §1.6.2');
     });
 
     // 3 未打标探测：线框出现 probe 类名，但没有任何 data-viz 根元素带该 probe
@@ -152,12 +161,12 @@ function audit(html, opts) {
 
     // 双向对应
     vizes.forEach((v) => {
-      if (byKey[v.key] && !decls.some((d) => d.key === v.key)) {
+      if (v.key !== 'REF' && byKey[v.key] && !decls.some((d) => d.key === v.key)) {
         errors.push(pid + ' 线框画了 `' + v.key + '` 但没有同键的《可视化件声明》');
       }
     });
     decls.forEach((d) => {
-      if (d.key && byKey[d.key] && !vizes.some((v) => v.key === d.key)) {
+      if (d.key && d.key !== 'REF' && byKey[d.key] && !vizes.some((v) => v.key === d.key)) {
         errors.push(pid + ' 声明了 `' + d.key + '` 但线框里没有这个键的 data-viz 根元素（声明与落地不是同一件）');
       }
     });

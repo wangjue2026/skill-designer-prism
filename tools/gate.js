@@ -1343,6 +1343,40 @@ function runSP() {
       else ok('SP-W-07', '占位能力逐条落地：' + caps.length + ' 组 CAP 能力清单均已在对应页映射清单中出现');
     }
   }
+
+  /* SP-W-06⑥ DX 高保真区落点（跨文件：草图 data-dx ↔ 说明书线框 data-dx）
+     机检只验「有没有落点 / 有没有留占位」；结构 / 编码 / 位次是否真的一致由人检 */
+  if (sketchArg && fs.existsSync(sketchArg)) {
+    const skDx = fs.readFileSync(sketchArg, 'utf8');
+    const dxIdsOf = (h) => [...new Set((h.match(/data-dx="([^"]+)"/g) || [])
+      .map((s) => s.replace(/^data-dx="/, '').replace(/"$/, '').split('@')[0].trim()).filter(Boolean))];
+    const srcDx = dxIdsOf(skDx);
+    const outDx = dxIdsOf(noStyle);
+    if (srcDx.length) {
+      const miss = srcDx.filter((id) => outDx.indexOf(id) < 0);
+      if (miss.length) {
+        bad('SP-W-06', 'DX 高保真区没落点：草图 ' + miss.join('、') + ' 在说明书线框里找不到 data-dx（DX 区须带 data-dx 并保留结构 / 编码 / 位次；SP-W-06⑥）');
+      }
+      const extra = outDx.filter((id) => srcDx.indexOf(id) < 0);
+      if (extra.length) {
+        wr('SP-W-06', '说明书出现草图没有的 data-dx：' + extra.join('、') + '（编号须沿用 1.4 dx-ledger，不许新造）');
+      }
+      const phDx = [];
+      (noStyle.match(/<[^>]+data-dx="[^"]+"[^>]*>/g) || []).forEach((tag) => {
+        if (/data-ph="/.test(tag)) {
+          const m = tag.match(/data-dx="([^"]+)"/);
+          phDx.push(m ? m[1].split('@')[0] : '?');
+        }
+      });
+      if (phDx.length) {
+        bad('SP-W-06', 'DX 高保真区仍是占位：' + [...new Set(phDx)].join('、') + '（DX 区必须展开成真实控件 / 图表，不许留 data-ph）');
+      }
+      if (!miss.length && !phDx.length) {
+        ok('SP-W-06', 'DX 高保真区已落点：' + srcDx.length + ' 个 data-dx 全部能在线框里指到，无占位残留');
+      }
+    }
+  }
+
   /* SP-W-08 控件形态未照抄草图：时间筛选必须是复合日期筛选器 / 复合搜索框；表单分区标题不许用序号 */
   const wf08 = [];
   noStyle.split(/<h5[^>]*id="page-/).slice(1).forEach((s) => {
