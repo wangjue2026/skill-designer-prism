@@ -19,6 +19,14 @@
  *   - auditing 只读被测产物与 tools/fixtures/visual/；图例册仅在 --doc-check 时被读取
  *   - --doc-check 只比对图例册 data-v 与夹具编号（不判视觉、不进门禁）
  *
+ * 两段必检（MUST_IDS，草图与说明书都必须真判，不得靠"草图阶段不判"或"待核"吞掉）：
+ *   V-04 通栏克制 / V-05 撑满留白 / V-06 筛选区 / V-07 动作分区 / V-09 内边距
+ *   V-10 字阶 / V-14 色彩 / V-23 KPI 结构 / V-25 行内对齐
+ *   其中 V-05 只有量测半（无静态近似），拿不到 bbox 时输出"必检项未取得判定"。
+ * 暂停检视（PAUSED_IDS，两阶段都不判，输出 ⏸）：V-26 形态与关系 / V-27 承载空间。
+ * 其余条目：草图裁掉 10 条成品精度项（V-01/02/03/08/11/12/13/16/19/21），
+ * 即草图实判 15 条、说明书实判 25 条。
+ *
  * 用法：
  *   node tools/visual-audit.js <产物.html> --profile=sketch|wireframe [--only=V-08,V-19]
  *   node tools/visual-audit.js --selftest
@@ -58,9 +66,20 @@ const SHADOW_TOKENS = {                                         // design-color 
 };
 const AVATAR_WHITE = /(avatar|\.icon|\.logo|\.dot)/i;
 
-// 草图阶段不执行的条目：草图画法允许灰块 / 文字当控件 / 宽松间距 / 无圆角，
-// 这 9 条按"成品页"精度判必然全红（实测某草图 3929 红），改成 ⚠️ 不判。
-const SKETCH_SKIP = ['V-01', 'V-02', 'V-03', 'V-04', 'V-05', 'V-06', 'V-08', 'V-13', 'V-09', 'V-10', 'V-11', 'V-12', 'V-14', 'V-16', 'V-19', 'V-21', 'V-25'];
+// 草图阶段不执行的条目：这些是"成品页"精度项（左基线 / 栅格列线 / 嵌套 / 间距阶梯 /
+// 行高 / 数字对齐 / 截断换行 / 对比度 / 圆角阴影 / 表格视觉），草图画法允许灰块、
+// 文字当控件、宽松间距、无圆角，按成品精度判必然全红，改成 ⚠️ 不判。
+//
+// ⚠️ 与上一条相对：V-04/05/06/07/09/10/14/23/25 是**两段必检项**（MUST_IDS），
+// 草图与说明书都必须真判，不得靠"草图阶段不判"或"待核"吞掉。
+const SKETCH_SKIP = ['V-01', 'V-02', 'V-03', 'V-08', 'V-11', 'V-12', 'V-13', 'V-16', 'V-19', 'V-21'];
+
+const MUST_IDS = ['V-04', 'V-05', 'V-06', 'V-07', 'V-09', 'V-10', 'V-14', 'V-23', 'V-25'];
+
+// 暂停检视（2026-11-26 用户裁定）：V-26 形态与关系、V-27 承载空间，两阶段都不判——
+// 当前没有可靠的机械判据，等人实际项目里看到视觉问题后再开。判据与夹具保留，
+// --only=V-xx 可单点复现；恢复时把 id 从这里删掉即可。
+const PAUSED_IDS = ['V-26', 'V-27'];
 
 // §1.2 语义色映射表（12 token）+ 品牌蓝三态
 const SEM = ['#cf171d', '#82010e', '#1c6eff', '#12a679', '#6f7785', '#fdaa1d',
@@ -83,6 +102,19 @@ function toPx(v) {
   if (r) return parseFloat(r[1]) * 16;
   return null;
 }
+// 输出折叠：同一根因只报一次并带计数，超出 cap 折叠成一行。
+// 用途：必检项在 40 页副本上会重复同一缺陷（实测 V-14 单条约 300 行），
+// 逐条罗列没人看，等于没检。
+function fold(list, cap) {
+  cap = cap || 6;
+  const m = new Map();
+  list.forEach((x) => m.set(x, (m.get(x) || 0) + 1));
+  const keys = [...m.keys()];
+  const shown = keys.slice(0, cap).map((k) => (m.get(k) > 1 ? `${k}（${m.get(k)} 处）` : k));
+  if (keys.length > cap) shown.push(`…另 ${keys.length - cap} 类未展开`);
+  return shown.join('；');
+}
+
 function canonShadow(v) {
   return String(v).toLowerCase().replace(/\s+/g, ' ').replace(/\s*,\s*/g, ',')
     .replace(/0\.(\d)/g, '.$1')
@@ -437,17 +469,71 @@ function roleOf(el, box) {
 const ROLE_RANK = { action: 0, date: 1, select: 2, search: 3, refresh: 4 };
 const ROLE_NAME = { action: '按钮区', date: '日期筛选器', select: '选择器', search: '搜索框', refresh: '刷新' };
 
+// 控件族：动作（按钮 / data-act / data-go） vs 查询（日期 / 选择器 / 搜索 / CAP 占位）
+const isActEl = (el) => el.tag === 'button' || el.attrs['data-act'] !== undefined
+  || el.attrs['data-go'] !== undefined || el.cls.some((c) => /^(btn|wf-btn)/.test(c));
+const isQueryEl = (el) => ['input', 'select'].indexOf(el.tag) >= 0
+  || el.cls.some((c) => /^(date|select|search|entrybar|segx|field)$/.test(c))
+  || el.attrs['data-ph'] === 'CAP';
+
+// 疑似筛选区：草图常用文字当控件 + CAP 占位，没有 data-region。
+// 判法：2~8 个直接子元素、其中 ≥60% 的子树本身很小且是控件族——"小"这一条把
+// .page / section.scene 这类整页包裹层挡在外面（否则整页都会被误判成筛选区）。
+// 取"最外层命中者"，一个筛选区只算一处。
+const SUBTREE_MAX = 16;
+function subtreeSize(el) { return 1 + (el.children || []).reduce((n, k) => n + subtreeSize(k), 0); }
+function suspectFilterBars(root, marked) {
+  const cand = [];
+  findAll(root, (el) => {
+    if (marked.indexOf(el) >= 0) return false;
+    if (['body', 'html'].indexOf(el.tag) >= 0) return false;
+    const kids = (el.children || []).filter((k) => k.tag);
+    if (kids.length < 2 || kids.length > 8) return false;
+    const hit = kids.filter((k) => {
+      if (subtreeSize(k) > SUBTREE_MAX) return false;
+      return isActEl(k) || isQueryEl(k) || findAll(k, (x) => isActEl(x) || isQueryEl(x)).length > 0;
+    });
+    if (hit.length / kids.length < 0.6) return false;
+    // 筛选区必须同时有动作与查询：只有"指标说明"这类 CAP 标签的行不算筛选区
+    const hasAct = findAll(el, isActEl).length > 0;
+    const hasQuery = findAll(el, isQueryEl).length > 0;
+    return hasAct && hasQuery;
+  }).forEach((el) => cand.push(el));
+  return cand.filter((el) => {
+    let p = el.parent;
+    while (p && p.tag !== '#root') { if (cand.indexOf(p) >= 0) return false; p = p.parent; }
+    return true;
+  });
+}
+
 function checkV06(root, rules, ctx) {
   const out = [];
-  const boxes = findAll(root, (el) => el.attrs['data-region'] === 'filter-bar'
+  let boxes = findAll(root, (el) => el.attrs['data-region'] === 'filter-bar'
     || el.cls.indexOf('filter-bar') >= 0 || el.cls.indexOf('wf-filter-bar') >= 0);
-  if (!boxes.length) return [{ id: 'V-06', ok: true, warn: true, msg: '未标筛选区（data-region="filter-bar"），跳过' }];
+  let unmarkedCount = 0;
+  if (!boxes.length) {
+    boxes = suspectFilterBars(root, boxes);
+    if (!boxes.length) {
+      return [{ id: 'V-06', ok: true, warn: true, msg: '未找到筛选区（含疑似），本条无法判定——必检项须补 data-region="filter-bar"' }];
+    }
+    unmarkedCount = boxes.length;
+  }
   let rowIssue = false;
+  let placeholderOnly = 0;
+  const splitSlots = [], rowIssues = [], orderIssues = [];
   boxes.forEach((box) => {
     const ctrls = findAll(box, (el) => ['input', 'select', 'button', 'textarea'].indexOf(el.tag) >= 0
-      || el.attrs['data-act'] !== undefined || el.cls.some((c) => ['btn', 'select', 'date', 'search'].indexOf(c) >= 0));
+      || el.attrs['data-act'] !== undefined || el.attrs['data-go'] !== undefined
+      || el.cls.some((c) => ['btn', 'select', 'date', 'search'].indexOf(c) >= 0));
+    // ① 两段式：动作与查询不得挤在同一个子容器里（左按钮区 / 右查询区）
+    const kids = (box.children || []).filter((k) => k.tag);
+    kids.forEach((k) => {
+      const hasAct = isActEl(k) || findAll(k, isActEl).length > 0;
+      const hasQuery = isQueryEl(k) || findAll(k, isQueryEl).length > 0;
+      if (hasAct && hasQuery) splitSlots.push(`${describe(k)}(在 ${describe(box)} 内)`);
+    });
     if (!ctrls.length) return;
-    // 掉行：控件落在 2 个以上"块级行容器"里（flex 容器内的并列子元素不算掉行）
+    // ② 掉行：控件落在 2 个以上"块级行容器"里（flex 容器内的并列子元素不算掉行）
     const rowNodes = new Set();
     ctrls.forEach((c) => {
       let node = c, p = c.parent;
@@ -457,17 +543,31 @@ function checkV06(root, rules, ctx) {
     const boxDisplay = (styleOf(box).display || '').toLowerCase();
     if (rowNodes.size > 1 && !/flex|grid/.test(boxDisplay)) {
       rowIssue = true;
-      out.push({ id: 'V-06', ok: false, msg: `工具栏控件落在 ${rowNodes.size} 个行容器（掉行）` });
+      rowIssues.push(`散落在 ${rowNodes.size} 个行容器`);
     }
+    // ③ 顺序：只对真实控件判；查询区是 CAP 占位时如实标"顺序未判定"
     const seq = ctrls.map((c) => ({ el: c, r: roleOf(c, box) })).filter((x) => x.r !== 'search-suffix');
+    if (seq.filter((x) => x.r !== 'action').length === 0
+      && findAll(box, (el) => el.attrs['data-ph'] === 'CAP').length) {
+      placeholderOnly++;
+      return;
+    }
     let last = -1, lastName = '';
     seq.forEach((x) => {
       const r = ROLE_RANK[x.r];
       if (r < last) {
-        out.push({ id: 'V-06', ok: false, msg: `顺序不符：${ROLE_NAME[x.r]} 排在 ${ROLE_NAME[lastName]} 之后（应为 按钮区→日期→选择器→搜索框→刷新）` });
+        orderIssues.push(`${ROLE_NAME[x.r]} 排在 ${ROLE_NAME[lastName]} 之后`);
       } else { last = r; lastName = x.r; }
     });
   });
+  if (unmarkedCount) out.push({ id: 'V-06', ok: false, msg: `${unmarkedCount} 处筛选区未标 data-region="filter-bar"（钩子缺失本身即不合规）` });
+  if (splitSlots.length) out.push({ id: 'V-06', ok: false, msg: `${splitSlots.length} 处动作按钮与查询控件同处一个子容器（未分左右两段）：${fold(splitSlots, 3)}` });
+  if (rowIssues.length) out.push({ id: 'V-06', ok: false, msg: `掉行 ${rowIssues.length} 处，控件${fold(rowIssues, 2)}` });
+  if (orderIssues.length) {
+    const seqText = orderIssues[0].indexOf('按钮区') >= 0
+      ? '动作按钮落到了查询控件右侧' : '查询控件落到了动作按钮左侧';
+    out.push({ id: 'V-06', ok: false, msg: `顺序不符 ${orderIssues.length} 处：${seqText}（应为 按钮区→日期→选择器→搜索框→刷新）` });
+  }
   // Δy ≤2px：有 bbox 时量测，无 bbox 时明确降级；已判掉行时不重复报同一缺陷
   const fb = ctx && ctx.metrics && ctx.metrics.filterBar;
   if (fb && fb.length && !rowIssue) {
@@ -480,6 +580,12 @@ function checkV06(root, rules, ctx) {
   }
   if (out.length) return out.filter((o) => !o.ok);
   const noDy = !(fb && fb.length);
+  if (placeholderOnly) {
+    return [{
+      id: 'V-06', ok: true, warn: true,
+      msg: `筛选区分段合规；查询区为 CAP 占位（${placeholderOnly} 处），顺序与 Δy 须待线框展开后判`,
+    }];
+  }
   return [{
     id: 'V-06', ok: true, warn: noDy,
     msg: noDy
@@ -500,9 +606,20 @@ function checkV07(root) {
     const regions = [...new Set(byAct[a].map(regionOf))];
     if (regions.length > 1) out.push({ id: 'V-07', ok: false, msg: `data-act="${a}" 出现在 ${regions.length} 区（${regions.join(' / ')}）` });
   });
-  const buttons = findAll(root, (el) => el.tag === 'button' || el.cls.indexOf('btn') >= 0);
-  if (!acts.length && buttons.length >= 3) out.push({ id: 'V-07', ok: true, warn: true, msg: '有 3+ 按钮但未标 data-act，归属无法判' });
-  return out.length ? out : [{ id: 'V-07', ok: true, msg: '每个 data-act 只在 1 个区域' }];
+  // 动作控件口径：按钮 / .btn* / data-act / data-go（下钻链接也是动作）
+  const actions = findAll(root, isActEl);
+  const unmarked = actions.filter((el) => !el.attrs['data-act']);
+  if (unmarked.length >= 3) {
+    // 必检项：不标 = 归属无法判，不能算通过（旧版只打 ⚠️，等于放行）
+    out.push({
+      id: 'V-07', ok: false,
+      msg: `${unmarked.length} 个动作控件未标 data-act（示例：${fold(unmarked.slice(0, 8).map(describe), 4)}）；归属与分区无法判定`,
+    });
+  } else if (unmarked.length) {
+    out.push({ id: 'V-07', ok: true, warn: true, msg: `${unmarked.length} 个动作控件未标 data-act（不足 3 个，不判）` });
+  }
+  if (out.some((o) => !o.ok)) return out.filter((o) => !o.ok);
+  return out.length ? out : [{ id: 'V-07', ok: true, msg: `每个 data-act 只在 1 个区域（动作控件 ${actions.length} 个全部标了归属）` }];
 }
 
 function checkV08(rules) {
@@ -540,7 +657,8 @@ function padSig(v) {
   if (p.length === 3) return [p[0], p[1], p[2], p[1]];
   return p.slice(0, 4);
 }
-function checkV09(root) {
+function checkV09(root, rules, ctx) {
+  const profile = (ctx && ctx.profile) || 'wireframe';
   const groups = {};
   findAll(root, (el) => el.cls.length > 0).forEach((el) => {
     const key = el.attrs['data-comp'] || el.cls[0];
@@ -551,9 +669,11 @@ function checkV09(root) {
     (groups[key] = groups[key] || []).push({ el, sig });
   });
   const out = [];
+  let compared = 0;
   Object.keys(groups).forEach((k) => {
     const g = groups[k];
     if (g.length < 2) return;
+    compared++;
     const base = g[0].sig;
     g.slice(1).forEach((x) => {
       const vDiff = Math.abs(x.sig[0] - base[0]) + Math.abs(x.sig[2] - base[2]);
@@ -563,38 +683,89 @@ function checkV09(root) {
       if (!same && !grouped) out.push({ id: 'V-09', ok: false, msg: `${k} 内 padding 不一（${base.join('/')} vs ${x.sig.join('/')}）` });
     });
   });
-  const body = findAll(root, (el) => el.tag === 'body')[0];
-  if (body) {
-    const cs = styleOf(body);
-    if (cs.padding) {
-      const sig = padSig(cs.padding);
-      if (sig && !(sig[0] === sig[1] && sig[1] === sig[2] && sig[2] === sig[3] && (sig[0] === 24 || sig[0] === 48))) {
-        out.push({ id: 'V-09', ok: false, msg: `body padding ${sig.join('/')}（须四值相等且 = 24 / ≥1720 屏 48）` });
+  // 页面级 M：只在说明书判（草图用宽松间距、页面级边距由 .wrap 承担属允许画法）
+  if (profile !== 'sketch') {
+    const body = findAll(root, (el) => el.tag === 'body')[0];
+    if (body) {
+      const cs = styleOf(body);
+      if (cs.padding) {
+        const sig = padSig(cs.padding);
+        if (sig && !(sig[0] === sig[1] && sig[1] === sig[2] && sig[2] === sig[3] && (sig[0] === 24 || sig[0] === 48))) {
+          out.push({ id: 'V-09', ok: false, msg: `body padding ${sig.join('/')}（须四值相等且 = 24 / ≥1720 屏 48）` });
+        }
       }
     }
   }
-  return out.length ? out : [{ id: 'V-09', ok: true, msg: '同类容器 padding 一致，页面级 = 24' }];
+  if (out.length) {
+    const fails = out.filter((o) => !o.ok);
+    return [{
+      id: 'V-09', ok: false,
+      msg: `${fold(fails.map((o) => o.msg), 5)}（可比同类容器 ${compared} 组）`,
+    }];
+  }
+  // 空集不得报绿：一个可比组都没有，说明同类容器根本没成组，本条没判到东西
+  if (!compared) {
+    return [{ id: 'V-09', ok: true, warn: true, msg: `无可比同类容器（${Object.keys(groups).length} 个带类名容器），padding 一致性未判定` }];
+  }
+  const tail = profile === 'sketch' ? '；页面级 M 归说明书判' : '，页面级 = 24';
+  return [{ id: 'V-09', ok: true, msg: `同类容器 padding 一致（${compared} 组可比）${tail}` }];
 }
 
-function checkV10(rules) {
+function checkV10(rules, ctx) {
+  const profile = (ctx && ctx.profile) || 'wireframe';
   const out = [], sizes = new Set(), weights = new Set();
+  const off = [];        // 表外字号：值 + 选择器
+  const wOff = [];       // 表外字重：值 + 选择器
+  let declared = 0, nonPx = 0;
   rules.forEach((r) => {
     const fsd = r.decls['font-size'];
     if (fsd) {
       const n = toPx(fsd);
-      if (n === null) out.push({ id: 'V-10', ok: true, warn: true, msg: `${r.selector} font-size:${fsd}（非 px/rem，未判）` });
-      else { sizes.add(n); if (SIZE_TOKENS.indexOf(n) < 0) out.push({ id: 'V-10', ok: false, msg: `${r.selector}  font-size:${fsd}（不在字阶）` }); }
+      if (n === null) nonPx++;
+      else {
+        declared++;
+        sizes.add(n);
+        if (SIZE_TOKENS.indexOf(n) < 0) off.push({ sel: r.selector, n: n });
+      }
     }
     const fw = r.decls['font-weight'];
     if (fw) {
       const s = fw.trim().toLowerCase();
       const n = s === 'normal' ? 400 : s === 'bold' ? 700 : parseInt(s, 10);
-      if (!isNaN(n)) { weights.add(n); if (WEIGHTS.indexOf(n) < 0) out.push({ id: 'V-10', ok: false, msg: `${r.selector}  font-weight:${fw}（只许 400 / 600）` }); }
+      if (!isNaN(n)) { weights.add(n); if (WEIGHTS.indexOf(n) < 0) wOff.push({ sel: r.selector, n: n }); }
     }
   });
-  if (sizes.size > 5) out.push({ id: 'V-10', ok: false, msg: `同页字号 ${sizes.size} 档（上限 5）` });
-  return out.some((o) => o.ok === false) ? out.filter((o) => !o.ok)
-    : [{ id: 'V-10', ok: true, msg: `字号 ${sizes.size} 档 / 字重 ${weights.size} 档，均在册` }];
+  const sorted = [...sizes].sort((a, b) => b - a);
+  if (wOff.length) {
+    const byW = {};
+    wOff.forEach((o) => { byW[o.n] = (byW[o.n] || 0) + 1; });
+    out.push({
+      id: 'V-10', ok: false,
+      msg: `字重 ${Object.keys(byW).join('/')} 出现（只许 400 / 600，共 ${wOff.length} 处，如 ${wOff.slice(0, 3).map((o) => o.sel).join(' / ')}）`,
+    });
+  }
+  // 档数 ≤5 两段同判：这是层级问题，与"字号具体取几"无关
+  if (sizes.size > 5) {
+    out.push({ id: 'V-10', ok: false, msg: `同页字号 ${sizes.size} 档（上限 5）：${sorted.join('/')}` });
+  }
+  // 白名单只在说明书判（草图允许占位字号的近似值，但不是允许编 10 档）
+  if (profile !== 'sketch' && off.length) {
+    const byVal = {};
+    off.forEach((o) => { byVal[o.n + 'px'] = (byVal[o.n + 'px'] || 0) + 1; });
+    const vals = Object.keys(byVal).map((k) => (byVal[k] > 1 ? `${k}×${byVal[k]}` : k));
+    out.push({
+      id: 'V-10', ok: false,
+      msg: `表外字号 ${Object.keys(byVal).length} 种（${vals.slice(0, 6).join('、')}${vals.length > 6 ? ' …' : ''}），共 ${off.length} 处`,
+    });
+  }
+  if (out.length) return out.filter((o) => !o.ok);
+  if (!declared) {
+    return [{ id: 'V-10', ok: true, warn: true, msg: `无字号声明（${nonPx} 处非 px/rem），字阶未判定` }];
+  }
+  return [{
+    id: 'V-10', ok: true,
+    msg: `字号 ${sizes.size} 档（${sorted.join('/')}）/ 字重 ${weights.size} 档` + (profile === 'sketch' ? '；白名单归说明书判' : '，均在册'),
+  }];
 }
 
 function checkV11(root) {
@@ -639,15 +810,30 @@ function checkV12(root) {
   return out.length ? out : [{ id: 'V-12', ok: true, msg: '数值列右对齐 + tabular-nums' }];
 }
 
-function checkV14(root) {
+function checkV14(root, rules, ctx) {
   const out = [];
-  let colored = 0;
+  const bad = {};        // hex|prop -> 处数
+  let colored = 0;   // 只作"有没有彩色声明"的存在性判断；彩色块个数不判（2026-11-26 用户裁定取消）
   walk(root, (el) => {
     if (el.tag === '#root') return;
     const cs = styleOf(el);
     ['background-color', 'background', 'color', 'border-color'].forEach((p) => {
       const raw = cs[p];
-      if (!raw || /gradient/i.test(raw)) return;
+      if (!raw) return;
+      if (/gradient/i.test(raw)) {
+        // 渐变不整条豁免：取各色停逐个判，否则"用渐变画条"就能绕过整条 V-14
+        const stops = raw.match(/#[0-9a-fA-F]{3,8}/g) || [];
+        stops.forEach((rawStop) => {
+          const rgb = parseColor(rawStop);
+          if (!rgb) return;
+          const { s, l } = hsl(rgb);
+          const d = (Math.max(rgb[0], rgb[1], rgb[2]) - Math.min(rgb[0], rgb[1], rgb[2])) / 255;
+          if (s < 0.18 || d <= 0.047 || l > 0.80) return;
+          const h = hex(rgb);
+          if (SEM.indexOf(h) < 0) { const k = h + '|' + p + '(渐变)'; bad[k] = (bad[k] || 0) + 1; }
+        });
+        return;
+      }
       const rgb = parseColor(raw);
       if (!rgb) return;
       const { s, l } = hsl(rgb);
@@ -657,7 +843,8 @@ function checkV14(root) {
       colored++;
       const h = hex(rgb);
       if (SEM.indexOf(h) < 0 && REDS.concat(['#1c6eff']).indexOf(h) < 0) {
-        out.push({ id: 'V-14', ok: false, msg: `${describe(el)}  ${p}:${raw}（不在语义映射表）` });
+        const k = h + '|' + p;
+        bad[k] = (bad[k] || 0) + 1;
       }
     });
     const bgv = cs.background || cs['background-color'] || '';
@@ -665,8 +852,21 @@ function checkV14(root) {
       out.push({ id: 'V-14', ok: false, msg: `${describe(el)} 全屏渐变铺底（无出处）` });
     }
   });
-  if (colored > 8) out.push({ id: 'V-14', ok: false, msg: `彩色块 ${colored} 个（上限 8）` });
-  return out.length ? out : [{ id: 'V-14', ok: true, msg: `语义色全部在映射表内（彩色块 ${colored}）` }];
+  const keys = Object.keys(bad);
+  if (keys.length) {
+    // 按"色值 × 出现次数"讲，不按元素刷屏（40 页副本会重复同一色 150+ 次）
+    const detail = fold(keys.sort((a, b) => bad[b] - bad[a]).map((k) => {
+      const [h, p] = k.split('|');
+      return `${h} ${p}`;
+    }), 6);
+    out.push({ id: 'V-14', ok: false, msg: `表外色 ${keys.length} 处组合：${detail}` });
+  }
+  // 彩色块个数不再判（2026-11-26 用户裁定：这条口径无法稳定界定，取消）
+  if (out.length) return out.filter((o) => !o.ok);
+  if (!colored) {
+    return [{ id: 'V-14', ok: true, warn: true, msg: '未发现彩色声明（全灰阶），语义色映射未判定' }];
+  }
+  return [{ id: 'V-14', ok: true, msg: `语义色全部在映射表内（彩色声明 ${colored} 处）` }];
 }
 
 function checkV15(root) {
@@ -845,7 +1045,39 @@ function checkV22(root) {
   return out.length ? out : [{ id: 'V-22', ok: true, msg: `${states.length} 处状态文案不重复` }];
 }
 
-function checkV23(root) {
+const NUM_TEXT = /^[\s¥$]?[\d,]+(?:\.\d+)?\s*(?:%|台|个|次|项|件|人|天|ms|s|分|条)?$/;
+function kpiItemInfo(k) {
+  const leaves = findAll(k, (el) => (el.children || []).length === 0 && ownText(el).trim());
+  const numEl = leaves.find((el) => NUM_TEXT.test(ownText(el).trim()) && /\d/.test(ownText(el)));
+  if (!numEl) return null;
+  const labelEl = leaves.find((el) => el !== numEl && ownText(el).trim() && !NUM_TEXT.test(ownText(el).trim()));
+  if (!labelEl) return null;
+  const csN = styleOf(numEl), csL = styleOf(labelEl);
+  const fsN = toPx(csN['font-size'] || '') || 0, fsL = toPx(csL['font-size'] || '') || 0;
+  const wN = parseInt(csN['font-weight'] || '400', 10) || 400;
+  const wL = parseInt(csL['font-weight'] || '400', 10) || 400;
+  return { strong: (fsL > 0 && fsN / fsL >= 1.4) || (wN >= 600 && wL <= 400) };
+}
+// 结构识别：≥3 个同类子项，每项一个"数字 + 标签"且数字明显重于标签 = 并列统计数字。
+// 不看类名——草图和说明书都可能是 .stats/.stat 这类自命名结构。
+function looseKpiGroups(root) {
+  const out = [];
+  findAll(root, (el) => {
+    const kids = (el.children || []).filter((k) => k.tag);
+    if (kids.length < 3) return false;
+    if (['table', 'thead', 'tbody', 'tr', 'ul', 'ol', 'select'].indexOf(el.tag) >= 0) return false;
+    if (!kids[0].cls.length || kids[0].cls.join('.') !== kids[kids.length - 1].cls.join('.')) return false;
+    if (el.attrs['data-kpi-strip'] !== undefined || el.cls.indexOf('wf-kpi--strip') >= 0) return false;
+    if (findAncestor(el, (x) => x.attrs['data-kpi-strip'] !== undefined
+      || x.cls.indexOf('wf-kpi--strip') >= 0 || x.attrs['data-viz'] !== undefined)) return false;
+    const infos = kids.map(kpiItemInfo).filter(Boolean);
+    if (infos.length < 3 || infos.length !== kids.length) return false;
+    return infos.every((i) => i.strong);
+  }).forEach((el) => out.push(el));
+  return out;
+}
+
+function checkV23(root, rules, ctx) {
   const out = [];
   const strips = findAll(root, (el) => el.cls.indexOf('wf-kpi--strip') >= 0);
   strips.forEach((strip) => {
@@ -868,7 +1100,22 @@ function checkV23(root) {
       if (!bySize && !byWeight) out.push({ id: 'V-23', ok: false, msg: `${describe(it)} value 与 label 同级同重（${fsV || '?'}/${fsL || '?'}）` });
     });
   });
-  return out.length ? out : [{ id: 'V-23', ok: true, msg: 'KPI 组：单元容器 + 三层可辨' }];
+  // 自命名结构：≥3 个并列数字但没有 wf-kpi 标准结构 → 两段同判 FAIL
+  // （v0.9 起草图也判死：实测 P1 那 7 个一级数就是"指标当文本平铺"，只报 ⚠️ 等于放行）
+  const loose = looseKpiGroups(root);
+  if (loose.length) {
+    const where = loose.slice(0, 4).map((el) => `${describe(el)}(${el.children.length} 项)`);
+    out.push({
+      id: 'V-23', ok: false,
+      msg: `${loose.length} 组并列统计数字未用 wf-kpi--strip / wf-kpi-item 结构（无单元容器与层级契约）：${where.join(' / ')}`,
+    });
+  }
+  if (out.some((o) => !o.ok)) return out.filter((o) => !o.ok);
+  if (out.length) return out;
+  if (!strips.length && !loose.length) {
+    return [{ id: 'V-23', ok: true, warn: true, msg: '未找到 ≥3 个并列统计数字，本条无判定对象（不是通过）' }];
+  }
+  return [{ id: 'V-23', ok: true, msg: `KPI 组：单元容器 + 三层可辨（标准结构 ${strips.length} 组）` }];
 }
 
 function checkV24(root, ctx) {
@@ -919,7 +1166,8 @@ function checkV05(ctx) {
   if (!m) {
     return [{
       id: 'V-05', ok: true, warn: true,
-      msg: (ctx && ctx.noMeasure ? '量测已按 --no-measure 关闭' : '未量测（9222 未开，本轮降级不阻断）') + ' · 容器撑满与留白（需 bbox）',
+      // 必检项：本条没有静态近似，拿不到 bbox 就是"没判定"，回执必须登记为未完成
+      msg: (ctx && ctx.noMeasure ? '量测已按 --no-measure 关闭' : '未量测（9222 未开）') + ' · 必检项未取得判定：容器撑满与留白只有 bbox 能判',
     }];
   }
   const out = [];
@@ -952,7 +1200,14 @@ function checkV05(ctx) {
 // ── V-25 行内标签纵向对齐（静态近似：数值右对齐 + 槽位结构；left 极差需量测）──
 function checkV25(root) {
   const out = [];
-  findAll(root, (el) => el.tag === 'table').forEach((tb) => {
+  const tables = findAll(root, (el) => el.tag === 'table');
+  if (!tables.length) {
+    return [{ id: 'V-25', ok: true, warn: true, msg: '无表格，数值列对齐与槽位一致性未判定（不是通过）' }];
+  }
+  let judged = 0;
+  const byCol = {};          // 列号 -> { tables, bad, total }（横向汇总，避免 40 页副本刷屏）
+  const sigIssues = [];
+  tables.forEach((tb, ti) => {
     const rows = findAll(tb, (el) => el.tag === 'tr').filter((tr) => tr.children.some((c) => c.tag === 'td'));
     if (rows.length < 2) return;
     const cells = rows.map((tr) => tr.children.filter((c) => c.tag === 'td'));
@@ -962,14 +1217,37 @@ function checkV25(root) {
       // 纯数值才算数值列：日期 / 版本号 / 「2.1.x 261」这类不算
       const numeric = col.filter((td) => /^[¥$]?\d[\d,]*(?:\.\d+)?\s*(?:%|台|个|次|项)?$/.test(textOf(td).trim())).length / col.length >= 0.8;
       if (!numeric) continue;
+      judged++;
       const bad = col.filter((td) => (styleOf(td)['text-align'] || 'left') !== 'right');
-      if (bad.length) out.push({ id: 'V-25', ok: false, msg: `第 ${i + 1} 列数值未右对齐（${bad.length} 处，如「${textOf(bad[0])}」）` });
+      if (bad.length) {
+        const rec = byCol[i + 1] = byCol[i + 1] || { tables: [], bad: 0, total: 0 };
+        rec.tables.push(ti + 1);
+        rec.bad += bad.length;
+        rec.total += col.length;
+      }
     }
     const sigs = rows.map((tr) => findAll(tr, (el) => el.cls.indexOf('tag') >= 0)
       .map((el) => el.cls.filter((c) => c !== 'tag').join('.') || 'tag').join('|'));
-    if (new Set(sigs).size > 1) out.push({ id: 'V-25', ok: false, msg: '各行标签槽位不一致（数量或类型不同）' });
+    if (new Set(sigs).size > 1) sigIssues.push(`表 ${ti + 1}`);
   });
-  return out.length ? out : [{ id: 'V-25', ok: true, msg: '数值列右对齐、标签槽位一致；left 极差待量测' }];
+  const colIds = Object.keys(byCol);
+  if (colIds.length) {
+    out.push({
+      id: 'V-25', ok: false,
+      msg: `数值列未右对齐：${colIds.map((k) => {
+        const r = byCol[k];
+        return `第 ${k} 列（${r.tables.length} 张表 / ${r.bad} 处）`;
+      }).join('、')}`,
+    });
+  }
+  if (sigIssues.length) {
+    out.push({ id: 'V-25', ok: false, msg: `标签槽位不一致 ${sigIssues.length} 张表（${fold(sigIssues, 3)}）` });
+  }
+  if (out.length) return out.filter((o) => !o.ok);
+  if (!judged) {
+    return [{ id: 'V-25', ok: true, warn: true, msg: `有 ${tables.length} 张表但无纯数值列（≥80%），本条未判定` }];
+  }
+  return [{ id: 'V-25', ok: true, msg: `数值列右对齐（${judged} 列）、标签槽位一致；left 极差待量测` }];
 }
 
 const REL_MAP = {
@@ -1062,15 +1340,23 @@ function checkV27(root) {
     if (ratio < 0.8) out.push({ id: 'V-27', ok: false, msg: `数字 / 单元 = ${Math.round(ratio * 100)}% < 80%（${nums.length}/${units.length}）` });
     if (!out.length) out.push({ id: 'V-27', ok: true, msg: `主图落在同一承载空间（${units.length} 单元 / ${nums.length} 数字，KPI 条不计）` });
   });
-  return out;
+  // 40 页副本会把同一条"待核"刷 36 行，按根因折叠后仍保留红/绿判定
+  if (out.length <= 1) return out;
+  const fails = out.filter((o) => !o.ok);
+  const warns = out.filter((o) => o.ok);
+  const merged = [];
+  if (fails.length) merged.push({ id: 'V-27', ok: false, msg: fold(fails.map((o) => o.msg), 4) });
+  if (warns.length) merged.push({ id: 'V-27', ok: true, warn: true, msg: `${warns.length} 个 data-hero 未取得判定：${fold(warns.map((o) => o.msg), 2)}` });
+  return merged;
 }
 
 function checkV26(root) {
   const out = [];
   const blocks = findAll(root, (el) => el.attrs['data-viz'] !== undefined);
+  let skipped = 0;
   blocks.forEach((b) => {
     const rel = b.attrs['data-rel'];
-    if (!rel) return;
+    if (!rel) { skipped++; return; }
     const kind = (b.attrs['data-viz-kind'] || '').trim();
     const allow = REL_MAP[rel];
     if (!kind) { out.push({ id: 'V-26', ok: true, warn: true, msg: `${describe(b)} data-rel=${rel} 但无 data-viz-kind` }); return; }
@@ -1078,6 +1364,13 @@ function checkV26(root) {
     if (allow.indexOf(kind) < 0) out.push({ id: 'V-26', ok: false, msg: `${describe(b)} rel=${rel} 却是 kind=${kind}（应为 ${allow.join('/')}）` });
   });
   if (!blocks.length) out.push({ id: 'V-26', ok: true, warn: true, msg: '无 data-viz，转走查' });
+  // 空集不得报绿：一块都没标 data-rel 时，旧版会输出"每块 rel 与 kind 匹配"（实测 212 块 0 标注）
+  if (skipped && !out.some((o) => !o.ok)) {
+    out.push({
+      id: 'V-26', ok: true, warn: true,
+      msg: `${skipped}/${blocks.length} 块未标 data-rel，形态与关系未判定（不是通过）`,
+    });
+  }
   return out.length ? out : [{ id: 'V-26', ok: true, msg: '每块 data-rel 与 kind 匹配' }];
 }
 
@@ -1106,8 +1399,10 @@ function staticViz(b) {
   const decl = b.attrs['data-viz-w'] || '';
   if (ratio === null && decl) {
     const d = decl.toLowerCase();
-    if (/^(full|wide|all|100%?)$/.test(d)) ratio = 1;
-    else if (/^(half|49%?|50%?)$/.test(d)) ratio = 0.5;
+    // 主图 / 通栏 都是通栏语义：旧版只认 full/wide，导致数据件声明 main 时整条 V-04 判不出来
+    if (/^(full|wide|all|main|100%?|通栏|主图|大图)$/.test(d)) ratio = 1;
+    else if (/^(half|aux|side|narrow|49%?|50%?|副|1\/2)$/.test(d)) ratio = 0.5;
+    else if (/^\d+(?:\.\d+)?%?$/.test(d)) { const n = parseFloat(d); ratio = n > 1 ? n / 100 : n; }
   }
   const units = findAll(b, (el) => el.attrs['data-point'] !== undefined
     || el.cls.some((c) => /^(point|tick|bar|cell|node)$/.test(c))).length;
@@ -1126,35 +1421,44 @@ function checkV04(root, rules, ctx) {
   const metrics = ctx && ctx.metrics;
   const blocks = findAll(root, (el) => el.attrs['data-viz'] !== undefined);
   if (!blocks.length) return [{ id: 'V-04', ok: true, warn: true, msg: '无 data-viz，转走查' }];
-  const out = [];
+  const fails = [], warns = [], unjudged = [];
   blocks.forEach((b, i) => {
     const measured = metrics && metrics.vizs && metrics.vizs[i];
     const v = measured || staticViz(b);
     const where = describe(b) + (v.kind ? ` kind=${v.kind}` : '');
     const ratio = v.ratio;
     if (ratio === null) {
-      out.push({ id: 'V-04', ok: true, warn: true, msg: `${where} 宽度未声明且无量测，待核不判死` });
+      unjudged.push(where);
       return;
     }
     if (ratio < 0.85) return;
-    if (ratio < 0.9) {
-      out.push({ id: 'V-04', ok: true, warn: true, msg: `${where} 实测宽占比 ${Math.round(ratio * 100)}%（0.85~0.9 待核）` });
-      return;
-    }
+    if (ratio < 0.9) { warns.push(`${where} 宽占比 ${Math.round(ratio * 100)}%（0.85~0.9 待核）`); return; }
     const pct = Math.round(ratio * 100) + '%';
-    if (v.declared && /half|49%?|50%?|narrow/i.test(v.declared)) {
-      out.push({ id: 'V-04', ok: false, msg: `${where} 实测通栏 ${pct} 但 data-viz-w=${v.declared}（声明不实）` });
+    const src = measured ? '实测' : '声明';
+    if (v.declared && /half|49%?|50%?|narrow|aux|side/i.test(v.declared)) {
+      fails.push(`${where} ${src}通栏 ${pct} 但 data-viz-w=${v.declared}（声明不实）`);
       return;
     }
     if (VIZ_ALLOW.indexOf(v.kind) >= 0) return;
     if ((v.kind === 'line' || v.kind === 'area') && v.points >= 12) return;
     if (!v.carrier && v.kpi) return;
-    if (v.kind === 'geo') {
-      out.push({ id: 'V-04', ok: true, warn: true, msg: `${where} geo 未收录（EX-1.4-39），待核不判死` });
-      return;
-    }
-    out.push({ id: 'V-04', ok: false, msg: `${where} 实测通栏 ${pct}，形态不在白名单` });
+    if (v.kind === 'geo') { warns.push(`${where} geo 未收录（EX-1.4-39），待核不判死`); return; }
+    fails.push(`${where} ${src}通栏 ${pct}`);
   });
+  const out = [];
+  if (fails.length) {
+    out.push({
+      id: 'V-04', ok: false,
+      msg: `${fails.length} 块通栏但形态不在白名单（允许 ${VIZ_ALLOW.join('/')} / ≥12 点折线面积 / 无图形载体的 KPI 条）：${fold(fails, 4)}`,
+    });
+  }
+  if (unjudged.length) {
+    out.push({
+      id: 'V-04', ok: true, warn: true,
+      msg: `${unjudged.length}/${blocks.length} 块既未声明宽度也未量测，通栏与否未判定（${fold(unjudged, 3)}）`,
+    });
+  }
+  warns.forEach((w) => out.push({ id: 'V-04', ok: true, warn: true, msg: w }));
   if (!out.length) out.push({ id: 'V-04', ok: true, msg: `通栏块形态合规（${blocks.length} 块）` });
   return out;
 }
@@ -1301,12 +1605,12 @@ const CHECKS = {
   'V-06': (root, rules, ctx) => checkV06(root, rules, ctx),
   'V-07': (root) => checkV07(root),
   'V-08': (root, rules) => checkV08(rules),
-  'V-09': (root) => checkV09(root),
-  'V-10': (root, rules) => checkV10(rules),
+  'V-09': (root, rules, ctx) => checkV09(root, rules, ctx),
+  'V-10': (root, rules, ctx) => checkV10(rules, ctx),
   'V-11': (root) => checkV11(root),
   'V-12': (root) => checkV12(root),
   'V-13': (root) => checkV13(root),
-  'V-14': (root) => checkV14(root),
+  'V-14': (root, rules, ctx) => checkV14(root, rules, ctx),
   'V-15': (root) => checkV15(root),
   'V-16': (root) => checkV16(root),
   'V-17': (root) => checkV17(root),
@@ -1315,7 +1619,7 @@ const CHECKS = {
   'V-20': (root) => checkV20(root),
   'V-21': (root, rules, ctx) => checkV21(root, rules, ctx),
   'V-22': (root) => checkV22(root),
-  'V-23': (root) => checkV23(root),
+  'V-23': (root, rules, ctx) => checkV23(root, rules, ctx),
   'V-24': (root, rules, ctx) => checkV24(root, ctx),
   'V-25': (root) => checkV25(root),
   'V-26': (root) => checkV26(root),
@@ -1331,6 +1635,7 @@ const ALL_IDS = Object.keys(CHECKS).concat(Object.keys(PENDING)).sort();
 // ── 执行 ────────────────────────────────────────────────────────────────────
 function runChecks(html, only, profile, ctx) {
   ctx = ctx || {};
+  ctx.profile = profile;
   RULES = extractRules(html).map((r) => { delete r._cand; return r; });
   const root = parseHTML(html);
   const idx = indexTree(root);
@@ -1347,8 +1652,17 @@ function runChecks(html, only, profile, ctx) {
       }
       return;
     }
+    if (PAUSED_IDS.indexOf(id) >= 0 && !(only && only.length)) {
+      // 2026-11-26 用户裁定：V-26 / V-27 两阶段都暂停，等实际项目出现视觉问题后再开。
+      // --only=V-26 仍可单点复现（自测走这条路，夹具不会失守）。
+      res.push({
+        id, ok: true, warn: true, paused: true,
+        msg: '⏸ 暂停检视（两阶段都不判；判据仍在册，需要时 --only 单点复现）',
+      });
+      return;
+    }
     if (profile === 'sketch' && SKETCH_SKIP.indexOf(id) >= 0) {
-      res.push({ id, ok: true, warn: true, msg: '草图阶段不判（灰块 / 文字当控件语汇）' });
+      res.push({ id, ok: true, warn: true, msg: '草图阶段不判（成品精度项；九条必检项不在此列）' });
       return;
     }
     res.push.apply(res, CHECKS[id](root, RULES, ctx));
@@ -1376,13 +1690,26 @@ function report(file, res, profile, noMeasure, forceMeasureFail) {
   const shown = res.map((r) => (inWarn && r.part === 'measure' && OBSERVE_IDS.indexOf(r.id) >= 0 && !r.ok)
     ? { ...r, ok: true, warn: true, msg: '【观察期 WARN · 不阻断】' + r.msg }
     : r);
-  shown.forEach((r) => console.log(`  ${r.warn ? '⚠️ ' : r.ok ? '✅' : '❌'} ${r.id}  ${r.msg}`));
+  shown.forEach((r) => console.log(`  ${r.paused ? '⏸️ ' : r.warn ? '⚠️ ' : r.ok ? '✅ ' : '❌'} ${r.id}  ${r.msg}`));
   const fails = shown.filter((r) => !r.ok).length;
   const hit = new Set(shown.map((r) => r.id));
   const down = shown.filter((r) => r.warn && /未量测|--no-measure 关闭/.test(r.msg)).map((r) => r.id);
   const pend = new Set(shown.filter((r) => PENDING[r.id]).map((r) => r.id).concat(down));
-  console.log(`  ── V 明细 ${hit.size}/${ALL_IDS.length} 条：机检 ${hit.size - pend.size} 条、未量测 ${pend.size} 条`
-    + (pend.size ? (noMeasure ? '（--no-measure 关闭）' : '（⚠️ 不计通过，回执须登记为未完成项）') : ''));
+  const paused = new Set(shown.filter((r) => r.paused).map((r) => r.id));
+  const judged = hit.size - paused.size;
+  console.log(`  ── V 明细 ${judged}/${ALL_IDS.length} 条实判：机检 ${judged - pend.size} 条、未量测 ${pend.size} 条`
+    + (pend.size ? (noMeasure ? '（--no-measure 关闭）' : '（⚠️ 不计通过，回执须登记为未完成项）') : '')
+    + (paused.size ? `；⏸ 暂停 ${paused.size} 条（${[...paused].join(' ')}，两阶段都不判）` : ''));
+  // 必检九条单列一行：不看这一行，绿不绿都说明不了"必检项真的判过"
+  const mustRes = shown.filter((r) => MUST_IDS.indexOf(r.id) >= 0);
+  const mustFail = [...new Set(mustRes.filter((r) => !r.ok).map((r) => r.id))];
+  const mustPass = [...new Set(mustRes.filter((r) => r.ok && !r.warn).map((r) => r.id))]
+    .filter((id) => mustFail.indexOf(id) < 0);
+  const mustUnjudged = [...new Set(mustRes.filter((r) => r.ok && r.warn).map((r) => r.id))]
+    .filter((id) => mustFail.indexOf(id) < 0);
+  console.log(`  ── 必检 ${MUST_IDS.length} 条：PASS ${mustPass.length} / FAIL ${mustFail.length} / 未判定 ${mustUnjudged.length}`
+    + (mustFail.length ? ` · FAIL：${mustFail.join(' ')}` : '')
+    + (mustUnjudged.length ? ` · 未判定：${mustUnjudged.join(' ')}` : ''));
   console.log(fails ? `  🚫 未过（${fails} 项）` : '  🎉 视觉专项通过');
   return fails ? 1 : 0;
 }

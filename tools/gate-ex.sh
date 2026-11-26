@@ -53,7 +53,7 @@ if [ "$STAGE" = "1.4" ]; then
   bash "$DIR/sketch-selfcheck.sh" "$ART" || RC=1
   echo
 
-# 视觉专项（V 组）：草图 profile（17 条成品精度项不判）；端口未开时 4 条严格量测打 ⚠️ 未量测
+# 视觉专项（V 组）：草图 profile（10 条成品精度项不判，17 条实跑；V-04/05/06/07/09/10/14/23/25 为两段必检）；端口未开时严格量测打 ⚠️ 未量测
   if [ "$NO_VISUAL" -eq 0 ] && [ -f "$DIR/visual-audit.js" ]; then
     VA_ARGS=("$ART" "--profile=sketch")
     if [ "$NO_MEASURE" -eq 1 ]; then VA_ARGS+=("--no-measure"); fi
