@@ -114,8 +114,8 @@ function renderPlan(plan) {
         '  <b class="step-name">Step ' + (idx + 1) + '：【' + esc(st.name) + '】</b>\n' +
         '  <span class="step-intent">意图：' + esc(st.intent) + '</span>\n' +
         '  <span class="step-pages">关联界面：' + names + '</span>\n' +
-        '  <span class="step-see">看到：' + esc(st.see) + '</span>\n' +
-        '</div>\n' + pages;
+        '</div>\n' +
+        '  <div class="step-act" data-act="' + st.id + '">本步骤操作：' + esc(st.act || st.see || '') + '</div>\n' + pages;
     }).join('\n');
     return '<section class="scene' + (si === 0 ? ' on' : '') + '" data-scene="' + sc.id + '" data-name="' + esc(sc.name) + '">\n' + steps + '\n</section>';
   }).join('\n');

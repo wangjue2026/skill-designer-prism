@@ -62,27 +62,43 @@ function runEX() {
     const scenes = [];
     let m;
     while ((m = nameRe.exec(md))) scenes.push({ id: m[1], name: m[2].trim() });
-    if (scenes.length < 2 || scenes.length > 5) bad('EX-1.1-01', '主场景 ' + scenes.length + ' 条，应为 2~5 条');
+    if (scenes.length < 1 || scenes.length > 5) bad('EX-1.1-01', '主场景 ' + scenes.length + ' 条，应为 1~5 条（1 条合法；>5 是没收敛）');
     else ok('EX-1.1-01', '主场景 ' + scenes.length + ' 条');
     const badName = scenes.filter((s) => STAGE_WORDS.test(s.name));
     const noDuty = scenes.filter((s) => !DUTY_WORDS.test(s.name));
     if (badName.length) bad('EX-1.1-02', '场景名含阶段词：' + badName.map((s) => s.name).join('、'));
     else if (noDuty.length) bad('EX-1.1-02', '场景名缺职责词（运营/运维/管理/治理/盘点/交付/上架/值守/复核/审计/维护），仍是"点"：' + noDuty.map((s) => s.name).join('、'));
     else ok('EX-1.1-02', '场景名为职责级命名（含职责词、无阶段词）');
-    // 逐行取单元格：cells[0]=场景 cells[1]=角色 cells[2]=主场景 cells[3]=痛点
+    // 按表头解析列位（4 列交付表 / 9 列内部底稿都支持，不再靠 cells 下标猜）
+    const hdrLine = md.split(/\r?\n/).find((l) => /^\|\s*场景/.test(l)) || '';
+    const hdr = hdrLine.replace(/^\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.replace(/\*\*/g, '').trim());
+    const colIdx = (kw) => hdr.findIndex((h) => h.indexOf(kw) >= 0);
+    const iDuty = colIdx('要办成的事');
+    const iPain = colIdx('现状核心痛点') >= 0 ? colIdx('现状核心痛点') : (colIdx('现状卡点') >= 0 ? colIdx('现状卡点') : colIdx('痛点'));
+    const iEnd = colIdx('业务终态');
+    const iSrc = colIdx('需求出处');
+    // 逐行取单元格（按表头列位，不按固定下标）
     const sRows = md.split(/\r?\n/).filter((l) => /^\|\s*\*{0,2}S\d+\./.test(l));
-    const dutyBad = [], painBad = [], thinDuty = [];
+    const dutyBad = [], painBad = [], thinDuty = [], endBad = [], srcBad = [];
+    const ends = [];
     sRows.forEach((l) => {
       const cells = l.replace(/^\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.replace(/\*\*/g, '').trim());
       const id = (cells[0] || '').split('.')[0];
-      // 4 列交付表：场景 / 角色 / 要办成的事 / 痛点；6~7 列内部底稿多「触发情境」与「痛点概括」，列位后移
-      const wide = cells.length >= 6;
-      const duty = wide ? cells[3] || '' : cells[2] || '';
-      const pain = wide ? cells[4] || '' : cells[3] || '';
+      const duty = iDuty >= 0 ? cells[iDuty] || '' : (cells.length >= 6 ? cells[3] || '' : cells[2] || '');
+      const pain = iPain >= 0 ? cells[iPain] || '' : (cells.length >= 6 ? cells[4] || '' : cells[3] || '');
       if (duty.length < 10 || !/(维护|交付|把|一份|台账|清单|建立|取证|交代|形成一个)/.test(duty)) dutyBad.push(id);
       const items = duty.split(/[、；;，,/]/).map((x) => x.trim()).filter((x) => x.length >= 2);
       if (items.length < 3) thinDuty.push(id);
       if (pain.length < 6) painBad.push(id);
+      if (iEnd >= 0) {
+        const end = cells[iEnd] || '';
+        if (end.length < 6 || /(提交了|下发了|看完了|点完了)$/.test(end)) endBad.push(id);
+        else ends.push({ id: id, end: end });
+      }
+      if (iSrc >= 0) {
+        const src = cells[iSrc] || '';
+        if (src.length < 4 || /【假设】/.test(src)) srcBad.push(id);
+      }
     });
     if (dutyBad.length) bad('EX-1.1-03', '主场景内容不像"一份要交付的东西 + 覆盖工作"：' + dutyBad.join('、'));
     else ok('EX-1.1-03', '每条主场景均成形（一份东西 + 工作内容）');
@@ -92,6 +108,32 @@ function runEX() {
     else ok('EX-1.1-06', '每条主场景覆盖 ≥3 个子事项');
     if (/REQ-\d|S\d+-P\d/.test(md)) bad('EX-1.1-05', '编号外泄（REQ-xxx / Sx-Py）');
     else ok('EX-1.1-05', '无编号外泄');
+
+    // 07 需求出处（挡"联想扩展"）
+    if (iSrc >= 0) {
+      if (srcBad.length) bad('EX-1.1-07', '这些场景缺需求出处、或拿【假设】造场景：' + srcBad.join('、') + '（场景必须有需求文档章节 / 原句；【假设】只能用于场景内部细节）');
+      else ok('EX-1.1-07', '每条场景都有需求出处：' + sRows.length + ' 条');
+    } else {
+      wr('EX-1.1-07', '表头没有「需求出处」列（内部底稿 9 列版要求有）：没法机检"联想扩展"，须人检每条场景在需求里的出处');
+    }
+
+    // 08 业务终态互异（挡"一条闭环被切成多条场景"）
+    if (iEnd >= 0) {
+      const dupEnd = [];
+      for (let x1 = 0; x1 < ends.length; x1++) {
+        for (let y1 = x1 + 1; y1 < ends.length; y1++) {
+          const e1 = ends[x1].end, e2 = ends[y1].end;
+          if (e1 === e2 || e1.indexOf(e2) >= 0 || e2.indexOf(e1) >= 0) dupEnd.push(ends[x1].id + ' / ' + ends[y1].id);
+        }
+      }
+      if (endBad.length) bad('EX-1.1-08', '这些场景的「业务终态」为空、或写成操作终态（提交 / 下发 / 看完 / 点完）：' + endBad.join('、'));
+      else if (dupEnd.length) bad('EX-1.1-08', '这些场景的终态指向同一产物（同一条闭环被切开）：' + dupEnd.join('；') + ' → 回 1.1 Step 4 · 4.1 合并');
+      else ok('EX-1.1-08', '业务终态齐备且互异：' + ends.length + ' 条');
+    } else {
+      wr('EX-1.1-08', '表头没有「业务终态」列（内部底稿 9 列版要求有）：没法机检"闭环是否被切开"，须人检 1.1 Step 5 组②第 5 问');
+    }
+    wr('EX-1.1-09', '须人检：Step 4 · 4.1 分合判据逐对比较（串行 / 同产物 / 同入口 / 半程，命中任一即合并）');
+    wr('EX-1.1-10', '须人检：Step 5 六问逐条有答案且填进「场景自检表」（组①三条 + 组②三条，反问不向用户提出）');
   }
 
   if (stage === '1.2') {
@@ -850,7 +892,7 @@ function runEX() {
           return {
             id: attrOf(st.tag, 'data-step'), tag: st.tag, seg: st.seg,
             pages: pages,
-            names: ['step-name', 'step-intent', 'step-pages', 'step-see'].map(function (cls) {
+            names: ['step-name', 'step-intent', 'step-pages'].map(function (cls) {
               var m = st.seg.match(new RegExp('class="[^"]*\\b' + cls + '\\b[^"]*"[^>]*>([\\s\\S]*?)<\\/(?:b|span|div)>'));
               return m ? strip(m[1]) : '';
             })
@@ -930,13 +972,21 @@ function runEX() {
     plansData.forEach(function (p) {
       p.scenes.forEach(function (s) {
         s.steps.forEach(function (st) {
-          var labels = ['步名', '意图', '关联界面', '看到'];
+          var labels = ['步名', '意图', '关联界面'];
           st.names.forEach(function (v, i) { if (!v) s35.push('场景 ' + s.id + ' 的 ' + st.id + ' 步骤头缺「' + labels[i] + '」'); });
           var declared = (attrOf(st.tag, 'data-pages') || '').trim().split(/\s+/).filter(Boolean);
           var actual = st.pages.map(function (pg) { return pg.page; });
           if (!declared.length) s35.push(st.id + ' 没写 data-pages（这一步关联哪些页面）');
           else if (declared.join(',') !== actual.join(',')) s35.push(st.id + ' 的 data-pages（' + declared.join('/') + '）与下面页面（' + actual.join('/') + '）不一致');
           if (!st.pages.length) s35.push(st.id + ' 下面没有页面块');
+          var actM = st.seg.match(/<div[^>]*class="[^"]*step-act[^"]*"[^>]*>([\s\S]*?)<\/div>/);
+          if (!actM) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 缺「本步骤操作」行（步骤头下一行，写这一页做了什么动作）');
+          else {
+            var actTag = actM[0].slice(0, actM[0].indexOf('>') + 1);
+            if (attrOf(actTag, 'data-act') !== st.id) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 的「本步骤操作」data-act 与步骤号不一致（复制别的步骤忘改）');
+            var actTxt = strip(actM[1]).replace(/^本步骤操作[：:]\s*/, '').trim();
+            if (actTxt.length < 8) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 的「本步骤操作」为空或过短（要写清动作 + 对象）');
+          }
           st.pages.forEach(function (pg) {
             ['page', 'occ', 'scene', 'plan', 'step'].forEach(function (k) {
               if (!pg[k]) s35.push(st.id + ' 下的页面缺 data-' + k);
@@ -972,10 +1022,31 @@ function runEX() {
     }
     s35 = Array.from(new Set(s35));
     if (s35.length) {
-      bad('EX-1.4-35', '步骤-页面承接不成立：' + s35.slice(0, 6).join('；') + (s35.length > 6 ? ' 等 ' + s35.length + ' 处' : '') + '（步骤头四要素齐、data-pages 与页块一致、首步入口、末步末态、实例号唯一）');
+      bad('EX-1.4-35', '步骤-页面承接不成立：' + s35.slice(0, 6).join('；') + (s35.length > 6 ? ' 等 ' + s35.length + ' 处' : '') + '（步骤头三要素 + 本步骤操作、data-pages 与页块一致、首步入口、末步末态、实例号唯一）');
     } else {
       ok('EX-1.4-35', '步骤-页面承接成立：' + allOcc.length + ' 个页面实例，首步入口与末步末态齐');
     }
+
+    // 40 相邻步骤整页重复必须写变化（治"重复屏看不出差别"，EX-1.4-40）
+    var s40 = [];
+    plansData.forEach(function (p) {
+      p.scenes.forEach(function (sc) {
+        var prevPages = null, prevId = '';
+        sc.steps.forEach(function (st) {
+          var cur = st.pages.map(function (pg) { return pg.page; });
+          if (prevPages && cur.length && cur.length === prevPages.length) {
+            var same = true;
+            cur.forEach(function (x) { if (prevPages.indexOf(x) < 0) same = false; });
+            if (same && !(attrOf(st.tag, 'data-delta') || '').trim()) {
+              s40.push(sc.id + ' 的 ' + st.id + ' 与 ' + prevId + ' 页面完全相同（' + cur.join('/') + '），但没写 data-delta');
+            }
+          }
+          prevPages = cur; prevId = st.id;
+        });
+      });
+    });
+    if (s40.length) bad('EX-1.4-40', '相邻步骤整页重复却没写变化：' + s40.slice(0, 5).join('；') + '（在该步 step-hd 写 data-delta="与上一屏相比变了哪一块"；或合并这两步、或删掉重复那一步）');
+    else ok('EX-1.4-40', '相邻步骤无"未声明变化的整页重复"');
 
     // 36 重复副本一致（EX-1.4-36）
     var byPage = {};

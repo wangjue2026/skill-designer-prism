@@ -71,12 +71,12 @@ else
   echo "  ❌ 未找到分页面小节（<h5>Page-0x 或旧结构 h4 7.x Page-0x）"; is_bad
 fi
 
-# 场景切分（1.1 判据：数量 2~5 条；名字里不得带阶段/操作词，串行旅程必须合并）
+# 场景切分（1.1 判据：数量 1~5 条，1 条合法；名字里不得带阶段/操作词，串行旅程必须合并）
 SCN=$(grep -oE '<td><b>S[0-9]+\.' "$SPEC" | wc -l | tr -d ' ')
 if [ "$SCN" -gt 0 ]; then
   SCN_MSG=""
-  if [ "$SCN" -lt 2 ] || [ "$SCN" -gt 5 ]; then
-    SCN_MSG="${SCN_MSG}【场景数量】主场景 $SCN 条，应为 2~5 条（不足=拆碎，过多=没收敛）；"
+  if [ "$SCN" -lt 1 ] || [ "$SCN" -gt 5 ]; then
+    SCN_MSG="${SCN_MSG}【场景数量】主场景 $SCN 条，应为 1~5 条（1 条合法，不设下限；过多=没收敛）；"
   fi
   BADNAME=$(grep -oE '<td><b>S[0-9]+\. [^<]*' "$SPEC" | sed 's|<td><b>||' | grep -E '(追踪|结果|查看|定位|详情|下发|提交|编辑|导入|导出|新建)' || true)
   if [ -n "$BADNAME" ]; then
