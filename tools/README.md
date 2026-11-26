@@ -245,6 +245,36 @@ TARGET=<内网地址> PORT=<独占端口> node tools/internal-reverse-proxy.js
 | 退出码 | `0` 通过（无可视化件的说明书自适应跳过）；`1` 存在失败项 |
 | 边界 | 只读不改文件；按 `<h5 id="page-">` 逐页比对，不跨页混算 |
 
+### `visual-audit.js` —— 视觉门禁检视器（V 组）
+
+> 治的病：判据写在 md 里、图例册也有，但**门禁跑的时候没有任何一行会被执行**，只能靠人肉对表。
+> **现状：可执行 27 条（全量）**（批次 C 补齐 V-01 左基线、V-02 栅格列线）；**未实现 0 条**。端口未开时 V-01/02/05/24 输出 `⚠️ 未量测`，回执仍须逐条登记。**别把它的绿当成"视觉已检视"**——回执要贴原始输出。
+
+| 项 | 说明 |
+| :--- | :--- |
+| 用法 | `node tools/visual-audit.js <产物.html> --profile=sketch\|wireframe [--only=V-08,V-19]` |
+| 自测 | `node tools/visual-audit.js --selftest` → 跑 `tools/fixtures/visual/` 全部 good/bad/badm/bad-order/alt，bad / badm / bad-order 必红、good/alt 必绿（当前 **83/83**；无 9222 时跳过 13 个量测用例，不判失败） |
+| 取值源 | `03-design-assets/global-styles`：间距 `2/4/8/12/16/24/32`、字阶 10 档、字重 `400/600`、圆角 `0/2`、阴影 `s1/s2/s3`、语义色映射表；一处不符即 FAIL |
+| 判定方式 | **两层**：① 静态解析（轻量 HTML → DOM 树 + 选择器匹配 + `<style>` / inline 声明合并，不渲染）；② 量测（`visual-measure.js` 走 CDP 9222 取 bbox，供 `V-05` 留白占比、`V-24` 操作坐标、`V-04` 通栏宽度与 `V-21` 表格行高 / 溢出；后两条无端口时走静态近似） |
+| 阶段裁剪 | `--profile=sketch` 时 **V-01/02/03/04/05/06/08/09/10/11/12/13/14/16/19/21/25 不执行**（输出 `⚠️`，不算通过也不算阻断）。裁前实测某草图 3929 条红，裁后 3 份历史草图 **0 误伤** |
+| 已知边界 | ① 布局计算只做"容器 vs 子元素并集"这一层，其余 bbox 需求仍 `⚠️`；② 不支持外部 CSS、`@import`、CSS 变量求值；③ `em` / `%` 间距按 md 口径不判；④ 伪类只认 `:focus` 的蓝 glow；⑤ 选择器子集（tag / .class / #id / [attr] / 后代 / `>`） |
+| 接入 | `gate-ex.sh 1.4`（草图 profile）与 `gate-sp.sh`（说明书 profile）都已接；`--no-visual` 整体跳过、`--no-measure` 只关量测 |
+| 观察期 | `V-05`/`V-24` 的**量测部分**至 2026-12-10 只 WARN 不阻断（静态照旧 FAIL）；`--measure-fail` 提前转 FAIL；自测不受影响 |
+| 退出码 | `0` 通过 / `1` 有 FAIL / `2` 用法错 |
+
+### `visual-measure.js` —— V 组量测通道（CDP bbox）
+
+> 治的病：留白占比、操作按钮左右飘这类问题**只有渲染后才看得见**，纯静态解析永远抓不到。
+
+| 项 | 说明 |
+| :--- | :--- |
+| 用法 | `node tools/visual-measure.js <产物.html>`（调试用）；门禁里由 `visual-audit.js` 自动调用 |
+| 前置 | Chrome 以 `--remote-debugging-port=9222` 启动；`open -na "Google Chrome" --args --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-prism-audit` |
+| 做法 | 复用带 `#prism-visual-audit-session` 锚点的标签页 → 1440 视口 → 只 `Page.navigate` 等 `readyState=complete` → 一次 `Runtime.evaluate` 取回 `content / page / grid / blocks / cards / vizs / tables` → 只关 WebSocket，不关标签；`<html data-viewport-width="1760">` 可覆盖断点视口 |
+| 会话复用 | 整批门禁共用**一个标签页**，只 navigate 不新建 / 不关闭；跑完全部后 `node tools/visual-measure.js --close` 一次关闭（避免闪屏） |
+| 边界 | 只读、不改页面状态；排除 `.handoff` 台账区与空态 / 加载 / 无权限区块（`.empty`/`.state`/`[data-state]`） |
+| 降级 | 端口未开返回 `null`，`V-01`/`V-02`/`V-05`/`V-24` 输出 `⚠️ 未量测`（`V-24` 仍判类名顺序），**不抛错、不阻断**；`V-04`/`V-21` 改走静态近似，**不算未量测** |
+
 ### `check-links.js` —— 文档链接可达性校验（常规校验）
 
 > 目录改名 / 文件搬迁后，"链接还写着旧路径"是最典型的静默失效：文档还能打开，但点进去是空的，AI 会据此判断"资产不存在"从而退回猜。本脚本把它挡在提交之前。

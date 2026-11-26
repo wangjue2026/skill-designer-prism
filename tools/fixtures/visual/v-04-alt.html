@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-04 合法变体 · 甘特、12 点趋势、KPI 条与地图待核</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .viz { height: 240px; margin-bottom: 16px; background: #FFFFFF;
+         border: 1px solid #D3D7DE; border-radius: 2px; }
+  .kpi { display: flex; gap: 24px; padding: 16px; background: #FFFFFF;
+         border: 1px solid #D3D7DE; border-radius: 2px; }
+  .kpi div { min-width: 160px; }
+  .kpi b { display: block; font-size: 24px; line-height: 32px; font-weight: 600; }
+  svg { display: block; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+  <h1>实施计划总览</h1>
+  <section class="viz" data-viz="实施甘特" data-viz-kind="tl" data-viz-w="full" style="width:100%">
+    <svg data-carrier="gantt" viewBox="0 0 1200 220" aria-label="实施甘特图">
+      <rect x="120" y="40" width="520" height="20" fill="#1C6EFF"></rect>
+      <rect x="300" y="80" width="420" height="20" fill="#1C6EFF"></rect>
+      <rect x="520" y="120" width="360" height="20" fill="#12A679"></rect>
+      <path d="M100 20 L100 180 M1100 20 L1100 180" stroke="#6F7785" stroke-width="1"></path>
+    </svg>
+  </section>
+  <section class="viz" data-viz="在线趋势" data-viz-kind="line" data-points="12" data-viz-w="full" style="width:100%">
+    <svg data-carrier="line" viewBox="0 0 1200 220" aria-label="12 点在线趋势">
+      <polyline fill="none" stroke="#1C6EFF" stroke-width="2"
+        points="60,180 155,170 250,176 345,150 440,158 535,132 630,140 725,110 820,120 915,92 1010,100 1105,70"></polyline>
+    </svg>
+  </section>
+  <div class="kpi" data-kpi-strip>
+    <div><b>128</b><span>接入终端</span></div>
+    <div><b>12</b><span>在线组织</span></div>
+    <div><b>98%</b><span>隧道可用率</span></div>
+  </div>
+  <section class="viz" data-viz="区域分布" data-viz-kind="geo" data-viz-w="full" style="width:100%">
+    <svg data-carrier="geo" viewBox="0 0 1200 200" aria-label="区域分布待核">
+      <circle cx="320" cy="100" r="28" fill="#4FA1FF"></circle>
+      <circle cx="760" cy="90" r="36" fill="#4FA1FF"></circle>
+    </svg>
+  </section>
+  <div data-viz="KPI 摘要" data-viz-w="full" style="width:100%" data-kpi-strip>
+    <span>128 台</span><span>12 个组织</span>
+  </div>
+</body>
+</html>

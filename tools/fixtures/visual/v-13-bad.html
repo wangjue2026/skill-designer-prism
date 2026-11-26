@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-13 反例 · 长名溢出无截断、标签旋转、ID 列被压窄</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 12px; border-bottom: 1px solid #E1E5EB; font-size: 12px;
+           line-height: 20px; text-align: left; font-weight: 400; }
+  th { background: #F4F7FB; color: #5E6573; font-weight: 600; }
+  /* 反例 1：溢出但没有 ellipsis，也没有 title */
+  .overflow { max-width: 180px; white-space: nowrap; overflow: hidden; }
+  /* 反例 2：标签旋转 45° */
+  .rot { display: inline-block; transform: rotate(45deg); }
+  /* 反例 3：关键 ID 列被压到 8 字符宽 */
+  .key-col { min-width: 64px; white-space: nowrap; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>对象接入清单</h1>
+    <p>示例环境 · 快照 2026-11-26 09:20 · 规模 128 终端 / 4 组织</p>
+  </div>
+  <table>
+    <thead><tr><th class="key-col">对象标识</th><th><span class="rot">接入路径</span></th><th>最近检查</th></tr></thead>
+    <tbody>
+      <tr><td class="key-col">VU-2041</td><td><span class="overflow">研发部-北京研发中心-3 号楼-终端接入代理-主链路</span></td><td>2026-11-26 09:18:42</td></tr>
+      <tr><td class="key-col">VU-2087</td><td><span class="overflow">销售部-上海分部-客户拜访终端-浏览器接入</span></td><td>2026-11-26 09:17:10</td></tr>
+      <tr><td class="key-col">VU-2190</td><td><span class="overflow">分支机构-深圳-移动办公终端-隧道接入</span></td><td>2026-11-26 09:16:55</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-05 防一刀切 · 宽扁条两端对齐，中间留空不算留白</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head { padding: 0 0 16px; }
+  .page-head h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .page-head p { margin: 8px 0 0; font-size: 12px; line-height: 20px; color: #5E6573; }
+  /* 正例根因：高 ≤72px 的宽扁条，左标签右数值，两端贴边（单侧空白 0），中间空是对的 */
+  .blk { display: flex; align-items: center; justify-content: space-between;
+         height: 64px; padding: 0 16px; background: #FFFFFF;
+         border: 1px solid #D3D7DE; border-radius: 2px; margin-bottom: 12px; }
+  .blk .label { font-size: 12px; line-height: 20px; color: #5E6573; }
+  .blk .value { font-size: 16px; line-height: 24px; font-weight: 600;
+                font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>访问诊断</h1>
+    <p>示例环境 · 快照 2026-11-25 09:20 · 规模 128 终端 / 4 组织</p>
+  </div>
+
+  <div class="blk"><span class="label">检查总次数</span><span class="value">128</span></div>
+  <div class="blk"><span class="label">异常终端</span><span class="value">14</span></div>
+  <div class="blk"><span class="label">平均耗时</span><span class="value">182 ms</span></div>
+</body>
+</html>

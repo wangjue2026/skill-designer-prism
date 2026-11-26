@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-22 正例 · 六态各有图形、文案与动作</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head { padding: 0 0 16px; }
+  .page-head h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .page-head p { margin: 8px 0 0; font-size: 12px; line-height: 20px; color: #5E6573; }
+  .card { background: #FFFFFF; border: 1px solid #D3D7DE; border-radius: 2px; padding: 16px; }
+  .state { display: flex; align-items: center; gap: 12px; min-height: 48px;
+           padding: 8px 12px; margin-bottom: 8px; border: 1px dashed #D3D7DE; border-radius: 2px; }
+  .state:last-child { margin-bottom: 0; }
+  .state .ico { display: inline-flex; width: 24px; height: 24px; align-items: center;
+                justify-content: center; border-radius: 2px; background: #F4F7FB;
+                color: #1C6EFF; font-size: 16px; line-height: 24px; }
+  .state .msg { flex: 1; font-size: 12px; line-height: 20px; }
+  .btn { height: 32px; padding: 0 12px; border: 1px solid #D3D7DE; border-radius: 2px;
+         background: #FFFFFF; color: #2F3540; font-size: 12px; }
+  .state[data-state="partial"] .ico { color: #FDAA1D; }
+  .state[data-state="denied"] .ico { color: #6F7785; }
+  .state[data-state="expired"] .ico { color: #0BA7B5; }
+  .state[data-state="unknown"] .ico { color: #6F7785; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>接入状态</h1>
+    <p>示例环境 · 快照 2026-11-26 09:20 · 规模 800 终端 / 12 组织</p>
+  </div>
+  <div class="card">
+    <div class="state" data-state="empty"><span class="ico" aria-hidden="true">○</span><span class="msg">无符合条件的数据</span><button class="btn">清空筛选</button></div>
+    <div class="state" data-state="loading"><span class="ico" aria-hidden="true">◌</span><span class="msg">正在加载 720 台终端…</span><button class="btn">取消加载</button></div>
+    <div class="state" data-state="partial"><span class="ico" aria-hidden="true">◐</span><span class="msg">部分加载完成：720/800 台</span><button class="btn">重试剩余</button></div>
+    <div class="state" data-state="denied"><span class="ico" aria-hidden="true">□</span><span class="msg">无查看权限</span><button class="btn">申请权限</button></div>
+    <div class="state" data-state="expired"><span class="ico" aria-hidden="true">△</span><span class="msg">数据截至 11-24 03:00</span><button class="btn">刷新数据</button></div>
+    <div class="state" data-state="unknown"><span class="ico" aria-hidden="true">◇</span><span class="msg">状态未知，暂无法判定</span><button class="btn">重新探测</button></div>
+  </div>
+</body>
+</html>

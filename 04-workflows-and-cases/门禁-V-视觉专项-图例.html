@@ -1,0 +1,1431 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>门禁-V-视觉专项 · 27 条正反例图册（定稿 v0.6）</title>
+<style>
+:root{
+  --blue:#1C6EFF;--blue-l:#E8F4FF;--ink:#2F3540;--ink2:#454C59;--muted:#6F7785;
+  --line:#E1E5EB;--bg:#F7F9FC;--ok:#12A679;--ok-bg:#F6FFED;--ok-bd:#B7EB8F;
+  --bad:#D9363E;--bad-bg:#FFF1F0;--bad-bd:#FFA39E;
+  --warn:#D46B08;--warn-bg:#FFF7E6;--warn-bd:#FFD591;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;padding:0 0 96px;background:var(--bg);color:var(--ink);
+  font:14px/1.7 -apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 26px 0}
+h1{font-size:23px;margin:0 0 6px;letter-spacing:-.2px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 3px}
+.how{background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 16px;margin:16px 0 0;font-size:12.5px;color:var(--ink2)}
+.how b{color:var(--ink)}
+.how code{background:#F1F5FB;border:1px solid #E1E8F2;border-radius:3px;padding:1px 4px;
+  font:12px/1 "JetBrains Mono",Menlo,monospace;color:#1458CC}
+h2.sec{font-size:15px;margin:30px 0 10px;padding-left:9px;border-left:3px solid var(--blue)}
+
+/* 全局疑点 */
+.gi{background:#fff;border:1px solid var(--line);border-radius:9px;padding:14px 18px 16px}
+.gi ol{margin:0;padding-left:20px}
+.gi li{margin:7px 0;font-size:13px}
+.gi .k{color:var(--bad);font-weight:600}
+.gi .w{color:var(--warn);font-weight:600}
+
+/* 目录 */
+table.toc{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
+  border-radius:9px;overflow:hidden;font-size:12.5px}
+.toc th{background:#F4F7FB;text-align:left;padding:8px 10px;font-weight:600;
+  border-bottom:1px solid var(--line);font-size:12px;color:var(--ink2)}
+.toc td{padding:7px 10px;border-bottom:1px solid #F0F3F7;vertical-align:top}
+.toc tr:last-child td{border-bottom:0}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--blue)}
+.toc .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#DDE3EC;
+  margin-right:6px;vertical-align:1px}
+.dot.ok{background:var(--ok)}.dot.doubt{background:#FA8C16}.dot.wrong{background:var(--bad)}
+.jd{font-size:11.5px;white-space:nowrap}
+.jd.ok{color:#237804}.jd.doubt{color:#AD4E00}.jd.wrong{color:#A4262C}
+
+/* 条目 */
+.item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 20px;
+  margin:14px 0;scroll-margin-top:74px}
+.hd{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.code{font:600 13px/1 "JetBrains Mono",Menlo,monospace;background:var(--blue-l);color:#1458CC;
+  border:1px solid #BBD9FF;border-radius:4px;padding:4px 7px}
+.ttl{font-size:16px;font-weight:600}
+.mm{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:1px 6px}
+.mm.cdp{color:#AD4E00;border-color:var(--warn-bd);background:var(--warn-bg)}
+.st{font-size:11px;border-radius:3px;padding:1px 6px;border:1px solid var(--line);
+  color:var(--muted);margin-left:auto}
+.st.ok{background:var(--ok-bg);color:#237804;border-color:var(--ok-bd)}
+.st.doubt{background:var(--warn-bg);color:#AD4E00;border-color:var(--warn-bd)}
+.st.wrong{background:var(--bad-bg);color:#A4262C;border-color:var(--bad-bd)}
+.judge{font-size:12.5px;color:var(--ink2);margin:10px 0 0;background:var(--bg);
+  border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 6px 6px 0}
+.judge b{color:var(--ink)}
+
+/* 正反例 */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 0}
+.pane{border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+.pane .cap{font-size:11.5px;padding:6px 9px;border-bottom:1px solid var(--line);
+  background:var(--bg);color:var(--muted);line-height:1.5}
+.pane.ok .cap{background:var(--ok-bg);color:#0E7F5C;border-bottom-color:var(--ok-bd)}
+.pane.bad .cap{background:var(--bad-bg);color:#A4262C;border-bottom-color:var(--bad-bd)}
+.mock{padding:11px;min-height:190px;display:flex;flex-direction:column;gap:7px;
+  background:#fff;font-size:11px;flex:1}
+
+/* mock 基础件 */
+.pg{border:1px solid #DCE2EA;border-radius:4px;overflow:hidden;background:#fff;position:relative;
+  flex:1;display:flex;flex-direction:column}
+.gd{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #A9B6C9;z-index:2}
+.gd.r{border-left:1.5px solid var(--bad);border-left-style:solid}
+.blk{border:1px solid #DCE2EA;border-radius:4px;background:#FBFCFE;display:flex;
+  align-items:center;justify-content:center;font-size:10px;color:var(--muted);min-height:34px}
+.blk.f{background:#F4F7FB}
+.mk{outline:1.5px solid var(--bad);outline-offset:-1.5px;border-radius:3px}
+.lb{font-size:10.5px;color:var(--muted);line-height:1.5}
+.lb b{color:var(--ink2)}
+.tip{font-size:11px;color:#A4262C;background:var(--bad-bg);border:1px dashed var(--bad-bd);
+  border-radius:6px;padding:6px 9px;line-height:1.55}
+.tip b{color:var(--ink2)}
+.tip.g{color:#0E7F5C;background:var(--ok-bg);border-color:var(--ok-bd)}
+.tip.g b{color:#0E7F5C}
+
+/* 标签 / 按钮 */
+.tg{display:inline-block;font-size:10px;line-height:16px;padding:0 6px;border-radius:3px;
+  border:1px solid;white-space:nowrap;background:#fff}
+.tg.ok{background:#F5FFFA;color:#015945;border-color:#9BF2CC}
+.tg.warn{background:#FFF5E8;color:#872600;border-color:#FFC996}
+.tg.bad{background:#FFF7F5;color:#82010E;border-color:#FFACA3}
+.tg.info{background:#E8F4FF;color:#00258C;border-color:#96C7FF}
+.tg.gray{background:#FAFBFC;color:#6F7785;border-color:#DCE2EA}
+.tg.solid{background:#CF171D;color:#fff;border-color:#CF171D}
+.bt{height:24px;line-height:22px;padding:0 9px;border-radius:3px;border:1px solid transparent;
+  font-size:10px;display:inline-block;white-space:nowrap}
+.bt.p{background:var(--blue);color:#fff}
+.bt.s{background:#fff;border-color:#C7D0DC;color:#454C59}
+.bt.t{color:var(--blue);background:transparent}
+.bt.d{background:var(--bad);color:#fff}
+.bt.od{background:#fff;border-color:var(--bad-bd);color:var(--bad)}
+.bt .i{display:inline-block;width:9px;height:9px;border-radius:50%;background:currentColor;
+  opacity:.9;margin-right:4px;vertical-align:-1px}
+.inp{height:24px;border:1px solid #C7D0DC;border-radius:3px;background:#fff;font-size:10px;
+  color:#A0A8B4;line-height:22px;padding:0 7px;display:inline-block}
+
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse;font-size:10px}
+.tbl th{background:#F4F7FB;text-align:left;padding:5px 6px;border-bottom:1px solid #E1E5EB;
+  font-weight:600;color:var(--ink2)}
+.tbl td{padding:4px 6px;border-bottom:1px solid #F0F3F7;color:var(--ink2)}
+.tbl .r{text-align:right}
+.tn{font-variant-numeric:tabular-nums}
+
+/* 图表 */
+.bars{display:flex;align-items:flex-end;gap:5px;height:62px;border-bottom:1px solid #DCE2EA;padding:0 2px}
+.bars i{display:block;width:12px;background:#C7D3E3;border-radius:2px 2px 0 0}
+.bars i.hi{background:var(--blue)}
+.bars i.rd{background:var(--bad)}
+.stack{display:flex;height:24px;border:1px solid #DCE2EA;border-radius:3px;overflow:hidden}
+.stack span{font:600 9px/22px sans-serif;color:#fff;text-align:center}
+.ax{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px}
+.gl{position:relative}
+.gl::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(
+  to bottom,#EEF2F7 0 1px,transparent 1px 25%)}
+.cols{background-image:repeating-linear-gradient(to right,rgba(28,110,255,.14) 0 1px,
+  transparent 1px 4.1667%)}
+
+/* KPI */
+.kpis{display:flex;gap:7px}
+.kpi{flex:1;border:1px solid #EDF1F7;border-radius:4px;padding:5px 7px;background:#FBFCFE}
+.kpi .k{font-size:9px;color:var(--muted);line-height:1.4}
+.kpi .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.sk{height:6px;background:#EDF1F7;border-radius:3px}
+.dot3{display:inline-block;width:8px;height:8px;border-radius:50%}
+
+/* 疑点 */
+.cn{background:#FFFBEF;border:1px solid #FFE0A3;border-left:3px solid var(--warn);
+  border-radius:0 6px 6px 0;padding:9px 12px;margin-top:12px;font-size:12.5px;color:#5B4708}
+.cn h4{margin:0 0 5px;font-size:11.5px;color:#AD4E00;letter-spacing:.3px}
+.cn ul{margin:0;padding-left:17px}
+.cn li{margin:3px 0;line-height:1.62}
+.cn li b{color:#8A3B00}
+.cn code{background:#FFF3D6;border:1px solid #FFE0A3;border-radius:3px;padding:0 4px;
+  font:11.5px/1 "JetBrains Mono",Menlo,monospace;color:#8A3B00}
+.cn .sev{font-size:10px;border:1px solid;border-radius:3px;padding:0 4px;margin-right:4px}
+.sev.c{color:#A4262C;border-color:var(--bad-bd);background:var(--bad-bg)}
+.sev.w{color:#AD4E00;border-color:var(--warn-bd);background:#FFF3E0}
+.sev.n{color:#1458CC;border-color:#BBD9FF;background:var(--blue-l)}
+
+/* 建议层 */
+.sg{background:#F5FAFF;border:1px solid #CFE3FF;border-left:3px solid var(--blue);
+  border-radius:0 6px 6px 0;padding:10px 12px;margin-top:10px;font-size:12.5px;color:#123C6B}
+.sg h4{margin:0 0 6px;font-size:11.5px;color:#0B57C7;letter-spacing:.3px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sg .act{font-size:10px;border:1px solid;border-radius:3px;padding:0 5px;font-weight:600}
+.act.keep{color:#237804;border-color:var(--ok-bd);background:var(--ok-bg)}
+.act.tune{color:#AD4E00;border-color:var(--warn-bd);background:var(--warn-bg)}
+.act.fix{color:#A4262C;border-color:var(--bad-bd);background:var(--bad-bg)}
+.act.split{color:#1458CC;border-color:#BBD9FF;background:var(--blue-l)}
+.sg .say{margin:0 0 6px;line-height:1.65;font-weight:600;color:#124A8C}
+.sg .rule{background:#fff;border:1px dashed #9FC3FF;border-radius:4px;padding:7px 9px;
+  font-size:12px;color:#1B3A5C;line-height:1.75}
+.sg .rule b{color:#0B57C7}
+.sg ul{margin:6px 0 0;padding-left:17px}
+.sg li{margin:2px 0;line-height:1.6}
+.sg em{font-style:normal;color:#8A5A00;font-weight:600}
+.sg .acc{margin-left:auto;font:11px/1 inherit;border:1px solid #9FC3FF;background:#fff;
+  color:#1458CC;border-radius:12px;padding:4px 10px;cursor:pointer}
+.sg .acc:hover{border-color:#1C6EFF}
+.sg .acc.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.gi code{background:#F1F5FB;border:1px solid #E1E8F2;border-radius:3px;padding:0 3px;
+  font:11.5px/1 "JetBrains Mono",Menlo,monospace;color:#1458CC}
+
+/* v0.6 判定句 + v0.5 折叠 */
+.judge06{background:#F3FBF7;border-left-color:#12A679}
+details.v05{margin:7px 0 0}
+details.v05 summary{font-size:11px;color:var(--muted);cursor:pointer;list-style:none;
+  display:inline-block;border:1px dashed var(--line);border-radius:10px;padding:3px 9px}
+details.v05 summary::-webkit-details-marker{display:none}
+details.v05 summary:hover{color:#A4262C;border-color:var(--bad-bd)}
+details.v05 div{margin-top:6px;font-size:12px;color:#7A8088;background:#FAFBFC;
+  border:1px dashed var(--line);border-radius:6px;padding:8px 11px;line-height:1.7}
+details.v05 div b{color:#7A8088}
+details.v05 div code{background:#F1F3F6;border-color:#E1E5EB;color:#7A8088}
+
+/* 资产依据层 */
+.as{background:#F3FBF7;border:1px solid #BFE9D6;border-left:3px solid #12A679;
+  border-radius:0 6px 6px 0;padding:9px 12px;margin-top:10px;font-size:12.5px;color:#124B3A}
+.as h4{margin:0 0 5px;font-size:11.5px;color:#0E7F5C;letter-spacing:.3px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.as .tagx{font-size:10px;border:1px solid;border-radius:3px;padding:0 5px;font-weight:600}
+.tagx.yes{color:#237804;border-color:var(--ok-bd);background:var(--ok-bg)}
+.tagx.part{color:#AD4E00;border-color:var(--warn-bd);background:var(--warn-bg)}
+.tagx.no{color:#A4262C;border-color:var(--bad-bd);background:var(--bad-bg)}
+.tagx.none{color:#6F7785;border-color:var(--line);background:#FAFBFC}
+.as blockquote{margin:5px 0;padding:6px 9px;background:#fff;border-left:2px solid #B7E4D0;
+  font-size:12px;color:#2C4B41;line-height:1.72}
+.as blockquote b{color:#0E7F5C}
+.as ul{margin:5px 0 0;padding-left:17px}
+.as li{margin:2px 0;line-height:1.62}
+.as code{background:#EAF7F0;border:1px solid #BFE9D6;border-radius:3px;padding:0 4px;
+  font:11.5px/1 "JetBrains Mono",Menlo,monospace;color:#0E7F5C}
+table.ast{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
+  border-radius:9px;overflow:hidden;font-size:12px;margin-top:4px}
+.ast th{background:#F4F7FB;text-align:left;padding:7px 9px;font-weight:600;font-size:11.5px;
+  border-bottom:1px solid var(--line);color:var(--ink2)}
+.ast td{padding:6px 9px;border-bottom:1px solid #F0F3F7;vertical-align:top;line-height:1.6}
+.ast tr:last-child td{border-bottom:0}
+.ast td.n{font:600 11.5px/1.5 "JetBrains Mono",Menlo,monospace;color:#1458CC;white-space:nowrap}
+
+/* 评审层 */
+.rv{border-top:1px dashed var(--line);margin-top:12px;padding-top:11px}
+.rv-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rv-lb{font-size:11.5px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{appearance:none;background:#fff;border:0;border-right:1px solid var(--line);
+  font:12px/1 inherit;color:var(--ink2);padding:7px 11px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:#F7F9FC}
+.seg button.on[data-val="ok"]{background:var(--ok-bg);color:#237804;font-weight:600}
+.seg button.on[data-val="doubt"]{background:var(--warn-bg);color:#AD4E00;font-weight:600}
+.seg button.on[data-val="wrong"]{background:var(--bad-bg);color:#A4262C;font-weight:600}
+.rv textarea{width:100%;margin-top:8px;min-height:44px;resize:vertical;border:1px solid var(--line);
+  border-radius:6px;padding:8px 10px;font:12.5px/1.6 inherit;color:var(--ink2);background:#FCFDFF}
+.rv textarea:focus{outline:0;border-color:#9FC3FF;box-shadow:0 0 0 2px #E8F4FF}
+
+/* 工具条 */
+.bar{position:sticky;bottom:0;z-index:30;background:rgba(255,255,255,.96);
+  border-top:1px solid var(--line);backdrop-filter:blur(6px)}
+.bar-in{max-width:1180px;margin:0 auto;padding:9px 26px;display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap}
+.bar-t{font-size:12px;color:var(--ink2);font-weight:600}
+.pbar{width:120px;height:6px;background:#EDF1F7;border-radius:4px;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--blue);transition:width .2s}
+.bar-n{font-size:12px;color:var(--muted)}
+.cnt{font-size:11.5px;color:var(--muted)}
+.cnt b{font-variant-numeric:tabular-nums}
+.cnt.ok b{color:#237804}.cnt.dc b{color:#AD4E00}.cnt.wc b{color:#A4262C}
+.fl{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
+.chip{appearance:none;background:#fff;border:1px solid var(--line);border-radius:14px;
+  font:11.5px/1 inherit;color:var(--ink2);padding:6px 11px;cursor:pointer}
+.chip:hover{border-color:#C7D7EE}
+.chip.on{background:var(--blue-l);border-color:#9FC3FF;color:#1458CC;font-weight:600}
+.chip.act{background:#fff;border-color:#9FC3FF;color:#1458CC}
+.foot{color:var(--muted);font-size:12px;margin:26px 0 0;line-height:1.8}
+@media (max-width:860px){
+  .pair{grid-template-columns:1fr}
+  .wrap{padding:24px 14px 0}
+  .bar-in{padding:9px 14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>门禁-V-视觉专项 · 27 条正反例</h1>
+  <p class="sub">依据 <code style="font:12px/1 'JetBrains Mono',Menlo,monospace;background:#F1F5FB;border:1px solid #E1E8F2;border-radius:3px;padding:1px 4px;color:#1458CC">04-workflows-and-cases/门禁-V-视觉专项.md</code> v0.6（2026-11-25）· 定稿</p>
+  <p class="sub">每条一句判定句 + 一张正例 + 一张反例；真 DOM 绘制，不用截图</p>
+
+  <div class="how">
+    <b>这份文件只做一件事</b>：给判定句配一张正例、一张反例，让人一眼看出"这样能过、那样不过"。<b>它不含规则全文、不含阈值出处、不含待办</b>。<br>
+    <b>AI 不需要打开它</b>：判据以 <code>门禁-V-视觉专项.md</code> 为准，机检只读被测产物与 <code>tools/fixtures/visual/</code>。本页不被任何脚本读取，删掉它也不影响门禁。<br>
+    <b>唯一的例外</b>：<code>--doc-check</code> 会把本页区块的 <code>data-v</code> 与夹具目录对账（只比编号，不判视觉）。
+  </div>
+
+  <h2 class="sec">一、目录</h2>
+  <table class="toc">
+    <thead><tr><th style="width:86px">编号</th><th>标题</th><th style="width:110px">手段</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#v-01">V-01</a></td><td>唯一 Container 与左基线</td><td>量测</td></tr>
+      <tr><td><a href="#v-02">V-02</a></td><td>块落 24 栅格列线</td><td>量测</td></tr>
+      <tr><td><a href="#v-03">V-03</a></td><td>容器嵌套克制</td><td>机检</td></tr>
+      <tr><td><a href="#v-04">V-04</a></td><td>通栏克制</td><td>量测</td></tr>
+      <tr><td><a href="#v-05">V-05</a></td><td>容器撑满与留白</td><td>量测</td></tr>
+      <tr><td><a href="#v-06">V-06</a></td><td>工具栏布局</td><td>机检+量测</td></tr>
+      <tr><td><a href="#v-07">V-07</a></td><td>功能分区归属</td><td>机检</td></tr>
+      <tr><td><a href="#v-08">V-08</a></td><td>间距阶梯</td><td>机检</td></tr>
+      <tr><td><a href="#v-09">V-09</a></td><td>内边距一致</td><td>机检</td></tr>
+      <tr><td><a href="#v-10">V-10</a></td><td>字阶层级</td><td>机检</td></tr>
+      <tr><td><a href="#v-11">V-11</a></td><td>行高与行长</td><td>机检+走查</td></tr>
+      <tr><td><a href="#v-12">V-12</a></td><td>数字对齐</td><td>机检</td></tr>
+      <tr><td><a href="#v-13">V-13</a></td><td>截断与换行</td><td>量测</td></tr>
+      <tr><td><a href="#v-14">V-14</a></td><td>色彩数量</td><td>机检</td></tr>
+      <tr><td><a href="#v-15">V-15</a></td><td>状态三元组</td><td>机检</td></tr>
+      <tr><td><a href="#v-16">V-16</a></td><td>对比度</td><td>机检</td></tr>
+      <tr><td><a href="#v-17">V-17</a></td><td>颜色不作唯一编码</td><td>机检+走查</td></tr>
+      <tr><td><a href="#v-18">V-18</a></td><td>按钮层级</td><td>机检</td></tr>
+      <tr><td><a href="#v-19">V-19</a></td><td>圆角与阴影</td><td>机检</td></tr>
+      <tr><td><a href="#v-20">V-20</a></td><td>语义色专用</td><td>机检</td></tr>
+      <tr><td><a href="#v-21">V-21</a></td><td>表格视觉</td><td>机检+量测</td></tr>
+      <tr><td><a href="#v-22">V-22</a></td><td>七态完备</td><td>机检+走查</td></tr>
+      <tr><td><a href="#v-23">V-23</a></td><td>指标组容器与层级</td><td>机检</td></tr>
+      <tr><td><a href="#v-24">V-24</a></td><td>同构对象操作位置一致</td><td>机检+量测</td></tr>
+      <tr><td><a href="#v-25">V-25</a></td><td>行内标签纵向对齐</td><td>机检+走查</td></tr>
+      <tr><td><a href="#v-26">V-26</a></td><td>形态与关系</td><td>走查+机检</td></tr>
+      <tr><td><a href="#v-27">V-27</a></td><td>承载空间与信息量</td><td>机检</td></tr>
+    
+    </tbody>
+  </table>
+
+  <h2 class="sec">二、逐条正反例</h2>
+<section class="item" id="v-01" data-v="v-01">
+    <div class="hd"><span class="code">V-01</span><span class="ttl">唯一 Container 与左基线</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：只有一个内容容器；其左边界 = 单侧页边距 <b>M = 24px（≥1720 屏 48px）</b>；页头/筛选条/主图/列表/分页左边界与之偏差 ≤1px；不设全局 max-width</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 五区左边界全落在同一条 24px 线上</div>
+        <div class="mock">
+          <div class="pg">
+            <i class="gd" style="left:24px"></i>
+            <div style="padding:7px 24px;background:#F4F7FB;font-size:10px;font-weight:600">资产清单</div>
+            <div style="padding:6px 24px;border-bottom:1px solid #F0F3F7;font-size:9px;color:#6F7785">搜索　类型　时间　查询</div>
+            <div style="padding:9px 24px;border-bottom:1px solid #F0F3F7;font-size:9px;color:#454C59">主图区 · 合规趋势</div>
+            <div style="padding:9px 24px;border-bottom:1px solid #F0F3F7;font-size:9px;color:#454C59">列表 12 行</div>
+            <div style="padding:6px 24px;font-size:9px;color:#6F7785;display:flex;justify-content:space-between"><span>共 128 条</span><span>1 / 11</span></div>
+          </div>
+          <div class="lb">虚线 = 单侧页边距 <b>24px</b>（资产值）；五个区块的 left 实测应同为 24</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 页头满宽 + 筛选条自留 32 + 分页右缘不齐</div>
+        <div class="mock">
+          <div class="pg">
+            <i class="gd r" style="left:0"></i><i class="gd r" style="left:24px"></i><i class="gd r" style="left:32px"></i>
+            <div style="padding:7px 0;background:#F4F7FB;font-size:10px;font-weight:600;text-align:center">页头（满宽，left=0）</div>
+            <div class="mk" style="padding:6px 0 6px 32px;border-bottom:1px solid #F0F3F7;font-size:9px;color:#454C59">筛选条（left=32）</div>
+            <div style="padding:9px 24px;border-bottom:1px solid #F0F3F7;font-size:9px;color:#454C59">主图区（left=24）</div>
+            <div style="padding:9px 24px;border-bottom:1px solid #F0F3F7;font-size:9px;color:#454C59">列表（left=24）</div>
+            <div class="mk" style="padding:6px 22px 6px 16px;font-size:9px;color:#6F7785;display:flex;justify-content:space-between"><span>共 128 条</span><span>1 / 11</span></div>
+          </div>
+          <div class="tip">命中：<b>三条左基线（0 / 24 / 32）</b>，分页右缘比列表少 6px。<b>声明"统一 1176 居中"也算 FAIL</b>：Container 不是"看起来居中"。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-02" data-v="v-02">
+    <div class="hd"><span class="code">V-02</span><span class="ttl">块落 24 栅格列线</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：一级块左右边缘落 24 栅格列线（±1px）；gutter ∈ <code>{8,16,24,32}</code> 且<b>同一 Row 组内唯一</b>；两栏 span ∈ <code>{12:12,16:8,18:6,20:4,21:3}</code>，三栏 ∈ <code>{8:8:8,6:6:12,4:8:12,6:8:10}</code></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 三块 span 8 / gutter 16，边缘压列线</div>
+        <div class="mock">
+          <div class="pg cols" style="padding:9px;display:flex;gap:10px;min-height:104px">
+            <div class="blk" style="flex:8">span 8</div>
+            <div class="blk" style="flex:8">span 8</div>
+            <div class="blk" style="flex:8">span 8</div>
+          </div>
+          <div class="lb">缩略示意：实际 W=1408、gutter=<b>16</b>、colW≈41.3，块边到最近列线 ≤1px</div>
+          <div class="tip g">三块等分 + 同一 gutter → 左右边缘同时落线，比例 8:8:8 合法</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · width:33.3% + gutter 12</div>
+        <div class="mock">
+          <div class="pg cols" style="padding:9px;display:flex;gap:7px;min-height:104px">
+            <div class="blk mk" style="width:33.3%">33.3%</div>
+            <div class="blk mk" style="width:33.3%">33.3%</div>
+            <div class="blk mk" style="width:33.3%">33.3%</div>
+          </div>
+          <div class="tip">命中：<b>gutter=12（非 8/16/24/32）</b>；右缘 1173，最近列线 1168，差 <b>5px</b>。三等分必须写 span=8，不能写百分比。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-03" data-v="v-03">
+    <div class="hd"><span class="code">V-03</span><span class="ttl">容器嵌套克制</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：有可见边界（<code>border-width>0</code> 或背景非 <code>transparent</code> 或 <code>box-shadow≠none</code>）的容器，祖先链深度 ≤2；结构容器（<code>table/tr/td</code>、<code>.form-group</code>、<code>.list-item</code>、<code>.tab-pane</code>、折叠面板、树节点）不计层</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 区块（无边框）→ 卡（1 层边）→ 卡内用分隔线与间距</div>
+        <div class="mock">
+          <div style="background:#FCFDFF;padding:9px;flex:1">
+            <div style="border:1px solid #E1E5EB;border-radius:5px;background:#fff;padding:9px">
+              <div style="font-size:10px;font-weight:600;margin-bottom:7px">接入状态</div>
+              <div style="display:flex;gap:12px;border-top:1px solid #F0F3F7;padding-top:7px">
+                <div><div style="font-size:9px;color:#6F7785">已接入</div><div style="font-size:15px;font-weight:700">430</div></div>
+                <div style="width:1px;background:#F0F3F7"></div>
+                <div><div style="font-size:9px;color:#6F7785">未接入</div><div style="font-size:15px;font-weight:700">290</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="lb">只数 1 层可见边框；卡内靠 <b>1px 分隔线 + 12px 间距</b> 分组，不再套框</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 区块 → 卡 → 卡内小框（3 层）</div>
+        <div class="mock">
+          <div class="blk mk" style="flex:1;padding:8px;display:block;background:#F4F7FB">
+            <div style="font-size:9px;color:#6F7785;margin-bottom:5px">页面区块（第 1 层边框）</div>
+            <div style="border:1px solid #C7D0DC;border-radius:4px;background:#fff;padding:7px">
+              <div style="font-size:9px;color:#6F7785;margin-bottom:4px">卡片（第 2 层边框）</div>
+              <div class="mk" style="border:1px solid #C7D0DC;border-radius:3px;background:#FBFCFE;padding:6px;font-size:9px;color:#454C59">卡内小框（第 3 层）</div>
+            </div>
+          </div>
+          <div class="tip">命中：<b>3 层可见边框</b>。同一块信息被框了三次，画面碎、每个框都在抢注意力。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-04" data-v="v-04">
+    <div class="hd"><span class="code">V-04</span><span class="ttl">通栏克制</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：通栏块（≥ 内容宽 90%）形态 ∈ <code>{topo,sankey,mx,scatter,geo,gantt,heatmap}</code>，或时间序列点 ≥12 的折线/面积，或不含图形载体的 KPI 条</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 全宽给拓扑（关系型），普通图表只占一半</div>
+        <div class="mock">
+          <div style="border:1px solid #EDF1F7;border-radius:4px;background:#FBFCFE;padding:6px">
+            <div style="font-size:9px;color:#6F7785;margin-bottom:2px">资产暴露链路 · topo（全宽合法）</div>
+            <svg viewBox="0 0 400 64" style="width:100%;height:64px;display:block">
+              <line x1="46" y1="32" x2="150" y2="14" stroke="#C7D3E3"/>
+              <line x1="46" y1="32" x2="150" y2="50" stroke="#C7D3E3"/>
+              <line x1="150" y1="14" x2="255" y2="32" stroke="#C7D3E3"/>
+              <line x1="150" y1="50" x2="255" y2="32" stroke="#C7D3E3"/>
+              <line x1="255" y1="32" x2="356" y2="32" stroke="#C7D3E3"/>
+              <circle cx="46" cy="32" r="9" fill="#E8F4FF" stroke="#1C6EFF"/>
+              <circle cx="150" cy="14" r="9" fill="#FFF7E6" stroke="#FA8C16"/>
+              <circle cx="150" cy="50" r="9" fill="#FFF7E6" stroke="#FA8C16"/>
+              <circle cx="255" cy="32" r="9" fill="#FFF1F0" stroke="#D9363E"/>
+              <circle cx="356" cy="32" r="9" fill="#F6FFED" stroke="#12A679"/>
+              <text x="46" y="36" font-size="8" text-anchor="middle" fill="#1458CC">GW</text>
+              <text x="150" y="18" font-size="8" text-anchor="middle" fill="#AD4E00">APP</text>
+              <text x="150" y="54" font-size="8" text-anchor="middle" fill="#AD4E00">DB</text>
+              <text x="255" y="36" font-size="8" text-anchor="middle" fill="#A4262C">CVE</text>
+              <text x="356" y="36" font-size="8" text-anchor="middle" fill="#237804">SRC</text>
+            </svg>
+          </div>
+          <div style="display:flex;gap:7px">
+            <div style="flex:1;border:1px solid #EDF1F7;border-radius:4px;padding:5px">
+              <div style="font-size:9px;color:#6F7785">近 7 天</div>
+              <div class="bars" style="height:34px"><i style="height:40%"></i><i style="height:62%"></i><i class="hi" style="height:88%"></i><i style="height:51%"></i></div>
+            </div>
+            <div style="flex:1;border:1px solid #EDF1F7;border-radius:4px;padding:5px">
+              <div style="font-size:9px;color:#6F7785">按部门</div>
+              <div class="bars" style="height:34px"><i style="height:70%"></i><i style="height:35%"></i><i style="height:55%"></i><i style="height:28%"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 单块柱状图拉满整宽，右侧大片空白</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;border:1px solid #EDF1F7;border-radius:4px;padding:8px;background:#FBFCFE;display:flex;flex-direction:column">
+            <div style="font-size:9px;color:#6F7785;margin-bottom:4px">近 7 天不合规数</div>
+            <div class="bars" style="height:88px"><i style="height:38%"></i><i style="height:52%"></i><i class="hi" style="height:86%"></i></div>
+            <div class="ax"><span>11-19</span><span>11-25</span></div>
+            <div style="margin-top:auto;font-size:9px;color:#A4262C">← 实测 1176 / 内容宽 1176 = 100%</div>
+          </div>
+          <div class="tip">命中：<b>r=1.00 + kind=bar</b>。3 根柱占满一屏，横向空间全浪费，扫读时视线要跑 1176px。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-05" data-v="v-05">
+    <div class="hd"><span class="code">V-05</span><span class="ttl">容器撑满与留白</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：内容块：内容宽 ≥ 容器宽 <b>80%</b>、内容高 ≥ 容器高 <b>60%</b>；宽扁块（高 ≤72px）只判单侧空白 ≤ 容器宽 20%；任一块单侧连续空白 > 容器宽 <b>25%</b> → FAIL</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 内容撑到 88% 宽，矩阵自己占满剩余空间</div>
+        <div class="mock">
+          <div style="border:1px solid #DCE2EA;border-radius:4px;padding:9px;background:#fff;flex:1;display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:10px;font-weight:600">策略命中矩阵</div>
+            <div style="display:flex;gap:6px;flex:1">
+              <div style="flex:0 0 58px;font-size:9px;color:#6F7785;display:flex;flex-direction:column;gap:4px">
+                <div>资产组 A</div><div>资产组 B</div><div>资产组 C</div><div>资产组 D</div>
+              </div>
+              <div style="flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:3px">
+                <div style="background:#E8F4FF;border-radius:2px"></div><div style="background:#D3E6FF;border-radius:2px"></div>
+                <div style="background:#F6FFED;border-radius:2px"></div><div style="background:#FFF7E6;border-radius:2px"></div>
+                <div style="background:#F6FFED;border-radius:2px"></div><div style="background:#FFF1F0;border-radius:2px"></div>
+                <div style="background:#D3E6FF;border-radius:2px"></div><div style="background:#F6FFED;border-radius:2px"></div>
+                <div style="background:#FFF7E6;border-radius:2px"></div><div style="background:#E8F4FF;border-radius:2px"></div>
+                <div style="background:#F6FFED;border-radius:2px"></div><div style="background:#D3E6FF;border-radius:2px"></div>
+                <div style="background:#FFF7E6;border-radius:2px"></div><div style="background:#F6FFED;border-radius:2px"></div>
+                <div style="background:#D3E6FF;border-radius:2px"></div><div style="background:#F6FFED;border-radius:2px"></div>
+                <div style="background:#FFF1F0;border-radius:2px"></div><div style="background:#E8F4FF;border-radius:2px"></div>
+                <div style="background:#F6FFED;border-radius:2px"></div><div style="background:#D3E6FF;border-radius:2px"></div>
+                <div style="background:#FFF7E6;border-radius:2px"></div><div style="background:#F6FFED;border-radius:2px"></div>
+                <div style="background:#E8F4FF;border-radius:2px"></div><div style="background:#F6FFED;border-radius:2px"></div>
+              </div>
+            </div>
+            <div class="lb">内容宽 / 容器宽 = <b>0.88</b>，内容高 / 容器高 = <b>0.86</b>，右侧连续空白 14px</div>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 卡高 168 只放两行，右侧空 420px</div>
+        <div class="mock">
+          <div class="mk" style="border:1px solid #DCE2EA;border-radius:4px;padding:9px;background:#fff;height:168px;display:flex;flex-direction:column">
+            <div style="font-size:10px;font-weight:600">接入卡</div>
+            <div style="font-size:9px;color:#6F7785;margin-top:2px">已接入 430 台 · 未接入 290 台</div>
+            <div style="margin-top:auto;font-size:9px;color:#A4262C;text-align:right">右侧连续空白 420px →</div>
+          </div>
+          <div class="tip">命中：<b>内容高 96 / 容器高 168 = 57%</b>；右侧空白 420px。高度是 <code>min-height</code> 给的，不是内容撑的。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-06" data-v="v-06">
+    <div class="hd"><span class="code">V-06</span><span class="ttl">工具栏布局</span>
+      <span class="mm cdp">机检 + Δy 量测</span></div>
+    <p class="judge judge06"><b>v0.7 PASS</b>：左＝按钮区（主 / 普通 / 批量 / 更多，≤7 个），右＝查询区，中间弹性空白；查询区内顺序 <b>日期 → 选择器 → 搜索框 → 刷新</b>（刷新恒最右、紧贴搜索框）；两段同属一个行容器（单行不换行）；同行盒顶 Δy ≤2px；搜索框内右侧按钮不计越位；&gt;4 项改高级搜索</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 按钮区在左、查询区在右，日期打头、刷新收尾</div>
+        <div class="mock">
+          <div style="border:1px solid #DCE2EA;border-radius:4px;padding:9px;background:#fff">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span class="bt p">新建策略</span>
+              <span class="bt s">批量导出</span>
+              <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
+                <span class="inp" style="width:96px">11-01 ~ 11-25</span>
+                <span class="inp" style="width:64px">类型 ▾</span>
+                <span class="inp" style="width:88px">搜索资产名</span>
+                <span class="bt s">刷新</span>
+              </span>
+            </div>
+            <div class="lb" style="margin-top:6px">Δy = 0；按钮区 → 日期 → 选择器 → 搜索框 → 刷新，刷新在最右</div>
+          </div>
+          <div class="tip g">两段齐、同一行、顺序对 —— 判据能过（资产 `01-page-types §2.3`）</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 顺序反了：搜索打头、日期压在最右，刷新和查询被拆走</div>
+        <div class="mock">
+          <div style="border:1px solid #DCE2EA;border-radius:4px;padding:9px;background:#fff">
+            <div class="mk" style="display:flex;align-items:center;gap:7px">
+              <span class="inp" style="width:88px">搜索资产名</span>
+              <span class="inp" style="width:64px">类型 ▾</span>
+              <span style="width:86px;height:24px;border:1px dashed #FFA39E;border-radius:3px;font-size:9px;color:#A4262C;line-height:22px;text-align:center">刷新应在此</span>
+              <span class="inp" style="width:96px;margin-left:auto">11-01 ~ 11-25</span>
+            </div>
+            <div class="mk" style="display:flex;justify-content:flex-end;margin-top:6px">
+              <span class="bt p">查询</span>
+            </div>
+            <div class="lb" style="margin-top:6px">实际序列 [search, select, date]，查询另起一行</div>
+          </div>
+          <div class="tip">命中：<b>顺序不符 + 掉行</b>。查询应走搜索框内搜索钮，不该另摆一个实心按钮。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-07" data-v="v-07">
+    <div class="hd"><span class="code">V-07</span><span class="ttl">功能分区归属</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：动作按钮标 <code>data-act</code>（7 值）；同一 <code>data-act</code> 只出现在一个区域容器（批量条自成一区）；族内 ≥1 个带标记时，同区域同文本者视为同族</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 三个动作族各归一处</div>
+        <div class="mock">
+          <div class="pg">
+            <div style="display:flex;align-items:center;padding:7px 9px;background:#F4F7FB;border-bottom:1px solid #EDF1F7">
+              <span style="font-size:10px;font-weight:600">资产清单</span>
+              <span style="margin-left:auto;display:flex;gap:5px"><span class="bt p">新建</span><span class="bt t">导入</span></span>
+            </div>
+            <div style="padding:6px 9px;border-bottom:1px solid #F0F3F7;display:flex;gap:6px;align-items:center">
+              <span class="inp" style="width:80px">搜索</span><span class="inp" style="width:56px">类型 ▾</span>
+              <span style="font-size:9px;color:#6F7785">⇅ 按时间</span>
+            </div>
+            <div style="padding:5px 9px;border-bottom:1px solid #F0F3F7;display:flex;gap:8px;font-size:9px;color:#454C59">
+              <span>⚙ 列设置</span><span>↓ 导出</span><span>⟳ 刷新</span>
+            </div>
+            <div style="padding:8px 9px;font-size:9px;color:#6F7785">表格区</div>
+          </div>
+          <div class="lb">筛选/排序 1 处 · 工具 1 处 · 主操作 1 处</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 导出在页头、刷新两处、排序两处</div>
+        <div class="mock">
+          <div class="pg">
+            <div class="mk" style="display:flex;align-items:center;padding:7px 9px;background:#F4F7FB;border-bottom:1px solid #EDF1F7">
+              <span style="font-size:10px;font-weight:600">资产清单</span>
+              <span style="margin-left:auto;display:flex;gap:5px"><span class="bt s" style="border-color:#D9363E;color:#D9363E">↓ 导出</span><span class="bt p">新建</span></span>
+            </div>
+            <div class="mk" style="padding:6px 9px;border-bottom:1px solid #F0F3F7;display:flex;gap:6px;align-items:center">
+              <span class="inp" style="width:80px">搜索</span><span style="font-size:9px;color:#6F7785">⇅ 排序</span>
+            </div>
+            <div class="mk" style="padding:5px 9px;border-bottom:1px solid #F0F3F7;display:flex;gap:8px;font-size:9px;color:#454C59">
+              <span>⚙ 列设置</span><span>⟳ 刷新</span>
+            </div>
+            <div class="mk" style="padding:6px 9px;font-size:9px;color:#6F7785;display:flex;gap:8px">表头 <span>⇅ 排序</span> <span>⟳ 刷新</span></div>
+          </div>
+          <div class="tip">命中：<b>工具动作 2 区（页头 + 工具栏）</b>；<b>排序 2 区（筛选条 + 表头）</b>。刷新共 3 个入口。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-08" data-v="v-08">
+    <div class="hd"><span class="code">V-08</span><span class="ttl">间距阶梯</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：<code>margin/padding/gap</code> 的 <b>px</b> 非零值 ∈ <code>{2,4,8,12,16,24,32}</code>；同页 ≤<b>6</b> 种；百分比/em/rem 不判；组件内部固定内距走白名单</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 全部落在资产阶梯上，同页 6 种（含 2px）</div>
+        <div class="mock">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:10px">
+              <span style="width:34px;color:#6F7785">gap</span>
+              <span style="width:2px;height:14px;background:#1C6EFF"></span><span style="color:#454C59">2</span>
+              <span style="width:4px;height:14px;background:#1C6EFF"></span><span style="color:#454C59">4</span>
+              <span style="width:8px;height:14px;background:#1C6EFF"></span><span style="color:#454C59">8</span>
+              <span style="width:12px;height:14px;background:#1C6EFF"></span><span style="color:#454C59">12</span>
+              <span style="width:16px;height:14px;background:#1C6EFF"></span><span style="color:#454C59">16</span>
+              <span style="width:24px;height:14px;background:#1C6EFF"></span><span style="color:#454C59">24</span>
+            </div>
+            <div style="border:1px dashed #C7D0DC;border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:8px">
+                <div style="flex:1;border:1px solid #EDF1F7;border-radius:3px;padding:8px;font-size:9px;color:#6F7785">卡 padding 8</div>
+                <div style="flex:1;border:1px solid #EDF1F7;border-radius:3px;padding:8px;font-size:9px;color:#6F7785">卡 padding 8</div>
+              </div>
+              <div style="border:1px solid #EDF1F7;border-radius:3px;padding:16px;font-size:9px;color:#6F7785">区块 padding 16 · 组间 16</div>
+            </div>
+          </div>
+          <div class="lb">取值集合 {2,4,8,12,16,24} → <b>6 种</b>，与资产 token 表一致</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 10 / 15 / 18 / 23 混用，同页 9 种</div>
+        <div class="mock">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div class="mk" style="border:1px solid #EDF1F7;border-radius:3px;padding:15px;font-size:9px;color:#454C59">卡 padding: 15px</div>
+            <div class="mk" style="border:1px solid #EDF1F7;border-radius:3px;padding:10px;font-size:9px;color:#454C59">工具栏 padding: 10px</div>
+            <div class="mk" style="border:1px solid #EDF1F7;border-radius:3px;padding:18px;font-size:9px;color:#454C59">区块 padding: 18px</div>
+            <div class="mk" style="border:1px solid #EDF1F7;border-radius:3px;padding:23px;font-size:9px;color:#454C59">页脚 padding: 23px</div>
+          </div>
+          <div class="tip">命中：<b>4 个非阶梯值</b>（15/10/18/23），同页共 <b>9 种</b>。视觉上看不出 18 与 16 的差，却占两档。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-09" data-v="v-09">
+    <div class="hd"><span class="code">V-09</span><span class="ttl">内边距一致</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：同类容器 padding 一致，允许上下/左右两组且两组差 ≤4px；页面级 padding 四值相等且 <b>= M（24 / ≥1720 48）</b></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 三张同类卡 padding 全 24，页面四边 24</div>
+        <div class="mock">
+          <div style="border:1px dashed #C7D0DC;border-radius:4px;padding:9px;background:#FCFDFF">
+            <div style="display:flex;gap:7px">
+              <div style="flex:1;border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:9px">
+                <div style="font-size:9px;color:#6F7785">padding 24</div><div style="font-size:13px;font-weight:700">430</div>
+              </div>
+              <div style="flex:1;border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:9px">
+                <div style="font-size:9px;color:#6F7785">padding 24</div><div style="font-size:13px;font-weight:700">290</div>
+              </div>
+              <div style="flex:1;border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:9px">
+                <div style="font-size:9px;color:#6F7785">padding 24</div><div style="font-size:13px;font-weight:700">128</div>
+              </div>
+            </div>
+          </div>
+          <div class="lb">同类卡四值全等 = 24；页面级 <b>上右下左 = 24</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 首卡 32 其余 24；页面左 32 右 16</div>
+        <div class="mock">
+          <div style="border:1px dashed #C7D0DC;border-radius:4px;padding:9px 4px 9px 9px;background:#FCFDFF">
+            <div style="display:flex;gap:7px">
+              <div class="mk" style="flex:1;border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:14px">
+                <div style="font-size:9px;color:#6F7785">padding 32</div><div style="font-size:13px;font-weight:700">430</div>
+              </div>
+              <div style="flex:1;border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:9px">
+                <div style="font-size:9px;color:#6F7785">padding 24</div><div style="font-size:13px;font-weight:700">290</div>
+              </div>
+              <div style="flex:1;border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:9px">
+                <div style="font-size:9px;color:#6F7785">padding 24</div><div style="font-size:13px;font-weight:700">128</div>
+              </div>
+            </div>
+          </div>
+          <div class="tip">命中：<b>同组 padding 2 种（32 / 24）</b>；页面级左右不等（32 / 16）。首卡更高，眼睛会以为它"更重要"。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-10" data-v="v-10">
+    <div class="hd"><span class="code">V-10</span><span class="ttl">字阶层级</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：同页字号 ∈ <code>{12,14,16,20,24,30,36,48,56,64}</code> 且 ≤5 档；<b>字重 ∈ <code>{400,600}</code></b>；<b>不判相邻比值</b></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 4 档字号全在资产字阶内 / 2 档字重</div>
+        <div class="mock">
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:24px;font-weight:600;line-height:32px">资产暴露概览</div>
+            <div style="font-size:16px;font-weight:600;line-height:24px">一、接入状态</div>
+            <div style="font-size:14px;line-height:22px;color:#2F3540">共 720 台终端已纳入策略范围，其中 430 台合规。</div>
+            <div style="font-size:12px;line-height:20px;color:#6F7785">更新于 11-25 09:20</div>
+          </div>
+          <div class="lb">24 / 16 / 14 / 12 全部命中资产字阶；但相邻比 <b>1.5 / 1.14 / 1.17</b> —— <b>所以这条判"在不在字阶"，不判比值</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 6 档字号，标题 16 对正文 14（1.14）</div>
+        <div class="mock">
+          <div class="mk" style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:16px;font-weight:600;line-height:1.3">资产暴露概览</div>
+            <div style="font-size:15px;line-height:1.3">一级区块标题 15</div>
+            <div style="font-size:14px;line-height:1.4;color:#454C59">正文 14 —— 与上面的标题只差 1，几乎看不出层级</div>
+            <div style="font-size:13px;line-height:1.4;color:#454C59">辅助 13</div>
+            <div style="font-size:12px;line-height:1.4;color:#6F7785">标签 12</div>
+            <div style="font-size:11px;line-height:1.4;color:#6F7785">脚注 11</div>
+          </div>
+          <div class="tip">命中：<b>字号 6 种（11/12/13/14/15/16）</b>；标题 16 / 正文 14，比值 <b>1.14 &lt; 1.2</b>。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-11" data-v="v-11">
+    <div class="hd"><span class="code">V-11</span><span class="ttl">行高与行长</span>
+      <span class="mm cdp">机检+量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：正文 <code>lineHeight − fontSize = 8px</code>（±1px）；中文行长 30~40 字（≤25 报 ⚠️）；表格行高见 <code>comp-table</code></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 12px / 20px（= 12+8），行宽约 34 字</div>
+        <div class="mock">
+          <div style="font-size:12px;line-height:20px;max-width:300px;color:#2F3540">
+            该类策略在终端侧生效后，管控范围内共 720 台设备完成上报。其中 430 台合规、150 台版本滞后、60 台未安装客户端，另有 80 台超过 7 天未上报，需要人工确认是否离线。
+          </div>
+          <div class="lb" style="margin-top:6px">行高 <b>20px = 12 + 8</b>（资产公式）；每行约 <b>34 字</b>；表格行高另见 comp-table</div>
+          <div class="tbl" style="margin-top:4px">
+            <table class="tbl"><tbody>
+              <tr><td style="height:18px">EDR-2201</td><td>研发部</td><td class="r tn">430</td></tr>
+              <tr><td style="height:18px">EDR-2202</td><td>销售部</td><td class="r tn">290</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 行高 14px（≠ 12+8），正文占满 1200px（约 90 字）</div>
+        <div class="mock">
+          <div class="mk" style="font-size:12px;line-height:14px;color:#2F3540">
+            该类策略在终端侧生效后，管控范围内共720台设备完成上报其中430台合规150台版本滞后60台未安装客户端另有80台超过7天未上报需要人工确认是否离线并决定是否清除策略或延长保留期以便后续审计留痕
+          </div>
+          <div class="tip">命中：行高 <b>14px ≠ 12+8=20</b>；单行约 <b>90 字 &gt;50</b>。换行时极易丢行，回读成本翻倍。</div>
+          <div class="tbl" style="margin-top:4px">
+            <table class="tbl"><tbody>
+              <tr><td style="height:13px;color:#A4262C">EDR-2201（行高 28 &lt;36）</td><td class="r tn">430</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-12" data-v="v-12">
+    <div class="hd"><span class="code">V-12</span><span class="ttl">数字对齐</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：数值列 <code>tabular-nums</code>（<b>实测 1 与 7 渲染宽度差 ≤1px</b>）；同列右对齐；单位字号 < 数值字号</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 等宽数字 + 右对齐 + 单位弱化</div>
+        <div class="mock">
+          <table class="tbl">
+            <thead><tr><th>对象</th><th class="r">合规率</th><th class="r">终端数</th></tr></thead>
+            <tbody>
+              <tr><td>研发部</td><td class="r tn">86<span style="font-size:8px;color:#6F7785">%</span></td><td class="r tn">430</td></tr>
+              <tr><td>销售部</td><td class="r tn">61<span style="font-size:8px;color:#6F7785">%</span></td><td class="r tn">290</td></tr>
+              <tr><td>分支机构</td><td class="r tn">100<span style="font-size:8px;color:#6F7785">%</span></td><td class="r tn">128</td></tr>
+            </tbody>
+          </table>
+          <div class="lb">1 与 7 等宽、小数点对齐；<b>% 号 8px &lt; 数值 10px</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 左对齐 + 比例字体 + 单位同号</div>
+        <div class="mock">
+          <table class="tbl mk">
+            <thead><tr><th>对象</th><th class="r">合规率</th><th class="r">终端数</th></tr></thead>
+            <tbody>
+              <tr><td>研发部</td><td style="font-family:Georgia,serif">86%</td><td style="font-family:Georgia,serif">430</td></tr>
+              <tr><td>销售部</td><td style="font-family:Georgia,serif">61%</td><td style="font-family:Georgia,serif">290</td></tr>
+              <tr><td>分支机构</td><td style="font-family:Georgia,serif">100%</td><td style="font-family:Georgia,serif">128</td></tr>
+            </tbody>
+          </table>
+          <div class="tip">命中：<b>表头右对齐、单元格左对齐</b>；<b>比例字体</b>（1/7 不等宽）；单位与数值同号同重。三处全中。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-13" data-v="v-13">
+    <div class="hd"><span class="code">V-13</span><span class="ttl">截断与换行</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：长文本单行截断 + <code>title</code>/tooltip；标签不换行不旋转；<b>关键值列 min-width ≥12 字符宽且不参与截断</b></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 省略号 + title，关键 ID 完整，标签不旋转</div>
+        <div class="mock">
+          <table class="tbl">
+            <thead><tr><th style="width:30%">对象 ID</th><th>对象名</th><th style="width:22%">状态</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="tn">OBJ-2201-0087</td>
+                <td title="华东区研发测试环境 Kubernetes 集群（预发布）" style="max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">华东区研发测试环境 Kube…</td>
+                <td><span class="tg ok">合规</span></td>
+              </tr>
+              <tr>
+                <td class="tn">OBJ-2201-0088</td>
+                <td title="财务共享中心文件服务器" style="max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">财务共享中心文件服务器</td>
+                <td><span class="tg warn">待处理</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="lb"><code>scrollWidth 148 &gt; clientWidth 92</code> → 有 ellipsis + 有 <code>title</code>，放行</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 溢出撑破 + ID 被截 + 标签旋转 45°</div>
+        <div class="mock">
+          <div class="mk" style="border:1px solid #E1E5EB;border-radius:3px;padding:5px;overflow:visible;width:56%">
+            <div style="font-size:10px;white-space:nowrap;overflow:visible;color:#454C59">华东区研发测试环境 Kubernetes 集群（预发布）— 溢出撑破容器</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+            <span class="tg gray">OBJ-2201-…</span>
+            <span style="font-size:9px;color:#A4262C">关键 ID 被省略</span>
+          </div>
+          <div style="height:30px;display:flex;align-items:center">
+            <span class="tg warn" style="transform:rotate(-45deg);display:inline-block">待处理</span>
+            <span style="font-size:9px;color:#A4262C;margin-left:12px">标签旋转 45°</span>
+          </div>
+          <div class="tip">命中：<b>溢出无截断</b> + <b>关键值省略</b> + <b>标签旋转</b>。三个错叠在一行，读的时候要先歪头。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-14" data-v="v-14">
+    <div class="hd"><span class="code">V-14</span><span class="ttl">色彩数量</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：语义色必须取自 <code>design-color §1.2</code> 映射表，每个语义含义只对应一个色值；表外色（紫/靛/品红/黄）不得用于状态；彩色块 ≤8 个；禁全屏渐变铺底</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 1 主色 + 3 语义色，彩色只落在标签与主按钮上</div>
+        <div class="mock">
+          <div style="display:flex;gap:4px;margin-bottom:6px;align-items:center;font-size:9px;color:#6F7785">
+            <span style="width:12px;height:12px;background:#1C6EFF;border-radius:2px"></span>
+            <span style="width:12px;height:12px;background:#12A679;border-radius:2px"></span>
+            <span style="width:12px;height:12px;background:#FA721B;border-radius:2px"></span>
+            <span style="width:12px;height:12px;background:#CF171D;border-radius:2px"></span>
+            <span style="margin-left:4px">主 1 + 语义 3 / 彩色面积 ≈ 6%</span>
+          </div>
+          <div style="flex:1;border:1px solid #E1E5EB;border-radius:4px;padding:8px;background:#FBFCFE">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:10px;font-weight:600;color:#2F3540">接入状态</span>
+              <span class="bt p" style="height:20px;line-height:18px">新建</span>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:6px">
+              <span class="tg ok">合规 430</span><span class="tg warn">待处理 150</span><span class="tg bad">失败 60</span>
+            </div>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <div style="flex:1;height:22px;background:#F4F7FB;border-radius:2px"></div>
+              <div style="flex:2;height:22px;background:#F4F7FB;border-radius:2px"></div>
+            </div>
+          </div>
+          <div class="lb">灰阶承担 94% 面积，彩色只做<b>语义标记</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 6 个彩色块 + 渐变铺底，彩色面积 22%</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;gap:3px">
+              <div style="flex:1;height:20px;background:#1C6EFF;border-radius:2px"></div>
+              <div style="flex:1;height:20px;background:#12A679;border-radius:2px"></div>
+              <div style="flex:1;height:20px;background:#FA721B;border-radius:2px"></div>
+              <div style="flex:1;height:20px;background:#CF171D;border-radius:2px"></div>
+              <div style="flex:1;height:20px;background:#7824FF;border-radius:2px"></div>
+              <div style="flex:1;height:20px;background:#0BA7B5;border-radius:2px"></div>
+            </div>
+            <div style="flex:1;background:linear-gradient(135deg,#1C6EFF,#7824FF 60%,#0BA7B5);border-radius:3px;min-height:52px"></div>
+            <div style="height:16px;background:#FA8C16;border-radius:2px"></div>
+            <div style="height:16px;background:#D9363E;border-radius:2px"></div>
+          </div>
+          <div class="tip">命中：<b>彩色面积 22% &gt; 15%</b>；6 个彩色块里紫 #7824FF 不在语义映射表；渐变铺底无出处。每个模块一个主色，等于没有主色。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-15" data-v="v-15">
+    <div class="hd"><span class="code">V-15</span><span class="ttl">状态三元组</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：状态标签 = 同色系 <b>l50 底 + d30 字 + l30 边</b>（边可选）；字底对比 ≥4.5:1；禁止 <code>L<90% 且 S>60%</code> 的实心块</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 三个状态同尺寸同形制，仅色相不同</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:9px">
+            <div style="display:flex;gap:6px;align-items:center"><span class="tg ok">● 合规</span><span style="font-size:9px;color:#6F7785">底 l50 #F5FFFA / 字 d30 #015945 / 边 l30 #9BF2CC</span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span class="tg warn">● 待处理</span><span style="font-size:9px;color:#6F7785">底 l50 #FFF5E8 / 字 d30 #872600 / 边 l30 #FFC996</span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span class="tg bad">● 失败</span><span style="font-size:9px;color:#6F7785">底 l50 #FFF7F5 / 字 d30 #82010E / 边 l30 #FFACA3</span></div>
+          </div>
+          <div class="lb">三元组齐、同 12px 字号、同 4px 8px 内距、同圆角</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 实心高饱和 + 白字；另一个只有红字无底无边</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:9px">
+            <div class="mk" style="display:inline-block;width:fit-content"><span class="tg solid">治理中</span>
+              <span style="font-size:9px;color:#A4262C;margin-left:6px">bg #CF171D 实心 / 无边框</span></div>
+            <div class="mk" style="display:inline-block;width:fit-content"><span style="font-size:10px;color:#D9363E;font-weight:600">失败</span>
+              <span style="font-size:9px;color:#A4262C;margin-left:6px">只有文字色，无底无边</span></div>
+            <div style="font-size:9px;color:#6F7785">实心块比旁边的正文重 3 个量级，整页第一眼全被它吸走</div>
+          </div>
+          <div class="tip">命中：<b>明度 &lt;90% 且饱和 &gt;60% + 缺 border</b>；第二个 <b>三元组不全</b>（缺 bg / border）。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-16" data-v="v-16">
+    <div class="hd"><span class="code">V-16</span><span class="ttl">对比度</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：正文对比度 ≥4.5:1；<code>≥24px</code> 与图形 ≥3:1；承载正文的文字色 ≥<code>#6F7785</code>（4.5 临界）；<b>placeholder <code>#A1A7B3</code> / 禁用 <code>#BEC3CC</code> 豁免，但不得承载正文或关键值</b></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 正文 12.3:1，表头 5.9:1</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
+            <div style="font-size:12px;line-height:20px;color:#2F3540">正文 #2F3540 → <b>12.3:1</b>，远超 4.5</div>
+            <div style="font-size:12px;line-height:20px;color:#5E6573">表头 #5E6573 → <b>5.9:1</b>，过 4.5</div>
+            <div style="font-size:24px;font-weight:600;color:#6F7785;line-height:32px">大字 24px/600 → 4.5:1（按大字 3:1 判）</div>
+            <div style="display:flex;gap:5px;margin-top:2px">
+              <span class="tg ok">合规</span><span class="tg warn">待处理</span>
+            </div>
+          </div>
+          <div class="lb">#6F7785 实测 <b>4.51:1</b>，只多 0.01；#A1A7B3（placeholder）仅 2.4:1、#BEC3CC（禁用）1.8:1 —— 必须豁免</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · #999 当正文（2.85:1）；#CCC 装关键信息（1.6:1）</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;border:1px solid #E1E5EB;border-radius:4px;padding:9px">
+            <div style="font-size:11px;color:#999999">说明文字 #999 on #FFF → <b>2.85:1</b>，读不清</div>
+            <div style="font-size:11px;color:#CCCCCC">禁用态里塞了关键信息 → <b>1.6:1</b>，等于没写</div>
+            <div style="font-size:11px;color:#BFBFBF">图表标签浅灰 → 数据读不出</div>
+          </div>
+          <div class="tip">命中：<b>3 处低于 4.5:1</b>。第二条最要命：信息在，但不可读。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-17" data-v="v-17">
+    <div class="hd"><span class="code">V-17</span><span class="ttl">颜色不作唯一编码</span>
+      <span class="mm">机检+走查</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：状态同时有色、词、形/图标（文本节点 + 图标节点）；转灰度仍可辨</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 色 + 词 + 形；转灰度仍可辨</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:10.5px">
+              <span style="width:14px;height:14px;border-radius:50%;background:#F6FFED;border:1px solid #12A679;color:#12A679;font-size:9px;line-height:12px;text-align:center">✓</span>
+              <span style="color:#237804;font-weight:600">合规</span><span style="color:#6F7785">430 台</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10.5px">
+              <span style="width:14px;height:14px;background:#FFF7E6;border:1px solid #FA8C16;color:#FA8C16;font-size:9px;line-height:12px;text-align:center">!</span>
+              <span style="color:#AD4E00;font-weight:600">待处理</span><span style="color:#6F7785">150 台</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10.5px">
+              <span style="width:14px;height:14px;background:#FFF1F0;border:1px solid #D9363E;color:#D9363E;font-size:9px;line-height:12px;text-align:center">×</span>
+              <span style="color:#A8071A;font-weight:600">失败</span><span style="color:#6F7785">60 台</span>
+            </div>
+          </div>
+          <div class="lb">三种编码独立：色相、中文词、形（✓ / ! / ×）。<b>灰度打印后仍能读出三种状态</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 只有色点，无词无形</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;border:1px solid #E1E5EB;border-radius:4px;padding:10px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:10.5px;color:#454C59"><span class="dot3" style="background:#12A679"></span>研发部</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:10.5px;color:#454C59"><span class="dot3" style="background:#FA721B"></span>销售部</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:10.5px;color:#454C59"><span class="dot3" style="background:#CF171D"></span>分支机构</div>
+            <div style="font-size:9px;color:#A4262C">灰度打印 / 红绿色盲 → 三个点完全一样</div>
+          </div>
+          <div class="tip">命中：<b>状态只有色点，无文本无图标</b>。三种状态在灰度下全部等价。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-18" data-v="v-18">
+    <div class="hd"><span class="code">V-18</span><span class="ttl">按钮层级</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：<b>每个操作区</b>（页头/页脚/工具栏/行内/批量条）内 <code>.btn-primary</code> ≤1；主按钮无前置图标；危险不与主按钮同级实心；批量条唯一出口须二次确认；<b>同区主按钮在左、辅按钮在右</b>（v0.6.9 起机检）</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 一主两次一文字，主按钮在最左；危险操作降为描边且在不同行</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:10px;color:#6F7785;width:34px">页脚</span>
+              <span class="bt p">保存策略</span><span class="bt s">预览影响</span><span class="bt t">取消</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:10px;color:#6F7785;width:34px">危险区</span>
+              <span class="bt od">删除策略</span>
+              <span style="font-size:9px;color:#6F7785">单独一行，不与主操作并列</span>
+            </div>
+            <div class="lb">primary = <b>1</b>，无图标；危险按钮为描边，且不在主操作行</div>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 3 个实心蓝 + 主按钮带图标 + 红色实心删除并排</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;border:1px solid #E1E5EB;border-radius:4px;padding:10px">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span class="bt p"><span class="i"></span>新建</span>
+              <span class="bt p">提交</span>
+              <span class="bt p">保存</span>
+              <span class="bt d">删除</span>
+            </div>
+            <div style="font-size:9px;color:#A4262C">primary=3；主按钮带前置图标；红实心与主按钮同排同级</div>
+            <div style="font-size:9px;color:#6F7785">四个按钮视觉权重几乎一样，用户会先点错一次</div>
+            <div style="margin-top:10px;border-top:1px dashed #E1E5EB;padding-top:8px">
+              <div style="font-size:9px;color:#A4262C">❌ 反例 2（卡片行内）· 三张卡都是「忽略」在左、「查看」主按钮在右</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+                <span class="bt">忽略</span><span class="bt p">查看</span>
+                <span style="font-size:9px;color:#6F7785">应为「查看」在左、「忽略」在右</span>
+              </div>
+              <div class="tip">命中：<b>辅按钮排在主按钮之前</b>（v0.6.9 起机检，同父容器 DOM 顺序）</div>
+            </div>
+          </div>
+          <div class="tip">命中：<b>primary=3（&gt;1）</b> + <b>前置图标</b> + <b>危险与主操作同权重</b>。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-19" data-v="v-19">
+    <div class="hd"><span class="code">V-19</span><span class="ttl">圆角与阴影</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：<b>圆角 ∈ <code>{0,2}</code></b>（表格 0 / 其余 2）；<b>阴影 ∈ <code>{none,s1,s2,s3}</code></b>；禁止 Focus 蓝色外发光</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 圆角只有 0（表格）/ 2（其余），阴影只用 s1</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px">
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="border:1px solid #D3D7DE;border-radius:2px;background:#fff;box-shadow:0 1px 4px rgba(31,35,43,.16);padding:7px 9px;font-size:9px;color:#454C59">卡片 r=2</span>
+              <span style="border:1px solid #D3D7DE;border-radius:2px;background:#fff;box-shadow:0 1px 4px rgba(31,35,43,.16);padding:7px 9px;font-size:9px;color:#454C59">卡片 r=2</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="border:1px solid #C7D0DC;border-radius:2px;background:#fff;padding:4px 9px;font-size:9px;color:#454C59">按钮 r=2</span>
+              <span style="border:1px solid #96C7FF;border-radius:2px;background:#E8F4FF;color:#00258C;padding:4px 9px;font-size:9px">标签 r=2</span>
+            </div>
+            <div class="lb">圆角集合 <b>{0, 2}</b>（表格 0 / 其余 2）；阴影统一 dropshadow-s1；同层两张卡同档</div>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 圆角 4/8/12/16 四档；同层卡阴影方向相反</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;border:1px solid #E1E5EB;border-radius:4px;padding:9px">
+            <div style="display:flex;gap:5px">
+              <span style="border:1px solid #E1E5EB;border-radius:16px;background:#fff;padding:5px 7px;font-size:8.5px;color:#454C59">r=16</span>
+              <span style="border:1px solid #E1E5EB;border-radius:12px;background:#fff;padding:5px 7px;font-size:8.5px;color:#454C59">r=12</span>
+              <span style="border:1px solid #E1E5EB;border-radius:8px;background:#fff;padding:5px 7px;font-size:8.5px;color:#454C59">r=8</span>
+              <span style="border:1px solid #E1E5EB;border-radius:4px;background:#fff;padding:5px 7px;font-size:8.5px;color:#454C59">r=4</span>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span style="border:1px solid #E1E5EB;border-radius:6px;background:#fff;padding:6px 8px;font-size:8.5px;color:#454C59;box-shadow:-3px -3px 6px rgba(15,23,42,.12)">阴影左上</span>
+              <span style="border:1px solid #E1E5EB;border-radius:6px;background:#fff;padding:6px 8px;font-size:8.5px;color:#454C59;box-shadow:3px 3px 6px rgba(15,23,42,.06)">阴影右下</span>
+            </div>
+          </div>
+          <div class="tip">命中：<b>4 个非资产圆角（4/8/12/16）</b>（合法值只有 0 与 2）+ <b>同层卡片阴影 2 种且方向相反</b>。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-20" data-v="v-20">
+    <div class="hd"><span class="code">V-20</span><span class="ttl">语义色专用</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：语义色 ∈ <code>§1.2</code> 映射表：红=故障/高危/失陷，<b>橙+brown</b>=中危/中低危/未接入，<b>蓝=正常</b>/主操作/链接/选中，绿=在线/安全，灰=离线/低危，青=信息；表外色不得用于状态</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 排名用蓝灰梯度；红色只出现在"风险"行</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:64px">研发部</span><span style="height:10px;width:78%;background:#1C6EFF;border-radius:2px"></span><span class="tn">430</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:64px">销售部</span><span style="height:10px;width:54%;background:#458FFF;border-radius:2px"></span><span class="tn">290</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:64px">分支机构</span><span style="height:10px;width:34%;background:#96C7FF;border-radius:2px"></span><span class="tn">128</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:64px">（风险）未装</span><span style="height:10px;width:22%;background:#CF171D;border-radius:2px"></span><span class="tn">60</span><span class="tg bad" style="font-size:8.5px;line-height:14px">风险</span></div>
+          </div>
+          <div class="lb">同一族色相做梯度 → 表示"排名"；<b>红只给真正带风险语境的元素</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 排名条全红，第 1 名最深</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;border:1px solid #E1E5EB;border-radius:4px;padding:9px">
+            <div style="font-size:9px;color:#6F7785">类型缺口排序</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:56px">类型 A</span><span style="height:10px;width:80%;background:#82010E;border-radius:2px"></span><span class="tn">430</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:56px">类型 B</span><span style="height:10px;width:56%;background:#CF171D;border-radius:2px"></span><span class="tn">290</span></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#454C59"><span style="width:56px">类型 C</span><span style="height:10px;width:32%;background:#FF5752;border-radius:2px"></span><span class="tn">128</span></div>
+          </div>
+          <div class="tip">命中：<b>.bar-fill #D9363E（排名非风险）</b>。读者会把这个排序读成"越靠前越危险"。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-21" data-v="v-21">
+    <div class="hd"><span class="code">V-21</span><span class="ttl">表格视觉</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.7 PASS</b>：表头与正文有区分（表头底 #EDF1F7 或字重不同）；同列文本类型一致时行高一致，<b>单行 40 / 双行 60，同表不得混用</b>；默认只留底部分割线，启用斑马纹则不得再叠横线；<b>仅当横向溢出时</b>要求操作列 sticky</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 表头有底 + 600，行高全 40，只留分割线，操作列 sticky</div>
+        <div class="mock">
+          <table class="tbl">
+            <thead><tr><th>对象</th><th>部门</th><th class="r">终端</th><th class="r" style="box-shadow:-1px 0 0 #E1E5EB">操作</th></tr></thead>
+            <tbody>
+              <tr><td style="height:20px">EDR-2201</td><td>研发部</td><td class="r tn">430</td><td class="r" style="box-shadow:-1px 0 0 #E1E5EB"><span class="bt t" style="height:18px;line-height:16px">查看</span></td></tr>
+              <tr><td style="height:20px">EDR-2202</td><td>销售部</td><td class="r tn">290</td><td class="r" style="box-shadow:-1px 0 0 #E1E5EB"><span class="bt t" style="height:18px;line-height:16px">查看</span></td></tr>
+              <tr><td style="height:20px">EDR-2203</td><td>分支机构</td><td class="r tn">128</td><td class="r" style="box-shadow:-1px 0 0 #E1E5EB"><span class="bt t" style="height:18px;line-height:16px">查看</span></td></tr>
+            </tbody>
+          </table>
+          <div class="lb">行高 40 / 40 / 40；无斑马线；操作列 <code>position:sticky; right:0</code>（左侧投影示意）</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 行高 40/56/72；斑马线 + 分割线；操作列随滚消失</div>
+        <div class="mock">
+          <div class="mk" style="border:1px solid #E1E5EB;border-radius:3px;overflow:hidden">
+            <table class="tbl">
+              <thead><tr><th>对象</th><th>备注</th><th class="r">终端</th></tr></thead>
+              <tbody>
+                <tr style="background:#F4F7FB"><td style="height:18px">EDR-2201</td><td>常规</td><td class="r tn">430</td></tr>
+                <tr><td style="height:30px">EDR-2202</td><td>多行备注把行撑到 56px，表格节奏断裂</td><td class="r tn">290</td></tr>
+                <tr style="background:#F4F7FB"><td style="height:40px">EDR-2203</td><td>行高又变 72</td><td class="r tn">128</td></tr>
+              </tbody>
+            </table>
+            <div style="padding:5px 8px;font-size:9px;color:#A4262C;border-top:1px solid #F0F3F7">操作列（不 sticky）→ 横向滚动时移出视野</div>
+          </div>
+          <div class="tip">命中：<b>行高 3 种（40/56/72）</b> + <b>斑马线 + 分割线并存</b> + <b>操作列未固定</b>。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-22" data-v="v-22">
+    <div class="hd"><span class="code">V-22</span><span class="ttl">七态完备</span>
+      <span class="mm">机检+走查</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：六态（空/加载/部分失败/无权限/过期/未知）各有独立图形 + 文案 + 至少一个可行动作；同一句"暂无数据"不得覆盖两种以上状态；<code>0</code> 与「—」视觉可区分</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 七态各自有图形 + 词 + 可行动作</div>
+        <div class="mock">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;flex:1">
+            <div style="border:1px dashed #C7D0DC;border-radius:3px;padding:5px;text-align:center">
+              <div style="font-size:12px;color:#A9B6C9">□</div><div style="font-size:8.5px;color:#454C59">无符合条件的数据</div>
+              <div style="font-size:8px;color:#1C6EFF">清除筛选</div>
+            </div>
+            <div style="border:1px solid #EDF1F7;border-radius:3px;padding:5px">
+              <div class="sk" style="width:70%"></div><div class="sk" style="width:90%;margin-top:3px"></div><div class="sk" style="width:50%;margin-top:3px"></div>
+            </div>
+            <div style="border:1px solid #FFD591;background:#FFF7E6;border-radius:3px;padding:5px">
+              <div style="font-size:8.5px;color:#AD4E00">2/4 区域加载失败</div><div style="font-size:8px;color:#1C6EFF">重试</div>
+            </div>
+            <div style="border:1px solid #E1E5EB;border-radius:3px;padding:5px;text-align:center">
+              <div style="font-size:8.5px;color:#454C59">无查看权限</div><div style="font-size:8px;color:#1C6EFF">申请权限</div>
+            </div>
+            <div style="border:1px solid #E1E5EB;border-radius:3px;padding:5px">
+              <div style="font-size:8.5px;color:#454C59">数据截至 11-24 03:00</div><div style="font-size:8px;color:#AD4E00">已过期 26h</div>
+            </div>
+            <div style="border:1px solid #E1E5EB;border-radius:3px;padding:5px">
+              <div style="font-size:13px;color:#A9B6C9">—</div><div style="font-size:8px;color:#6F7785">数据源未上报</div>
+            </div>
+          </div>
+          <div class="lb">空态给"清除筛选"、失败态给"重试"、无权限给"申请"——<b>每态都能行动，且文案不同</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 四类空态同一句"暂无数据"；0 显示为「—」</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;gap:5px;border:1px solid #E1E5EB;border-radius:4px;padding:8px">
+            <div style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:5px">
+              <div style="background:#FAFBFC;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8.5px;color:#A9B6C9">暂无数据</div>
+              <div style="background:#FAFBFC;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8.5px;color:#A9B6C9">暂无数据</div>
+              <div style="background:#FAFBFC;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8.5px;color:#A9B6C9">暂无数据</div>
+              <div style="background:#FAFBFC;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8.5px;color:#A9B6C9">暂无数据</div>
+            </div>
+            <div style="font-size:9px;color:#454C59">接口失败时整页空白；<span style="color:#A4262C">真实 0 也显示成「—」</span></div>
+          </div>
+          <div class="tip">命中：<b>"暂无数据"出现 4 次</b> → 四态未区分；<b>0 与「—」混用</b>。用户分不清"没数据 / 坏了 / 没权限 / 真的 0"。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-23" data-v="v-23">
+    <div class="hd"><span class="code">V-23</span><span class="ttl">指标组容器与层级</span>
+      <span class="mm">机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：≥3 个并列统计数字位于 <code>[data-kpi-strip]</code>（<b>不得作为 <code>[data-hero]</code> 主图</b>）；每数字在 <code>[data-kpi-item]</code>；value ≥ label×1.4 或字重 600/400，<b>全组同一判法</b></p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 4 个数字各有单元容器，value/label = 22/12</div>
+        <div class="mock">
+          <div class="kpis" style="flex:1;align-items:center">
+            <div class="kpi" data-kpi-item>
+              <div class="k" style="font-size:8.5px">合规终端</div>
+              <div class="v" style="font-size:16px">430</div>
+              <div style="font-size:8px;color:#6F7785">台</div>
+            </div>
+            <div class="kpi" data-kpi-item>
+              <div class="k" style="font-size:8.5px">待处理</div>
+              <div class="v" style="font-size:16px">150</div>
+              <div style="font-size:8px;color:#6F7785">台</div>
+            </div>
+            <div class="kpi" data-kpi-item>
+              <div class="k" style="font-size:8.5px">未安装</div>
+              <div class="v" style="font-size:16px">60</div>
+              <div style="font-size:8px;color:#6F7785">台</div>
+            </div>
+            <div class="kpi" data-kpi-item>
+              <div class="k" style="font-size:8.5px">超期未报</div>
+              <div class="v" style="font-size:16px">80</div>
+              <div style="font-size:8px;color:#6F7785">台</div>
+            </div>
+          </div>
+          <div class="lb">每项 <code>data-kpi-item</code>；label 12 / value 22 → 比值 <b>1.83 ≥1.5</b>；单位再降一档</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 七个数字平铺成一段，无单元容器</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;border:1px solid #E1E5EB;border-radius:4px;padding:10px;font-size:10px;color:#454C59;line-height:1.9">
+            <div>合规终端 430　待处理 150　未安装 60　超期未报 80</div>
+            <div>已安装 660　策略覆盖 720　本月新增 128</div>
+            <div style="font-size:9px;color:#A4262C;margin-top:6px">7 个数字 = 7 段纯文本，标签与数字同字号同字重</div>
+          </div>
+          <div class="tip">命中：<b>0 个 [data-kpi-item]</b>，父容器 <code>.stat-line</code>；数字与标签均 14px/400。看不出哪个数是哪个指标的值。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-24" data-v="v-24">
+    <div class="hd"><span class="code">V-24</span><span class="ttl">同构对象操作位置一致</span>
+      <span class="mm cdp">机检+量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：同类卡片主操作位置与顺序一致；无主操作卡<b>保留占位</b>，其余卡操作槽位不变</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 三张卡主操作都在右下，且都在次操作右侧</div>
+        <div class="mock">
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="border:1px solid #E1E5EB;border-radius:4px;padding:6px;display:flex;align-items:center">
+              <span style="font-size:9px;color:#454C59">接入计划 KP-01</span>
+              <span style="margin-left:auto;display:flex;gap:4px"><span class="bt s" style="height:18px;line-height:16px">忽略</span><span class="bt p" style="height:18px;line-height:16px">查看</span></span>
+            </div>
+            <div style="border:1px solid #E1E5EB;border-radius:4px;padding:6px;display:flex;align-items:center">
+              <span style="font-size:9px;color:#454C59">接入计划 KP-02</span>
+              <span style="margin-left:auto;display:flex;gap:4px"><span class="bt s" style="height:18px;line-height:16px">忽略</span><span class="bt p" style="height:18px;line-height:16px">查看</span></span>
+            </div>
+            <div style="border:1px solid #E1E5EB;border-radius:4px;padding:6px;display:flex;align-items:center">
+              <span style="font-size:9px;color:#454C59">接入计划 KP-03</span>
+              <span style="margin-left:auto;display:flex;gap:4px"><span class="bt s" style="height:18px;line-height:16px">忽略</span><span class="bt p" style="height:18px;line-height:16px">查看</span></span>
+            </div>
+          </div>
+          <div class="lb">签名一致：<b>(右下, [次, 主], .btn-primary)</b></div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 右上 / 左下 / 中下，主次顺序也换</div>
+        <div class="mock" style="gap:5px">
+          <div class="mk" style="border:1px solid #E1E5EB;border-radius:4px;padding:6px;display:flex;align-items:center">
+            <span style="font-size:9px;color:#454C59">KP-01</span>
+            <span style="margin-left:auto;display:flex;gap:4px"><span class="bt p" style="height:18px;line-height:16px">查看</span><span class="bt s" style="height:18px;line-height:16px">忽略</span></span>
+          </div>
+          <div class="mk" style="border:1px solid #E1E5EB;border-radius:4px;padding:6px;display:flex;align-items:center">
+            <span style="font-size:9px;color:#454C59">KP-02</span>
+            <span style="display:flex;gap:4px"><span class="bt p" style="height:18px;line-height:16px">查看</span></span>
+          </div>
+          <div class="mk" style="border:1px solid #E1E5EB;border-radius:4px;padding:6px;text-align:center">
+            <span style="font-size:9px;color:#454C59">KP-03</span>
+            <div style="margin-top:3px"><span class="bt p" style="height:18px;line-height:16px">查看</span></div>
+          </div>
+          <div class="tip">命中：<b>位置不一致（右上 / 左下 / 中下）</b>；主次顺序也不一致。每张卡都要重新找按钮。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-25" data-v="v-25">
+    <div class="hd"><span class="code">V-25</span><span class="ttl">行内标签纵向对齐</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：同语义标签占固定槽位：left 极差 ≤2px 且<b>槽宽差 ≤4px</b>；<b>槽位之后元素 x 极差 ≤2px</b>；行尾数值右缘极差 ≤2px</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 三类标签各有固定列，行尾数值右对齐</div>
+        <div class="mock">
+          <div style="display:flex;flex-direction:column;gap:3px;font-size:9.5px">
+            <div style="display:flex;gap:6px;align-items:center;color:#6F7785;font-size:9px;padding-bottom:2px;border-bottom:1px solid #F0F3F7">
+              <span style="flex:1">对象</span><span style="width:34px">级别</span><span style="width:44px">风险</span><span style="width:44px">状态</span><span style="width:36px;text-align:right">终端</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="flex:1;color:#454C59">EDR-2201</span><span style="width:34px"><span class="tg gray">P0</span></span><span style="width:44px"><span class="tg bad">高危</span></span><span style="width:44px"><span class="tg ok">合规</span></span><span style="width:36px;text-align:right" class="tn">430</span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="flex:1;color:#454C59">EDR-2202</span><span style="width:34px"><span class="tg gray">P1</span></span><span style="width:44px"><span class="tg warn">中危</span></span><span style="width:44px"><span class="tg warn">待处理</span></span><span style="width:36px;text-align:right" class="tn">290</span></div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="flex:1;color:#454C59">EDR-2203</span><span style="width:34px"><span class="tg gray">P2</span></span><span style="width:44px"><span class="tg ok">低危</span></span><span style="width:44px"><span class="tg ok">合规</span></span><span style="width:36px;text-align:right" class="tn">128</span></div>
+          </div>
+          <div class="lb">三类标签 left 极差 <b>0px</b>；数值 right 极差 <b>0px</b>。靠<b>固定列宽</b>，不靠 space-between</div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 标签宽度随文案变，把后面顶乱</div>
+        <div class="mock">
+          <div class="mk" style="display:flex;flex-direction:column;gap:4px;font-size:9.5px;border:1px solid #E1E5EB;border-radius:4px;padding:8px">
+            <div style="display:flex;gap:5px;align-items:center"><span style="color:#454C59">EDR-2201</span><span class="tg gray">P0</span><span class="tg bad">高危</span><span class="tg ok">合规</span><span style="margin-left:auto" class="tn">430</span></div>
+            <div style="display:flex;gap:5px;align-items:center"><span style="color:#454C59">EDR-2202</span><span style="margin-left:14px" class="tg gray">P1</span><span class="tg warn">中危</span><span class="tg warn">待处理中</span><span style="margin-left:auto" class="tn">2,290</span></div>
+            <div style="display:flex;gap:5px;align-items:center"><span style="color:#454C59">EDR-2203</span><span style="margin-left:26px" class="tg gray">P2</span><span class="tg ok">低危</span><span class="tg ok">合规</span><span style="margin-left:auto" class="tn">128</span></div>
+          </div>
+          <div class="tip">命中：<b>级别列 left 极差 18px</b>（16 / 52 / 34）；数值右缘极差也 &gt;2px。眼睛在行内横跳。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-26" data-v="v-26">
+    <div class="hd"><span class="code">V-26</span><span class="ttl">形态与关系</span>
+      <span class="mm">走查+机检</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：<b>每块</b>可视化只承担 1 个主关系；形态与关系匹配白名单（含排名→横向条形、进度→单条+基线）；一页可多块，逐块判</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 一条堆叠条表达"构成"，主关系只有 1 个</div>
+        <div class="mock">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px">
+            <div style="font-size:9.5px;color:#6F7785">终端合规构成 · 共 720 台</div>
+            <div class="stack" style="height:26px">
+              <span style="flex:430;background:#1C6EFF">430</span>
+              <span style="flex:150;background:#3D85FF">150</span>
+              <span style="flex:60;background:#FA8C16">60</span>
+              <span style="flex:80;background:#A9B6C9">80</span>
+            </div>
+            <div class="ax"><span>0</span><span>360</span><span>720</span></div>
+            <div style="font-size:9px;color:#454C59">遮住数字看 3 秒：<b>"合规占六成、未装最少"</b>，手指能落到具体那一段</div>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 构成用折线；一页并列两个主关系</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px;border:1px solid #E1E5EB;border-radius:4px;padding:9px">
+            <div style="font-size:9px;color:#6F7785">各类占比（用折线画构成）</div>
+            <svg viewBox="0 0 220 46" style="width:100%;height:46px">
+              <polyline points="8,34 58,12 108,26 158,18 208,30" fill="none" stroke="#D9363E" stroke-width="1.6"/>
+              <line x1="0" y1="44" x2="220" y2="44" stroke="#DCE2EA"/>
+            </svg>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;border:1px solid #FFD591;background:#FFF7E6;border-radius:2px;text-align:center;font-size:8px;color:#AD4E00;padding:3px">主关系②</div>
+              <div style="flex:1;border:1px solid #FFD591;background:#FFF7E6;border-radius:2px;text-align:center;font-size:8px;color:#AD4E00;padding:3px">主关系③</div>
+            </div>
+          </div>
+          <div class="tip">命中：<b>构成用折线</b>（读者得自己相加）；<b>并列多个主关系</b>，不知先看哪。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="v-27" data-v="v-27">
+    <div class="hd"><span class="code">V-27</span><span class="ttl">承载空间与信息量</span>
+      <span class="mm cdp">量测</span></div>
+    <p class="judge judge06"><b>v0.6 PASS</b>：<code>[data-hero]</code> 内主图有 1 个共享承载空间，<b>单元 ≥3、数字 ≥2、数字/单元 ≥0.8</b>；<code>[data-kpi-strip]</code> 不受约束；认不出载体 → ⚠️</p>
+    <div class="pair">
+      <div class="pane ok">
+        <div class="cap">✅ 正例 · 一条共享轴承载 4 段 + 4 个真实数字</div>
+        <div class="mock">
+          <div style="border:1px solid #EDF1F7;border-radius:4px;background:#FBFCFE;padding:9px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px">
+            <div style="font-size:9px;color:#6F7785">近 7 天不合规趋势（一天一根，共享时间轴）</div>
+            <div class="bars" style="height:64px">
+              <i style="height:38%"></i><i style="height:52%"></i><i class="hi" style="height:86%"></i><i style="height:61%"></i><i style="height:44%"></i><i style="height:70%"></i><i style="height:33%"></i>
+            </div>
+            <div class="ax"><span>11-19</span><span>11-22</span><span>11-25</span></div>
+            <div style="font-size:9px;color:#454C59">轴上 7 个单元 / 7 个数字（38、52、86…），<b>同一承载空间</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="pane bad">
+        <div class="cap">❌ 反例 · 四张卡各 1 个数，数字与图形分离</div>
+        <div class="mock">
+          <div class="mk" style="flex:1;display:flex;flex-direction:column;gap:6px;border:1px solid #E1E5EB;border-radius:4px;padding:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+              <div style="border:1px solid #EDF1F7;border-radius:3px;background:#FBFCFE;padding:6px"><div style="font-size:8px;color:#6F7785">合规</div><div style="font-size:15px;font-weight:700">430</div></div>
+              <div style="border:1px solid #EDF1F7;border-radius:3px;background:#FBFCFE;padding:6px"><div style="font-size:8px;color:#6F7785">待处理</div><div style="font-size:15px;font-weight:700">150</div></div>
+              <div style="border:1px solid #EDF1F7;border-radius:3px;background:#FBFCFE;padding:6px"><div style="font-size:8px;color:#6F7785">未装</div><div style="font-size:15px;font-weight:700">60</div></div>
+              <div style="border:1px solid #EDF1F7;border-radius:3px;background:#FBFCFE;padding:6px"><div style="font-size:8px;color:#6F7785">超期</div><div style="font-size:15px;font-weight:700">80</div></div>
+            </div>
+            <div style="font-size:9px;color:#A4262C">抹掉数字 → 整块什么都没了</div>
+          </div>
+          <div class="tip">命中：<b>载体 0 / 数字 4</b>（4 个数各在自己的私有框里，不共享任何承载空间）。这不是图，是"装了盒子的表格"。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="foot">
+    图例册 v0.6 · 27 条 · 2026-11-25。<br>
+    规则原文与门槛：<code style="font:11.5px/1 'JetBrains Mono',Menlo,monospace;background:#F1F5FB;border:1px solid #E1E8F2;padding:0 3px;border-radius:3px">04-workflows-and-cases/门禁-V-视觉专项.md</code>；
+    可跑夹具：<code style="font:11.5px/1 'JetBrains Mono',Menlo,monospace;background:#F1F5FB;border:1px solid #E1E8F2;padding:0 3px;border-radius:3px">tools/fixtures/visual/</code>。
+    本页不参与判定，改版式不影响任何门禁结果。
+  </div>
+</div>
+</body>
+</html>

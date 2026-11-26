@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN" data-viewport-width="1760">
+<head>
+<meta charset="utf-8">
+<title>V-02 合法变体 · ≥1720 屏 48px 边距 + gutter 32</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #F7F9FC; color: #2F3540; font-size: 14px; line-height: 22px; }
+  .page { padding: 0 48px 24px; background: #FFFFFF; }
+  h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .row { display: flex; gap: 32px; margin-bottom: 16px; }
+  .span12 { width: calc(50% - 16px); }
+  .box { min-height: 160px; padding: 16px; background: #F4F7FB; border: 1px solid #D3D7DE; }
+  .box b { display: block; font-size: 16px; line-height: 24px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <main class="page" data-page-root="主内容">
+    <h1>接入概览</h1>
+    <section class="row" data-grid-row="大屏双栏 12:12">
+      <div class="box span12" data-span="12"><b>在线终端</b>128 台</div>
+      <div class="box span12" data-span="12"><b>接入组织</b>12 个</div>
+    </section>
+    <p>示例环境 · 快照 2026-11-26 09:20 · 规模 128 终端 / 12 组织；1760 屏使用 M=48 / G=32</p>
+  </main>
+</body>
+</html>

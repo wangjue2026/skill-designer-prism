@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN" data-viewport-width="1440">
+<head>
+<meta charset="utf-8">
+<title>V-01 反例 · 第二内容容器 + 筛选条左漂 8px</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #F7F9FC; color: #2F3540; font-size: 14px; line-height: 22px; }
+  .page, .content { padding: 0 24px 24px; background: #FFFFFF; }
+  .page-head { padding: 16px 0; }
+  .page-head h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .filter-bar { margin-left: 8px; display: flex; gap: 8px; padding: 8px 0; }
+  .filter-bar span { display: inline-block; height: 32px; padding: 5px 12px; background: #F4F7FB; }
+  .hero { margin-bottom: 16px; padding: 16px; border: 1px solid #D3D7DE; }
+  .hero svg { display: block; width: 100%; height: 160px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 12px; border-bottom: 1px solid #E1E5EB; text-align: left; }
+  th { background: #F4F7FB; font-weight: 600; }
+  .pagination { padding-top: 16px; }
+</style>
+</head>
+<body>
+  <main class="page" data-page-root="主内容">
+    <section class="page-head" data-page-section="页头">
+      <h1>终端接入清单</h1>
+    </section>
+    <section class="filter-bar" data-page-section="筛选条">
+      <span>全部终端</span><span>在线</span><span>超时</span>
+    </section>
+    <section class="hero" data-page-section="主图">
+      <svg data-carrier="line" viewBox="0 0 1200 160" aria-label="在线趋势">
+        <polyline fill="none" stroke="#1C6EFF" stroke-width="2"
+          points="20,130 130,120 240,126 350,96 460,104 570,78 680,86 790,58 900,66 1010,40 1120,48"></polyline>
+      </svg>
+    </section>
+    <table data-page-section="列表">
+      <thead><tr><th>组织</th><th>状态</th><th>最近检查</th></tr></thead>
+      <tbody>
+        <tr><td>研发部</td><td>通过</td><td>2026-11-26 09:18</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" data-page-section="分页">1 2 3 · 共 3 页</div>
+  </main>
+  <div class="content" data-page-root="第二容器">侧栏残留区</div>
+</body>
+</html>

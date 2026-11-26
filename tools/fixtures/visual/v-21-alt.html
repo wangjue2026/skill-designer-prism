@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-21 合法变体 · 双行模式整表 60、只用斑马线、横滚 sticky 操作列</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .table-wrap { width: 720px; overflow-x: auto; border: 1px solid #D3D7DE; background: #FFFFFF; }
+  table { width: 100%; min-width: 980px; border-collapse: collapse; }
+  th { height: 40px; padding: 8px 12px; background: #F4F7FB; color: #5E6573;
+       font-size: 12px; line-height: 20px; font-weight: 600; text-align: left; }
+  td { padding: 8px 12px; font-size: 12px; line-height: 20px; font-weight: 400;
+       text-align: left; border: 0; }
+  th:last-child { position: sticky; right: 0; background: #F4F7FB; }
+  td:last-child { background: #FFFFFF; }
+  tbody tr:nth-child(odd) { background: #FFFFFF; }
+  tbody tr:nth-child(even) { background: #F7F9FC; }
+  .wrap { max-width: 220px; white-space: normal; }
+</style>
+</head>
+<body>
+  <h1>组织接入清单</h1>
+  <div class="table-wrap">
+    <table id="org-list" data-table-overflow="true">
+      <thead><tr><th>组织</th><th>接入路径</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr style="height:60px"><td>研发部</td><td class="wrap">北京总部终端接入</td><td>通过</td><td>查看</td></tr>
+        <tr style="height:60px"><td>销售部</td><td class="wrap">上海分部客户拜访终端浏览器接入，双链路互为备份</td><td>通过</td><td>查看</td></tr>
+        <tr style="height:60px"><td>分支机构</td><td class="wrap">深圳移动办公接入</td><td>超时</td><td>查看</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>示例环境 · 快照 2026-11-26 09:20 · 规模 3 组织</p>
+</body>
+</html>

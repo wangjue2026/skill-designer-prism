@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-05 正例 · 内容块撑满容器</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head { padding: 0 0 16px; }
+  .page-head h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .page-head p { margin: 8px 0 0; font-size: 12px; line-height: 20px; color: #5E6573; }
+  .card { background: #FFFFFF; border: 1px solid #D3D7DE; border-radius: 2px; padding: 16px;
+          margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; line-height: 24px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px; border-bottom: 1px solid #E1E5EB; font-size: 12px;
+           line-height: 20px; text-align: left; font-weight: 400; }
+  th { background: #F4F7FB; color: #5E6573; font-weight: 600; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 2px;
+         border: 1px solid #9BF2CC; background: #F5FFFA; color: #015945;
+         font-size: 12px; line-height: 20px; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>访问诊断</h1>
+    <p>示例环境 · 快照 2026-11-25 09:20 · 规模 128 终端 / 4 组织</p>
+  </div>
+
+  <div class="card">
+    <h2>诊断明细（最近 24 小时）</h2>
+    <table>
+      <thead><tr><th>对象</th><th>接入方式</th><th>最近检查</th><th>结果</th><th class="num">耗时</th></tr></thead>
+      <tbody>
+        <tr><td>VU-2041</td><td>客户端</td><td>2026-11-25 09:18:42</td><td><span class="tag">通过</span></td><td class="num">182 ms</td></tr>
+        <tr><td>VU-2087</td><td>浏览器</td><td>2026-11-25 09:17:10</td><td><span class="tag">通过</span></td><td class="num">204 ms</td></tr>
+        <tr><td>VU-2190</td><td>移动端</td><td>2026-11-25 09:16:55</td><td><span class="tag">超时</span></td><td class="num">3 000 ms</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>异常分布</h2>
+    <table>
+      <thead><tr><th>原因</th><th class="num">次数</th><th class="num">占比</th></tr></thead>
+      <tbody>
+        <tr><td>认证票据过期</td><td class="num">14</td><td class="num">43%</td></tr>
+        <tr><td>网络不可达</td><td class="num">11</td><td class="num">34%</td></tr>
+        <tr><td>策略未命中</td><td class="num">8</td><td class="num">23%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

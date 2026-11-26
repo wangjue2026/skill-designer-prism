@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-13 防一刀切 · 长文本换行展示也算全文可达</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  /* 正例：允许两行换行，全文直接可见，不需要 ellipsis / title */
+  .wrap { max-width: 420px; white-space: normal; overflow-wrap: anywhere; }
+  .tag { display: inline-block; padding: 2px 8px; border: 1px solid #9BF2CC;
+         border-radius: 2px; background: #F5FFFA; color: #015945;
+         font-size: 12px; line-height: 20px; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>接入路径说明</h1>
+    <p>示例环境 · 快照 2026-11-26 09:20 · 规模 128 终端 / 4 组织</p>
+  </div>
+  <div class="wrap">研发部-北京研发中心-3 号楼-终端接入代理-主链路：该链路承载办公终端的身份认证与策略下发，最近一次检查通过。</div>
+  <div class="wrap">销售部-上海分部-客户拜访终端-浏览器接入：浏览器形态免安装，适合临时访问，最近一次检查通过。</div>
+  <div class="wrap">分支机构-深圳-移动办公终端-隧道接入：隧道链路存在超时记录，详见下方异常明细。</div>
+  <span class="tag">共 3 条路径</span>
+</body>
+</html>

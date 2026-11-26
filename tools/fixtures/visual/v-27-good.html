@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-27 正例 · 同一承载条上的四个数据单元</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .hero { background: #FFFFFF; border: 1px solid #D3D7DE; border-radius: 2px; padding: 16px; }
+  .axis { display: flex; align-items: flex-end; gap: 24px; height: 180px; padding-top: 16px;
+          border-bottom: 1px solid #D3D7DE; }
+  .bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+         align-items: center; height: 100%; font-size: 12px; line-height: 20px; }
+  .bar i { display: block; width: 100%; background: #1C6EFF; border-radius: 2px 2px 0 0; }
+  .kpis { display: flex; gap: 12px; margin-top: 12px; }
+  .kpi { flex: 1; background: #F7F9FC; border-radius: 2px; padding: 8px 12px; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>接入质量概览</h1>
+    <p>示例环境 · 快照 2026-11-26 09:20 · 规模 128 终端 / 4 组织</p>
+  </div>
+  <div class="hero" data-hero>
+    <div class="axis">
+      <div class="bar"><i style="height:32px"></i><span>研发部 12</span></div>
+      <div class="bar"><i style="height:64px"></i><span>销售部 24</span></div>
+      <div class="bar"><i style="height:96px"></i><span>分支机构 36</span></div>
+      <div class="bar"><i style="height:128px"></i><span>后台部门 48</span></div>
+    </div>
+    <div class="kpis" data-kpi-strip>
+      <div class="kpi">终端 128</div><div class="kpi">异常 14</div><div class="kpi">通过率 89%</div>
+    </div>
+  </div>
+</body>
+</html>

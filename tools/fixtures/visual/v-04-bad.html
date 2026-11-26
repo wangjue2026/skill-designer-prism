@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-04 反例 · 普通柱状图通栏</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .viz { height: 320px; background: #FFFFFF; border: 1px solid #D3D7DE; border-radius: 2px; }
+  svg { display: block; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+  <h1>终端类型分布</h1>
+  <section class="viz" data-viz="终端类型分布" data-viz-kind="bar" data-viz-w="full" style="width:100%">
+    <svg data-carrier="bar" viewBox="0 0 1200 300" aria-label="终端类型柱状图">
+      <rect x="160" y="60" width="120" height="220" fill="#1C6EFF"></rect>
+      <rect x="440" y="120" width="120" height="160" fill="#1C6EFF"></rect>
+      <rect x="720" y="180" width="120" height="100" fill="#1C6EFF"></rect>
+      <rect x="1000" y="220" width="120" height="60" fill="#1C6EFF"></rect>
+    </svg>
+  </section>
+  <p>示例环境 · 快照 2026-11-26 09:20 · 规模 4 类终端</p>
+</body>
+</html>

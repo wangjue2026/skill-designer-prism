@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>V-27 反例 · hero 里四张 KPI 卡当主图（卡片墙）</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #F7F9FC; color: #2F3540;
+         font-size: 14px; line-height: 22px; font-weight: 400; }
+  .page-head h1 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 600; }
+  .hero { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  /* 反例根因：四张独立卡各一个数字，没有共享承载空间，抹掉数字图就没了 */
+  .card { background: #FFFFFF; border: 1px solid #D3D7DE; border-radius: 2px; padding: 16px; }
+  .card b { display: block; font-size: 24px; line-height: 32px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>接入质量概览</h1>
+    <p>示例环境 · 快照 2026-11-26 09:20 · 规模 128 终端 / 4 组织</p>
+  </div>
+  <div class="hero" data-hero>
+    <div class="card">研发部<b>12</b></div>
+    <div class="card">销售部<b>24</b></div>
+    <div class="card">分支机构<b>36</b></div>
+    <div class="card">后台部门<b>48</b></div>
+  </div>
+</body>
+</html>

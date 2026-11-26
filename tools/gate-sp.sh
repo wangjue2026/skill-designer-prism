@@ -16,8 +16,17 @@ SPEC="${1:-}"
 SKETCH="${2:-}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# 视觉专项开关：--no-visual 跳过 V 组；--no-measure 只关量测项（与 gate-ex.sh 对齐）
+NO_VISUAL=0
+NO_MEASURE=0
+for a in "$@"; do
+  [ "$a" = "--no-visual" ] && NO_VISUAL=1
+  [ "$a" = "--no-measure" ] && NO_MEASURE=1
+done
+case "${SKETCH:-}" in --*) SKETCH="";; esac
+
 if [ -z "$SPEC" ] || [ ! -f "$SPEC" ]; then
-  echo "用法: bash tools/gate-sp.sh design-spec-<业务名>.html [草图-<业务名>.html]"
+  echo "用法: bash tools/gate-sp.sh design-spec-<业务名>.html [草图-<业务名>.html] [--no-visual] [--no-measure]"
   exit 2
 fi
 if [ -n "$SKETCH" ] && [ ! -f "$SKETCH" ]; then
@@ -29,6 +38,17 @@ RC=0
 node "$DIR/gate.js" sp "$SPEC" "$SKETCH" || RC=1
 echo
 bash "$DIR/design-spec-selfcheck.sh" "$SPEC" || RC=1
+echo
+
+# 视觉专项（V 组）：visual-audit.js 可执行 27 条全量（含 V-06/V-25 静态近似、V-01/V-02/V-05/V-24 严格量测、V-13 静态近似、V-27 双判、V-04/V-21 bbox+静态双判），固定输出 27 行明细；
+# 端口未开时 V-01/V-02/V-05/V-24 报 ⚠️ 未量测；V-05/V-24 量测部分观察期至 2026-12-10 只 WARN；回执须登记未完成项
+if [ "$NO_VISUAL" -eq 0 ] && [ -f "$DIR/visual-audit.js" ]; then
+  VA_ARGS=("$SPEC" "--profile=wireframe")
+  if [ "$NO_MEASURE" -eq 1 ]; then VA_ARGS+=("--no-measure"); fi
+  node "$DIR/visual-audit.js" "${VA_ARGS[@]}" || RC=1
+else
+  echo "  ⚠️  视觉专项（V 组）已按 --no-visual 跳过：本次交付回执须注明\"视觉未检视\""
+fi
 
 echo
 echo "============================================================"
