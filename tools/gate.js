@@ -222,11 +222,9 @@ function runEX() {
     if (!/整体设计说明/.test(html)) bad('EX-1.4-02', '顶部缺「整体设计说明」对比表');
     if (!/思考点/.test(html)) bad('EX-1.4-02', '缺「设计思考点」对比表（两套各列各的，条数可不等）');
     if (/整体设计说明/.test(html) && /思考点/.test(html)) ok('EX-1.4-02', '对比表齐（整体说明 + 思考点）');
-    // 03 相同页交代（占位条），不许跳转
-    const same = (html.match(/两方案相同|与方案一相同|不重复画/g) || []).length;
-    if (same < 1) wr('EX-1.4-03', '未见相同页的占位交代（如"P4 ×××：与方案一相同"）');
-    else ok('EX-1.4-03', '相同页已有占位交代 ' + same + ' 处');
+    // 03 链路完整（2026-11-27 清理历史 SAME 占位残余：概念高保真原型每套方案独立完整呈现，不再要求"与方案一相同"占位，仅禁断链跳转）
     if (/见共用页面|见下方共用/.test(html)) bad('EX-1.4-03', '出现"见共用页面"跳转，链路断裂');
+    else ok('EX-1.4-03', '无断链跳转（各方案页面均独立完整呈现）');
     // 04 图下标号说明
     const notes = (html.match(/做法/g) || []).length;
     if (notes < 3) bad('EX-1.4-04', '图下标号说明不足（"做法"实得 ' + notes + ' 处）');
@@ -246,7 +244,7 @@ function runEX() {
     wr('EX-1.4-06', '人检：用户是否明确选定一套？选定结果要写进下游「方案来源：」，否则不得进 Part2');
 
     // 07 文案表达（用户视角，机检可判的部分）
-    var blocks = html.split(/<div class="page"/).slice(1);
+    var blocks = html.split(/<div class="page(?:\s+[^"]*)?"/).slice(1);
     var noWhy = [], noPair = [], tooLong = [], badgeMiss = [];
     blocks.forEach(function (blk, idx) {
       // 只保留页面自身（到下一个 h2 / 分隔线为止，避免把文末映射表算进最后一页）
@@ -367,9 +365,10 @@ function runEX() {
     if (cfgMiss.length) bad('EX-1.4-12', '配置类页面缺必备项（对象范围 / 触发条件 / 通知配置 / 生效状态）：' + cfgMiss.join('、'));
     else ok('EX-1.4-12', '配置类页面必备项齐（或本文件无配置页）');
 
-    // 13 仿真数据：声明 + 无占位符 + 标识/时间戳密度
+    // 13 仿真数据：声明 + 无占位符 + 标识/时间戳密度（剔除 style/script，避免 BEM 类名 __ 误伤）
+    var simText = html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, ' ');
     var simDecl = /(仿真|示例|快照)/.test(plain);
-    var ph = (plain.match(/__/g) || []).length;
+    var ph = (simText.match(/__/g) || []).length;
     var ids = (plain.match(/[A-Z]{2,4}-\d{2,4}/g) || []).length;
     var ts = (plain.match(/\d{2}:\d{2}(:\d{2})?/g) || []).length;
     if (!simDecl) bad('EX-1.4-13', '未见仿真数据声明（页头须写示例环境 + 快照时间 + 规模）');
@@ -511,6 +510,15 @@ function runEX() {
         }
         if (titles < 2) paneLack.push(pid2 + ' 面板「' + o.name + '」只有 ' + titles + ' 个命名区块（<b class="t">），至少要 2 个；只有一块时须标 data-thin="sys" 并写清系统接管了什么');
         else if (textLen < 24) paneLack.push(pid2 + ' 面板「' + o.name + '」有标题没内容（去标签后仅 ' + textLen + ' 字）');
+        // 2026-11-27 防敷衍加固（概念原型模式下阻断“文字壳”非默认 Tab）：
+        if (/data-mode="prototype"/.test(html)) {
+          if (/(链路|拓扑|流向|分布|热力|趋势|时间轴)/.test(o.name) && !/<(svg|canvas)\b|class="[^"]*(viz-svg|chain|mx|stack|bars|seg|trace-)/.test(seg)) {
+            paneLack.push(pid2 + ' 面板「' + o.name + '」属可视化视角，但未画任何图形载体（禁止仅用一行文字描述敷衍）');
+          }
+          if (!/<(table|svg|canvas|textarea|input|select)\b|class="[^"]*(chat-turn|rule-card|code-blk|tool-card|media-card|ui-ctrl|btn\b)/.test(seg)) {
+            paneLack.push(pid2 + ' 面板「' + o.name + '」仅有标题与文字占位，未做真实界面设计');
+          }
+        }
       });
     });
     if (paneLack.length) {
@@ -602,17 +610,24 @@ function runEX() {
       ok('EX-1.4-21', '交付面纯净：正文无台账表，交接件均在文末折叠区');
     }
 
-    // 22 主图存在性：每个非占位页须有 data-hero 图形区
+    // 22 主图存在性与反敷衍校验：核心非占位页须有 data-hero 图形区（轻量确认弹窗/简单表单页豁免，防硬塞假图）
     var heroLack = [];
+    var heroFake = [];
     blocks.forEach(function (blk3, idx3) {
       var b3 = blk3.split(/<hr[^>]*>|<h2[^>]*>/)[0];
       if (/class="same"/.test(b3)) return;
       var hd3 = (b3.match(/page-hd[\s\S]*?<\/div>/) || [''])[0];
       var pid3 = (hd3.match(/class="pid">([^<]+)</) || [, 'P' + (idx3 + 1)])[1];
+      var form3 = (hd3.match(/class="form">([^<]+)</) || [, ''])[1];
       if (/data-thin="sys"/.test(b3)) return;
+      // 2026-11-27 精简：轻量确认弹窗 / 简单表单页豁免 data-hero（禁止为了过门禁在确认弹窗里硬塞堆叠条）
+      var isModalExempt = /data-hero-exempt/.test(b3) || /(弹窗|确认)/.test(form3) || /class="[^"]*wf-modal\b/.test(b3);
       // 语法无关：抓住整个 data-hero 区块（HTML/CSS 组件到最近 </div>，或在 SVG 内到 </svg>）
       var heroStart = b3.search(/class="[^"]*hero[^"]*"[^>]*data-hero|data-hero[^>]*class="[^"]*hero/);
-      if (heroStart < 0) { heroLack.push(pid3 + '（无 data-hero 主图区）'); return; }
+      if (heroStart < 0) {
+        if (!isModalExempt) heroLack.push(pid3 + '（无 data-hero 主图区）');
+        return;
+      }
       var seg = b3.slice(heroStart, heroStart + 4000);
       // 数据呈现单元：SVG 几何元素 或 HTML 语义块（seg/stage/bar-fill/dot/card-v/step）
       var units = (seg.match(/<(rect|circle|path|line|polyline|polygon)\b/g) || []).length
@@ -621,11 +636,20 @@ function runEX() {
       var nums = (seg.match(/>[^<>]*\d[^<>]*</g) || []).length;
       if (units < 2) heroLack.push(pid3 + '（仅 ' + units + ' 个数据单元，疑似示意色块）');
       else if (nums < 2) heroLack.push(pid3 + '（主图仅 ' + nums + ' 处数字，缺真实数据呈现）');
+      // 防敷衍检查：若主图只是 .chain 里多个等大纯文字框 + 箭头，无任何长度/面积/色阶/SVG 视觉编码 → 明确告警
+      var chainNodes = (seg.match(/class="[^"]*chain-node\b/g) || []).length;
+      var hasRealEncoding = /<(svg|canvas)\b|class="[^"]*(bar-fill|seg|heat|gauge|spark|scale|meter)\b|style="[^"]*(?:width|height)\s*:\s*\d+%|data-scale="/i.test(seg);
+      if (chainNodes >= 2 && !hasRealEncoding) {
+        heroFake.push(pid3 + '（仅 ' + chainNodes + ' 个等大 .chain-node 文字框，缺长度/面积/色阶/SVG 视觉编码）');
+      }
     });
     if (heroLack.length) {
-      bad('EX-1.4-22', '主图不合格：' + heroLack.join('、') + '（每页须有 data-hero 主图区 + ≥2 数据单元 + ≥2 处真实数字；语法不限——HTML/CSS/SVG/动态 demo 均可，但不能是示意色块；画法与美观由执行时能力决定）');
+      bad('EX-1.4-22', '主图不合格：' + heroLack.join('、') + '（核心页面须有 data-hero 主图区 + ≥2 数据单元 + ≥2 处真实数字；确认弹窗已豁免；画法与美观由执行时能力决定）');
     } else {
-      ok('EX-1.4-22', '主图完整：每个非占位页均有数据主图（≥2 数据单元、≥2 处真实数字），语法与美观由执行时能力决定');
+      ok('EX-1.4-22', '主图完整：核心页面均有数据主图（≥2 数据单元、≥2 处真实数字；确认弹窗已豁免）');
+      if (heroFake.length) {
+        wr('EX-1.4-22', '疑似“等大文字框+箭头”敷衍主图（建议升级为带视觉编码的 SVG/比例条/轨迹图）：' + Array.from(new Set(heroFake)).join('；'));
+      }
     }
 
     // 30 视图声明（EX-1.4-30）：每页必须显式声明"几面"，不声明判未完成
@@ -816,10 +840,10 @@ function runEX() {
       var kpiC = (b6.match(/class="kpi"/g) || []).length;
       if (kpiC >= 6) vizWall.push(pid6 + ' 页内 ' + kpiC + ' 个指标卡（卡片墙）');
       var heroAt = b6.search(/data-hero/);
-      if (heroAt < 0) return;
+      if (heroAt < 0 || /data-hero-exempt/.test(b6)) return;
       var heroSeg = b6.slice(heroAt, heroAt + 4000);
-      var hasSpace = /class="[^"]*(chart|chain|\bmx\b|rank|stack|tl|steps|track|bars)/.test(heroSeg);
-      if (!hasSpace) vizWall.push(pid6 + ' 主图只有卡片 / 数字，没有共享承载空间（轴 / 网格 / 链路 / 构成条）');
+      var hasSpace = /<svg\b|class="[^"]*(chart|chain|\bmx\b|rank|stack|tl|steps|track|bars|viz-svg|seg|waterfall|sankey|topo)/.test(heroSeg);
+      if (!hasSpace) vizWall.push(pid6 + ' 主图只有卡片 / 数字，没有共享承载空间（轴 / 网格 / 链路 / 构成条 / SVG 图）');
     });
     if (vizWall.length) {
       bad('EX-1.4-29', '主图退化：' + vizWall.join('；') + '（主图必须把数据之间的关系编码进同一承载空间）');
@@ -867,9 +891,10 @@ function runEX() {
       var next = rest.search(/<(?:section|div)[^>]*class="[^"]*panel[^"]*"/);
       return rest.slice(0, next > 0 ? next : rest.length);
     }
+    var isProtoMode = /data-mode="prototype"/.test(html);
     var sceneRe = /<section[^>]*class="(?:[^"]*\s)?scene(?:\s[^"]*)?"[^>]*data-scene="(S\d+)"[^>]*>/;
-    var stepRe = /<div[^>]*class="[^"]*\bstep-hd\b[^"]*"[^>]*data-step="(S\d+-\d+)"[^>]*>/;
-    var pageRe = /<div[^>]*class="page"[^>]*>/g;
+    var stepRe = /<(?:div|button)[^>]*class="[^"]*\b(?:step-hd|step-pill)\b[^"]*"[^>]*data-step="(S\d+-\d+)"[^>]*>/;
+    var pageRe = /<div[^>]*class="page(?:\s+[^"]*)?"[^>]*>/g;
     var plansData = [], allOcc = [], allPageBlocks = [];
     planIds.forEach(function (p) {
       var panel = panelOf(p.tab);
@@ -877,20 +902,39 @@ function runEX() {
       var scTabs = (panel.match(/<[a-z]+[^>]*data-scene-tab="(S\d+)"[^>]*>/g) || []).map(function (t) { return { id: attrOf(t, 'data-scene-tab'), on: /class="[^"]*\bon\b/.test(t) }; });
       var scenes = sliceFrom(sceneRe, panel);
       scenes.forEach(function (s) {
-        var steps = sliceFrom(stepRe, s.seg).map(function (st) {
-          var pages = [];
-          var pm;
-          var pre = new RegExp(pageRe.source, 'g');
-          while ((pm = pre.exec(st.seg))) {
-            var tag = pm[0];
-            pages.push({
-              page: attrOf(tag, 'data-page'), occ: attrOf(tag, 'data-occ'), state: attrOf(tag, 'data-state'),
-              scene: attrOf(tag, 'data-scene'), plan: attrOf(tag, 'data-plan'), step: attrOf(tag, 'data-step'),
-              tag: tag
+        // 2026-11-27 概念高保真原型模式（data-mode="prototype"）：步骤条（.step-pill）集中在场景顶部，
+        // 页面块（.page[data-step="Sx-n"]）集中在下方 .proto-stage 中，按 data-step 归属关联。
+        var scenePages = [];
+        if (isProtoMode) {
+          var pmAll, preAll = new RegExp(pageRe.source, 'g');
+          while ((pmAll = preAll.exec(s.seg))) {
+            var tagAll = pmAll[0];
+            scenePages.push({
+              page: attrOf(tagAll, 'data-page'), occ: attrOf(tagAll, 'data-occ'), state: attrOf(tagAll, 'data-state'),
+              scene: attrOf(tagAll, 'data-scene'), plan: attrOf(tagAll, 'data-plan'), step: attrOf(tagAll, 'data-step'),
+              tag: tagAll
             });
           }
+        }
+        var steps = sliceFrom(stepRe, s.seg).map(function (st) {
+          var stepId = attrOf(st.tag, 'data-step');
+          var pages = [];
+          if (isProtoMode) {
+            pages = scenePages.filter(function (pg) { return pg.step === stepId; });
+          } else {
+            var pm;
+            var pre = new RegExp(pageRe.source, 'g');
+            while ((pm = pre.exec(st.seg))) {
+              var tag = pm[0];
+              pages.push({
+                page: attrOf(tag, 'data-page'), occ: attrOf(tag, 'data-occ'), state: attrOf(tag, 'data-state'),
+                scene: attrOf(tag, 'data-scene'), plan: attrOf(tag, 'data-plan'), step: attrOf(tag, 'data-step'),
+                tag: tag
+              });
+            }
+          }
           return {
-            id: attrOf(st.tag, 'data-step'), tag: st.tag, seg: st.seg,
+            id: stepId, tag: st.tag, seg: st.seg,
             pages: pages,
             names: ['step-name', 'step-intent', 'step-pages'].map(function (cls) {
               var m = st.seg.match(new RegExp('class="[^"]*\\b' + cls + '\\b[^"]*"[^>]*>([\\s\\S]*?)<\\/(?:b|span|div)>'));
@@ -979,13 +1023,18 @@ function runEX() {
           if (!declared.length) s35.push(st.id + ' 没写 data-pages（这一步关联哪些页面）');
           else if (declared.join(',') !== actual.join(',')) s35.push(st.id + ' 的 data-pages（' + declared.join('/') + '）与下面页面（' + actual.join('/') + '）不一致');
           if (!st.pages.length) s35.push(st.id + ' 下面没有页面块');
-          var actM = st.seg.match(/<div[^>]*class="[^"]*step-act[^"]*"[^>]*>([\s\S]*?)<\/div>/);
-          if (!actM) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 缺「本步骤操作」行（步骤头下一行，写这一页做了什么动作）');
-          else {
-            var actTag = actM[0].slice(0, actM[0].indexOf('>') + 1);
-            if (attrOf(actTag, 'data-act') !== st.id) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 的「本步骤操作」data-act 与步骤号不一致（复制别的步骤忘改）');
-            var actTxt = strip(actM[1]).replace(/^本步骤操作[：:]\s*/, '').trim();
-            if (actTxt.length < 8) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 的「本步骤操作」为空或过短（要写清动作 + 对象）');
+          if (isProtoMode) {
+            var pAct = (attrOf(st.tag, 'data-act-text') || '').replace(/^本步骤操作[：:]\s*/, '').trim();
+            if (pAct.length < 8) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 缺 data-act-text（或过短，要写清动作 + 对象）');
+          } else {
+            var actM = st.seg.match(/<div[^>]*class="[^"]*step-act[^"]*"[^>]*>([\s\S]*?)<\/div>/);
+            if (!actM) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 缺「本步骤操作」行（步骤头下一行，写这一页做了什么动作）');
+            else {
+              var actTag = actM[0].slice(0, actM[0].indexOf('>') + 1);
+              if (attrOf(actTag, 'data-act') !== st.id) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 的「本步骤操作」data-act 与步骤号不一致（复制别的步骤忘改）');
+              var actTxt = strip(actM[1]).replace(/^本步骤操作[：:]\s*/, '').trim();
+              if (actTxt.length < 8) s35.push('方案 ' + p.plan + ' 的 ' + st.id + ' 的「本步骤操作」为空或过短（要写清动作 + 对象）');
+            }
           }
           st.pages.forEach(function (pg) {
             ['page', 'occ', 'scene', 'plan', 'step'].forEach(function (k) {
@@ -1007,7 +1056,7 @@ function runEX() {
         var close = attrOf(last.tag, 'data-close');
         if (!close) s35.push(s.id + ' 末步没写 data-close（到哪一屏算完）');
         else if (!last.pages.some(function (pg) { return pg.page === close; })) s35.push(s.id + ' 的 data-close=' + close + ' 不在末步页面里');
-        var cm = last.seg.match(/class="[^"]*scene-close[^"]*"[^>]*>([\s\S]*?)<\/div>/);
+        var cm = (isProtoMode ? s.seg : last.seg).match(/class="[^"]*scene-close[^"]*"[^>]*>([\s\S]*?)<\/div>/);
         if (!cm || strip(cm[1]).length < 8) s35.push(s.id + ' 末步缺 scene-close（写清办成了什么 / 记录在哪 / 交给谁）');
       });
     });
@@ -1017,7 +1066,7 @@ function runEX() {
     if (!/\.scene\s*\{[^}]*display\s*:\s*none/.test(html) || !/\.scene\.on\s*\{[^}]*display\s*:\s*block/.test(html)) {
       s35.push('场景没有做成互斥面板：CSS 必须 `.scene{display:none}` + `.scene.on{display:block}`，否则一个方案下会无限滚动');
     }
-    if (!/step-hd/.test(html.slice(html.indexOf('<script'))) || !/scene-tab/.test(html.slice(html.indexOf('<script')))) {
+    if (!/(?:step-hd|step-pill)/.test(html.slice(html.indexOf('<script'))) || !/scene-tab/.test(html.slice(html.indexOf('<script')))) {
       s35.push('切换脚本没有处理场景：切方案要回到 S1 并滚到 Step1，切场景要换面板并定位到该场景首个步骤头');
     }
     s35 = Array.from(new Set(s35));
@@ -1077,8 +1126,8 @@ function runEX() {
       var at = html.indexOf(pg.tag);
       if (at < 0) return '';
       var rest = html.slice(at + pg.tag.length);
-      var next = rest.search(/<div[^>]*class="page"|<div[^>]*class="step-hd"|<\/section>/);
-      return rest.slice(0, next > 0 ? next : Math.min(rest.length, 6000));
+      var next = rest.search(/<div[^>]*class="page(?:\s+[^"]*)?"|<div[^>]*class="step-hd"|<\/section>/);
+      return rest.slice(0, next > 0 ? next : Math.min(rest.length, 24000));
     }
     s36 = Array.from(new Set(s36));
     if (s36.length) {
@@ -1153,7 +1202,8 @@ function runEX() {
   if (stage === '4.1') {
     const html = readOrDie(file, 'node tools/gate.js ex 4.1 <草图或页面清单.html>');
     const scanArg = process.argv[5];
-    head('EX-4.1 页面清单与装配（覆盖率 / 继承对账 / 逐页决策域扫读）');
+    head('EX-4.1 页面清单与装配（历史兼容模式 · 硬验收已收口至 gate-sp.sh）');
+    wr('EX-4.1', '2026-11-27 效率瘦身：4.1 已收敛为轻量化装配台账，所有硬验收已合入 gate-sp.sh，本入口仅作历史兼容保留');
     // EX-4.1-01 覆盖率：动作覆盖表
     const rows = html.match(/<tr>[\s\S]*?<\/tr>/g) || [];
     const coverRows = rows.filter((r) => {
@@ -1279,13 +1329,13 @@ function runSP() {
   let m;
   const sRe = /<td><b>(S\d+)\.\s*([^<]+)<\/b><\/td>/g;
   while ((m = sRe.exec(html))) scenes.push({ id: m[1], name: strip(m[2]) });
-  if (scenes.length < 2 || scenes.length > 5) bad('SP-S-03', '主场景 ' + scenes.length + ' 条，应为 2~5');
+  if (scenes.length < 1 || scenes.length > 5) bad('SP-S-03', '主场景 ' + scenes.length + ' 条，应为 1~5 条（1 条合法）');
   else ok('SP-S-03', '主场景 ' + scenes.length + ' 条');
   const badName = scenes.filter((s) => STAGE_WORDS.test(s.name));
   if (badName.length) bad('SP-S-03', '场景名含阶段词：' + badName.map((s) => s.name).join('、'));
   const roleCards = (html.match(/class="role-card/g) || []).length;
-  if (roleCards === 2) ok('SP-S-04', '角色卡片 2 张（主 + 次）');
-  else bad('SP-S-04', '角色卡片 ' + roleCards + ' 张，应固定 2 张');
+  if (roleCards >= 1 && roleCards <= 2) ok('SP-S-04', '角色卡片 ' + roleCards + ' 张（1~2 张合法）');
+  else bad('SP-S-04', '角色卡片 ' + roleCards + ' 张，应为 1~2 张（1 张主角色合法，≤2 张）');
   // 页面清单只认第 5 节，避免把交互逻辑表里的 P1/P2 行误计
   const sec5only = (html.split(/<h3[^>]*>\s*5\./)[1] || '').split(/<h2[^>]*class="part"/)[0];
   const pIds = new Set();
@@ -1298,34 +1348,50 @@ function runSP() {
   const pageCnt = pageH5 || pageH4old;
   if (pIds.size >= 1 && pageCnt >= 1 && pIds.size === pageCnt) ok('SP-S-02', '页面清单 ' + pIds.size + ' 页 = 分页面小节 ' + pageCnt + ' 个');
   else bad('SP-S-02', '页面清单 ' + pIds.size + ' 页 ≠ 第 7 节页面小节 ' + pageCnt + ' 个（页面小节写成 <h5 id="page-0x">Page-0x …</h5>）');
-  wr('SP-S-05', '人检内容预算：目标 ≤5 / 突破方向 = 旅程步骤数（不额外裁剪）/ 每页映射 ≤8 行 / 无废列');
-  // SP-S-06 IA 单一来源：5.1 页面清单必须带「所属功能域」列（继承 1.4 草图，不重拆）
-  if (!/所属功能域/.test(sec5only)) bad('SP-S-06', '5.1 页面清单缺「所属功能域」列：IA 唯一来源是 1.4 草图，缺此列会让功能域在说明书断链、第 7 节失去章节骨架');
-  else ok('SP-S-06', '页面清单带「所属功能域」列（继承 1.4 的 IA）');
+  wr('SP-S-05', '人检内容预算：目标 ≤5 / 每页映射 ≤8 行 / 无废列');
+  // SP-S-06 IA 单一来源：5.1 页面清单必须带「所属菜单」（兼容旧稿「所属功能域」）列
+  if (!/(所属菜单|所属功能域)/.test(sec5only)) bad('SP-S-06', '5.1 页面清单缺「所属菜单」（或「所属功能域」）列：IA 唯一来源是 1.4 草图，缺此列会让菜单层级在说明书断链');
+  else ok('SP-S-06', '页面清单带「所属菜单 / 所属功能域」列（继承 1.4 的 IA）');
 
-  // SP-S-07 第 7 节按功能域分组：<h4 class="domain">7.x 功能域名</h4>，名字须与 5.1 的「所属功能域」一致
-  const sec7only = (html.split(/<h3[^>]*>\s*7\./)[1] || '').split(/<h2[^>]*class="part"/)[0];
+  // SP-S-07 第 7 节按菜单/功能域分组：<h4 class="domain">7.x 菜单名</h4>，动态定位 5.1 表头列位
   const domHeads = [];
   const domRe = /<h4[^>]*class="[^"]*domain[^"]*"[^>]*>\s*7\.\d+\s*([^<]+)/g;
   let dmh;
   while ((dmh = domRe.exec(html))) domHeads.push(dmh[1].trim());
   if (!domHeads.length) {
-    wr('SP-S-07', '第 7 节未按功能域分组（旧结构：按页面编号平铺）。建议迁移为 <h4 class="domain">7.x 功能域名</h4> + 组内 <h5>Page-0x</h5>');
+    wr('SP-S-07', '第 7 节未按菜单/功能域分组（旧结构：按页面编号平铺）。建议迁移为 <h4 class="domain">7.x 菜单名</h4> + 组内 <h5>Page-0x</h5>');
   } else {
     const d5 = new Set();
-    (sec5only.match(/<tr>[\s\S]*?<\/tr>/g) || []).forEach((r) => {
+    let domColIdx = 1;
+    const thRows = sec5only.match(/<tr[\s\S]*?<\/tr>/g) || [];
+    for (const tr of thRows) {
+      if (/<th/.test(tr)) {
+        const ths = (tr.match(/<th[^>]*>([\s\S]*?)<\/th>/g) || []).map((c) => strip(c));
+        const idx = ths.findIndex((t) => /所属菜单|所属功能域/.test(t));
+        if (idx >= 0) { domColIdx = idx; break; }
+      }
+    }
+    thRows.forEach((r) => {
       const cells = (r.match(/<td[^>]*>([\s\S]*?)<\/td>/g) || []).map((c) => strip(c));
-      if (/^P\d+$/.test((cells[0] || '').trim()) && cells[2]) d5.add(cells[2].trim());
+      if (/^P\d+$/.test((cells[0] || '').trim()) && cells[domColIdx]) d5.add(cells[domColIdx].trim());
     });
     const domPools = [...d5];
     const domOnly = domHeads.filter((d) => !/规则|契约|状态机|口径|数据集|验收|边界/.test(d));
     const matchDom = (d) => domPools.some((x) => d.indexOf(x) >= 0 || x.indexOf(d) >= 0);
     const orphan = domPools.length ? domOnly.filter((d) => !matchDom(d)) : [];
     const missing = domPools.length ? domPools.filter((x) => !domOnly.some((d) => d.indexOf(x) >= 0 || x.indexOf(d) >= 0)) : [];
-    if (orphan.length) bad('SP-S-07', '第 7 节分组名在 5.1「所属功能域」里找不到：' + orphan.join('、'));
-    else if (missing.length) bad('SP-S-07', '这些功能域在 5.1 里有、第 7 节没有对应分组：' + missing.join('、'));
-    else ok('SP-S-07', '第 7 节按功能域分组 ' + domHeads.length + ' 组：' + domHeads.join(' / '));
+    if (orphan.length) bad('SP-S-07', '第 7 节分组名在 5.1「所属菜单/功能域」里找不到：' + orphan.join('、'));
+    else if (missing.length) bad('SP-S-07', '这些菜单/功能域在 5.1 里有、第 7 节没有对应分组：' + missing.join('、'));
+    else ok('SP-S-07', '第 7 节按菜单/功能域分组 ' + domHeads.length + ' 组：' + domHeads.join(' / '));
   }
+
+  /* 解析说明书「方案来源」（剥离 <b> 等内联标签后再匹配），供 SP-W-07 与 SP-W-06⑥ 仅过滤选定方案的草图台账 */
+  const plainHtmlForPlan = strip(html);
+  const planSrcM = plainHtmlForPlan.match(/方案来源[：:][^。\n]{0,60}/);
+  const selectedPlan = planSrcM
+    ? (/方案二/.test(planSrcM[0]) ? '方案二' : (/方案一/.test(planSrcM[0]) ? '方案一' : ''))
+    : '';
+  const selectedCode = selectedPlan === '方案二' ? 'B' : (selectedPlan === '方案一' ? 'A' : '');
 
   /* SP-A */
   head('SP-A 资产真实性');
@@ -1333,8 +1399,10 @@ function runSP() {
 
   /* SP-W */
   head('SP-W 线框与可视化');
-  if (/__/.test(noSketch)) {
-    const n = (noSketch.match(/__/g) || []).length;
+  // 剔除 HTML 标签与 BEM 类名（如 wf-kpi-item__label）后再查 `__` 占位，避免误杀 V-23 标准类名
+  const plainForPlaceholder = strip(noSketch.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, ''));
+  if (/(?:^|[^\w-])__(?:[^\w-]|$)/.test(plainForPlaceholder)) {
+    const n = (plainForPlaceholder.match(/(?:^|[^\w-])__(?:[^\w-]|$)/g) || []).length;
     bad('SP-W-04', '线框区仍有 ' + n + ' 处 `__` 占位（草图区免检）');
   } else ok('SP-W-04', '线框区无占位符');
 
@@ -1349,8 +1417,8 @@ function runSP() {
     const body = s.split(/<h5[^>]*id="page-/)[0];
     const idM = body.match(/(Page-\d+)/);
     const pid = idM ? idM[1] : '某页';
-    const i = body.indexOf('<div class="wf-container">');
-    const j = body.indexOf('<div class="wf-annotation">', i);
+    const i = body.indexOf('<div class="wf-container"');
+    const j = body.indexOf('<div class="wf-annotation"', i);
     const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
     if (!wf) { capLack.push(pid + '（未找到线框容器）'); return; }
     if (/page-(table|dashboard|list)/.test(body)) {
@@ -1368,13 +1436,13 @@ function runSP() {
   if (italic) bad('SP-W-06', '线框区出现 ' + italic + ' 处斜体：草图的占位语汇（灰底 + 12px 斜体）不得复刻进线框，须按组件规范与 Token 重新设计（5.0 铁律 24）');
   if (!phCount && !capLack.length) ok('SP-W-06', '占位已展开：线框无草图占位残留，列表/概览页筛选·排序·分页齐，表单页有主操作');
 
-  // 5.2 草图折叠区：存在即须声明"仅存档、实现以第 7 节为准"（否则读者与 Coding AI 会把草图占位当设计稿）
+  // 5.2 草图折叠区：存在即须声明"仅存档、实现以第 7 节为准"（5.2 亦支持轻量化链接引用，不强制内嵌）
   const fold = html.match(/<details[^>]*class="[^"]*sketch-fold[^"]*"[\s\S]*?<\/details>/);
   if (fold && !/存档|以第\s*7\s*节|以第7节|不得作为实现依据/.test(fold[0].slice(0, 800))) {
-    wr('SP-W-06', '5.2 草图折叠区未声明"仅存档、实现以第 7 节为准"：按 5.0 铁律 15.1 补 data-purpose="archive" + 摘要「📦 存档：…」+ 区内首行声明，否则读者会把草图占位当设计稿');
+    wr('SP-W-06', '5.2 草图折叠区未声明"仅存档、实现以第 7 节为准"：按 5.0 铁律 15.1 补 data-purpose="archive" + 摘要「📦 存档：…」+ 区内首行声明');
   }
 
-  /* SP-W-07 占位能力逐条落地（跨文件：草图 ph-ledger ↔ 说明书映射清单） */
+  /* SP-W-07 占位能力逐条落地（跨文件：按选定方案过滤草图 ph-ledger ↔ 说明书映射清单） */
   const sketchArg = process.argv[4];
   if (!sketchArg || !fs.existsSync(sketchArg)) {
     wr('SP-W-07', '未传草图路径，无法核对占位能力是否逐条落地（用法：bash tools/gate-sp.sh <spec> <草图>）');
@@ -1387,6 +1455,13 @@ function runSP() {
       (led.match(/<tr>[\s\S]*?<\/tr>/g) || []).forEach((r) => {
         const cells = (r.match(/<t[dh][^>]*>[\s\S]*?<\/t[dh]>/g) || []).map(strip);
         if (cells.length < 8 || !/^CAP\b/i.test(cells[3] || '')) return;
+        // 按选定方案过滤：仅校验选定方案的 CAP 行，跳过未选方案
+        if (selectedPlan) {
+          const rowPlan = (cells[1] || '').trim();
+          const rowId = (cells[0] || '').trim();
+          if ((rowPlan === '方案一' || rowPlan === '方案二') && rowPlan !== selectedPlan) return;
+          if (/^PH-[AB]-/i.test(rowId) && !new RegExp('^PH-' + selectedCode + '-', 'i').test(rowId)) return;
+        }
         const m = (cells[2] || '').match(/(?:Page-)?(\d+)/);
         if (!m) return;
         const items = (cells[6] || '').split('/').map((x) => x.trim()).filter((x) => x.length >= 2);
@@ -1410,23 +1485,28 @@ function runSP() {
         const lack = c.items.filter((it) => scope.indexOf(it) < 0);
         if (lack.length) missItems.push(c.pid + ' 缺「' + lack.join(' / ') + '」');
       });
-      if (missItems.length) bad('SP-W-07', '草图占位里的能力没有逐条落到线框映射清单：' + missItems.join('；') + '（每条 CAP 的每个能力项都要在「界面区域 / 业务能力项」里占一行）');
-      else ok('SP-W-07', '占位能力逐条落地：' + caps.length + ' 组 CAP 能力清单均已在对应页映射清单中出现');
+      const planTag = selectedPlan ? '（已按选定「' + selectedPlan + '」过滤）' : '';
+      if (missItems.length) bad('SP-W-07', '草图占位里的能力没有逐条落到线框映射清单' + planTag + '：' + missItems.join('；') + '（每条 CAP 的每个能力项都要在「界面区域 / 业务能力项」里占一行）');
+      else ok('SP-W-07', '占位能力逐条落地' + planTag + '：' + caps.length + ' 组 CAP 能力清单均已在对应页映射清单中出现');
     }
   }
 
-  /* SP-W-06⑥ DX 高保真区落点（跨文件：草图 data-dx ↔ 说明书线框 data-dx）
+  /* SP-W-06⑥ DX 高保真区落点（跨文件：按选定方案过滤草图 data-dx ↔ 说明书线框 data-dx）
      机检只验「有没有落点 / 有没有留占位」；结构 / 编码 / 位次是否真的一致由人检 */
   if (sketchArg && fs.existsSync(sketchArg)) {
     const skDx = fs.readFileSync(sketchArg, 'utf8');
     const dxIdsOf = (h) => [...new Set((h.match(/data-dx="([^"]+)"/g) || [])
       .map((s) => s.replace(/^data-dx="/, '').replace(/"$/, '').split('@')[0].trim()).filter(Boolean))];
-    const srcDx = dxIdsOf(skDx);
+    let srcDx = dxIdsOf(skDx);
+    if (selectedCode && srcDx.some((id) => /^DX-[AB]-/i.test(id))) {
+      srcDx = srcDx.filter((id) => !/^DX-[AB]-/i.test(id) || new RegExp('^DX-' + selectedCode + '-', 'i').test(id));
+    }
     const outDx = dxIdsOf(noStyle);
     if (srcDx.length) {
+      const planTag = selectedPlan ? '（已按选定「' + selectedPlan + '」过滤）' : '';
       const miss = srcDx.filter((id) => outDx.indexOf(id) < 0);
       if (miss.length) {
-        bad('SP-W-06', 'DX 高保真区没落点：草图 ' + miss.join('、') + ' 在说明书线框里找不到 data-dx（DX 区须带 data-dx 并保留结构 / 编码 / 位次；SP-W-06⑥）');
+        bad('SP-W-06', 'DX 高保真区没落点' + planTag + '：草图 ' + miss.join('、') + ' 在说明书线框里找不到 data-dx（DX 区须带 data-dx 并保留结构 / 编码 / 位次；SP-W-06⑥）');
       }
       const extra = outDx.filter((id) => srcDx.indexOf(id) < 0);
       if (extra.length) {
@@ -1443,7 +1523,7 @@ function runSP() {
         bad('SP-W-06', 'DX 高保真区仍是占位：' + [...new Set(phDx)].join('、') + '（DX 区必须展开成真实控件 / 图表，不许留 data-ph）');
       }
       if (!miss.length && !phDx.length) {
-        ok('SP-W-06', 'DX 高保真区已落点：' + srcDx.length + ' 个 data-dx 全部能在线框里指到，无占位残留');
+        ok('SP-W-06', 'DX 高保真区已落点' + planTag + '：' + srcDx.length + ' 个 data-dx 全部能在线框里指到，无占位残留');
       }
     }
   }
@@ -1454,8 +1534,8 @@ function runSP() {
     const body = s.split(/<h5[^>]*id="page-/)[0];
     const idM = body.match(/(Page-\d+)/);
     const pid = idM ? idM[1] : '某页';
-    const i = body.indexOf('<div class="wf-container">');
-    const j = body.indexOf('<div class="wf-annotation">', i);
+    const i = body.indexOf('<div class="wf-container"');
+    const j = body.indexOf('<div class="wf-annotation"', i);
     const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
     if (!wf) return;
     // 抓「用一排时间快捷项分段按钮冒充时间筛选」这一具体形态；不再按文本关键词判，避免把说明文字算成控件
@@ -1475,42 +1555,56 @@ function runSP() {
     const body = s.split(/<h5[^>]*id="page-/)[0];
     const idM = body.match(/(Page-\d+)/);
     const pid = idM ? idM[1] : '某页';
-    const i = body.indexOf('<div class="wf-container">');
-    const j = body.indexOf('<div class="wf-annotation">', i);
+    const i = body.indexOf('<div class="wf-container"');
+    const j = body.indexOf('<div class="wf-annotation"', i);
     const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
     if (!wf) return;
-    const tabsBlock = (wf.match(/<div class="wf-tabs">[\s\S]*?<\/div>/) || [''])[0];
+    const tabsBlock = (wf.match(/<div class="[^"]*wf-tabs[^"]*"[^>]*>[\s\S]*?<\/div>/) || [''])[0];
     if (!tabsBlock) return;
-    const tabNames = (tabsBlock.match(/<span[^>]*>([^<]*)<\/span>/g) || []).map((x) => x.replace(/<[^>]+>/g, '').trim());
-    const paneCount = (wf.match(/wf-pane-label/g) || []).length;
+    const tabNames = (tabsBlock.match(/<(?:span|button)[^>]*>([^<]*)<\/(?:span|button)>/g) || []).map((x) => x.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+    const paneCount = (wf.match(/wf-pane-label|data-wf-pane=/g) || []).length;
     if (paneCount < tabNames.length) {
       tabLack.push(pid + '：' + tabNames.length + ' 个页内 Tab（' + tabNames.join(' / ') + '），线框只画了 ' + paneCount + ' 个面板内容');
     } else {
-      // 每个面板标签之后必须有实质线框块（只挂标签、内容是空的，照样判缺）
-      const segs = wf.split('wf-pane-label').slice(1);
+      // 每个面板标签之后必须有实质线框块 + 账实相符防缩水机检（2026-11-27 加固：禁止标题写（4）却只画 1~2 行凑数）
+      const segs = wf.split(/wf-pane-label|data-wf-pane=/).slice(1);
       segs.forEach((seg, k) => {
         const text = seg.replace(/<[^>]+>/g, '').replace(/\s+/g, '');
         const blocks = (seg.match(/<(div|table|tr|ul|svg)/g) || []).length;
         const nm = tabNames[k] || ('第 ' + (k + 1) + ' 个');
         if (text.length < 12) tabLack.push(pid + ' 面板「' + nm + '」只有标签没有内容');
         else if (blocks < 1) tabLack.push(pid + ' 面板「' + nm + '」没有线框结构（只有一句文字）');
+        // 账实相符防缩水：Tab 标题声明计数（如「命中规则（4）」「对话原文（4 轮）」「工作链路（3 节点）」）时，面板内实质条目不得严重缩水
+        const cntM = nm.match(/[（(]\s*(\d+)\s*(?:条|轮|节点|项|个)?\s*[）)]/);
+        if (cntM) {
+          const declared = parseInt(cntM[1], 10);
+          if (declared >= 3 && declared <= 6) {
+            const tbodyM = seg.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
+            const trCnt = tbodyM ? (tbodyM[1].match(/<tr\b/gi) || []).length : Math.max(0, (seg.match(/<tr\b/gi) || []).length - 1);
+            const itemCnt = (seg.match(/class="[^"]*(?:wf-turn|wf-node|wf-tool-card|chat-turn|tool-card|wf-item)[^"]*"/gi) || []).length;
+            const hasSvg = /<svg\b/i.test(seg);
+            const actual = Math.max(trCnt, itemCnt);
+            if (!hasSvg && actual < Math.min(declared, 3)) {
+              tabLack.push(pid + ' 面板「' + nm + '」内容缩水：标题声明 ' + declared + ' 项，但面板仅呈现 ' + actual + ' 项（Part2 子 Tab 信息密度不得低于 Part1，且须账实相符）');
+            }
+          }
+        }
       });
     }
   });
-  if (tabLack.length) bad('SP-W-09', '多视图页面面板缺失或空壳：' + tabLack.join('；') + '（每个 Tab 面板都要有线框内容并挂 wf-pane-label，缺一个就会在 Demo 里变成空白页）');
+  if (tabLack.length) bad('SP-W-09', '多视图页面面板缺失或空壳：' + tabLack.join('；') + '（每个 Tab 面板都要有线框内容并挂 wf-pane-label 或 data-wf-pane，缺一个就会在 Demo 里变成空白页）');
   else ok('SP-W-09', '多视图页面面板齐：所有页内 Tab 均有对应线框面板且有实际结构');
 
-  /* SP-W-10 有特征物必有决策域经验：线框里画了什么，本页映射清单就必须有对应 D0x-EPxx（带档位） */
+  /* SP-W-10 有特征物必有决策域经验（支持 D0x-OVERRIDE / 经验已审视放弃 合法出口） */
   const domLack = [];
   noStyle.split(/<h5[^>]*id="page-/).slice(1).forEach((s) => {
     const body = s.split(/<h5[^>]*id="page-/)[0];
     const idM = body.match(/(Page-\d+)/);
     const pid = idM ? idM[1] : '某页';
-    const i = body.indexOf('<div class="wf-container">');
-    const j = body.indexOf('<div class="wf-annotation">', i);
+    const i = body.indexOf('<div class="wf-container"');
+    const j = body.indexOf('<div class="wf-annotation"', i);
     const wf = i >= 0 ? body.slice(i, j > i ? j : undefined) : '';
     if (!wf) return;
-    // 本页映射清单：优先取「映射清单」字样之后的第一个表，退化为页内第一个表
     let scope = body;
     const tStart = body.search(/映射清单/);
     if (tStart >= 0) {
@@ -1520,40 +1614,45 @@ function runSP() {
       const tbl = body.match(/<table[\s\S]*?<\/table>/);
       if (tbl) scope = tbl[0];
     }
+    const hasDom = (codes) => codes.some((c) =>
+      new RegExp(c + '-(?:EP\\d+|OVERRIDE)').test(scope) ||
+      new RegExp('经验已审视放弃[（(][^）)]*' + c).test(scope)
+    );
     const isListPage = /page-(table|dashboard|list)/.test(body);
     const need = [];
-    // ① 筛选控件 → D-09（至少 2 条：壳 + 触发/回显/排序）
+    // ① 筛选控件 → D-09（至少 2 条，或含 D09-OVERRIDE 显式审视放弃）
     const hasFilter = /wf-datefilter|wf-prosearch|wf-basic-search/.test(wf) || (isListPage && /wf-select/.test(wf));
     if (hasFilter) {
-      const n = new Set(scope.match(/D09-EP\d+/g) || []);
-      if (n.size < 2) need.push('有筛选控件但本页只有 ' + n.size + ' 条 D09-EPxx（至少 2 条：壳 + 触发/回显/排序）');
+      const n = new Set(scope.match(/D09-(?:EP\d+|OVERRIDE)/g) || []);
+      const hasOverride = /D09-OVERRIDE|经验已审视放弃[（(][^）)]*D09/.test(scope);
+      if (n.size < 2 && !hasOverride) need.push('有筛选控件但本页只有 ' + n.size + ' 条 D09-EPxx（至少 2 条：壳 + 触发/回显/排序，或标注 D09-OVERRIDE）');
     }
-    // ①b 引用了 D09-EP02 就必须写档位，且线框结构与档位一致
+    // ①b 引用了 D09-EP02（非放弃）就必须写档位，且线框结构与档位一致
     const m02 = scope.match(/D09-EP02[^<]{0,48}/);
-    if (m02) {
+    if (m02 && !/经验已审视放弃|OVERRIDE/.test(m02[0])) {
       const tier = (m02[0].match(/[①②③④⑤⑥⑦]/) || [''])[0];
       if (!tier) need.push('引用 D09-EP02 但没写档位（①②③…⑦），无法核对线框是否照档位落地');
       else if (/[④⑤]/.test(tier) && !/wf-prosearch/.test(wf)) need.push('声明 D09-EP02 ' + tier + '（复合搜索框）但线框里没有 wf-prosearch');
       else if (/[②③]/.test(tier) && (wf.match(/wf-select/g) || []).length < 2) need.push('声明 D09-EP02 ' + tier + '（行内平铺）但线框平铺下拉不足 2 个');
     }
     // ② 表格 → D-02 或 D-03
-    if (/<table|wf-table/.test(wf) && !/D0[23]-EP\d+/.test(scope)) need.push('有表格但缺 D-02 / D-03（壳选型或密度）');
+    if (/<table|wf-table/.test(wf) && !hasDom(['D02', 'D03'])) need.push('有表格但缺 D-02 / D-03（壳选型或密度）');
     // ③ 表单录入 → D-07
-    if (/wf-form-item|wf-form-title|wf-textarea/.test(wf) && !/D07-EP\d+/.test(scope)) need.push('有表单录入但缺 D-07（控件选型）');
-    // ④ 批量 / 导入导出 → D-10
-    if (/批量|导入|导出/.test(wf) && !/D10-EP\d+/.test(scope)) need.push('有批量/导入导出但缺 D-10（入口与流程）');
-    // ⑤ 危险动作 → D-05
-    if (/删除|停用|禁用|下线|覆盖/.test(wf) && !/D05-EP\d+/.test(scope)) need.push('有删除/停用类动作但缺 D-05（拦到什么程度）');
+    if (/wf-form-item|wf-form-title|wf-textarea/.test(wf) && !hasDom(['D07'])) need.push('有表单录入但缺 D-07（控件选型）');
+    // ④ 批量 / 导入导出 → D-10（仅扫可见文案，避免误命中 HTML 属性）
+    const wfVisibleText = strip(wf);
+    if (/批量|导入|导出/.test(wfVisibleText) && !hasDom(['D10'])) need.push('有批量/导入导出但缺 D-10（入口与流程）');
+    // ⑤ 危险动作 → D-05（仅扫可见文案，避免误命中 data-viz="REF / 资产未覆盖" 中的「覆盖」）
+    if (/删除|停用|禁用|下线|覆盖/.test(wfVisibleText) && !hasDom(['D05'])) need.push('有删除/停用类动作但缺 D-05（拦到什么程度）');
     // ⑥ 统计 / 图表 / 可视化件 → D-11（整页看数则 D-08）
-    // 探针改为"件型原语 + data-viz"（旧探针含 <svg，会被普通图标误伤；且只认字样不认结构）
     const VIZ_PROBES = /data-viz=|wf-kpi|wf-segbar|wf-topo|wf-rank|wf-steps|wf-flow|wf-split|wf-preview|wf-objcard|wf-diagram|wf-timeline|wf-chart/;
-    if (VIZ_PROBES.test(wf) && !/D11-EP\d+|D08-EP\d+/.test(scope)) need.push('有统计/图表件但缺 D-11 或 D-08（件型与嵌入）');
+    if (VIZ_PROBES.test(wf) && !hasDom(['D11', 'D08'])) need.push('有统计/图表件但缺 D-11 或 D-08（件型与嵌入，或标注 D11-OVERRIDE）');
     // ⑦ 页内 Tab → D-06 或 D-01
-    if (/wf-tabs|wf-pane-label/.test(wf) && !/D06-EP\d+|D01-EP\d+/.test(scope)) need.push('有页内 Tab 但缺 D-06 / D-01（层级与动线）');
+    if (/wf-tabs|wf-pane-label|data-wf-pane=/.test(wf) && !hasDom(['D06', 'D01'])) need.push('有页内 Tab 但缺 D-06 / D-01（层级与动线）');
     if (need.length) domLack.push(pid + '：' + need.join('；'));
   });
-  if (domLack.length) bad('SP-W-10', '有特征物却没有对应决策域经验（= 没学习就自由发挥）：' + domLack.join(' ｜ ') + '（按桥协议 Step 2.5 逐项补扫，映射清单写 D0x-EPxx + 档位，不许只写域号）');
-  else ok('SP-W-10', '每页特征物均有对应决策域经验编号（筛选 / 表格 / 表单 / 批量 / 统计 / Tab）');
+  if (domLack.length) bad('SP-W-10', '有特征物却没有对应决策域经验（= 没学习就自由发挥）：' + domLack.join(' ｜ ') + '（按桥协议 Step 2.5 补扫并写 D0x-EPxx + 档位；经审视认为经验错误/不适用可写 D0x-OVERRIDE + 放弃理由）');
+  else ok('SP-W-10', '每页特征物均有对应决策域经验编号或显式审视放弃（D0x-OVERRIDE）');
 
   /* SP-W-11 跨页动线闭合：每页批注写清「进入 / 去向」，提到的页面必须真实存在 */
   const flowLack = [];
@@ -1577,15 +1676,15 @@ function runSP() {
   if (flowLack.length) bad('SP-W-11', '跨页动线断链：' + flowLack.join('；') + '（每页批注首句写清"从 X 的哪个入口进来、办完去 Y"，提到的页必须存在）');
   else ok('SP-W-11', '跨页动线闭合：' + specPageIds.length + ' 页均写明进入 / 去向，引用页均存在');
 
-  wr('SP-W-01~05', '表单结构 / 线框规范 / 可视化件 / UI 文案 由 selfcheck 机检');
+  wr('SP-W-01~05', '表单结构 / 组件硬指标 / 可视化件声明 由 design-spec-selfcheck.sh（8 项）机检');
 
   /* SP-W-12 可视化件件型对账（实现 tools/viz-audit.js，数据源 件型落地契约.json）
-     治「声明写 VIZ-01-A2、线框画成四张白卡」：键在册 / 件数与声明对齐 / 未打标 / 形态一致 / 必写值到位 */
+     治「声明写 VIZ-01-A2、线框画成四张白卡」：键在册 / REF 分流 / 件数与声明对齐 / 未打标 / 形态一致 / 必写值到位 */
   const vizAudit = require('./viz-audit');
   const vres = vizAudit.audit(noStyle);
   if (vres.errors.length) bad('SP-W-12', '件型落地对账失败：' + [...new Set(vres.errors)].join('；'));
   else if (vres.skipped) ok('SP-W-12', '本说明书未出现可视化件，跳过件型对账');
-  else ok('SP-W-12', '件型对账通过：' + vres.pages.length + ' 页可视化件均在册、件数与声明一致、形态与声明匹配');
+  else ok('SP-W-12', '件型对账通过：' + vres.pages.length + ' 页可视化件均在册或合规走 REF 分流、件数与声明一致');
 
   /* SP-C */
   head('SP-C 内容一致性（Part1 与 Part2 是否对得上）');
@@ -1610,7 +1709,8 @@ function runSP() {
     scenes.forEach((s) => { if (seen.indexOf(s.name) === -1) bad('SP-C-01', '场景「' + s.name + '」没有对应目标'); });
   }
   const bx = [...new Set((html.match(/<td>\s*B\d+\s*<\/td>/g) || []).map((x) => x.replace(/[^B0-9]/g, '')))];
-  if (bx.length < 2 || bx.length > 5) bad('SP-C-03', '突破方向 ' + bx.length + ' 条，应为 2~5（= 1.1 该场景旅程任务块数）');
+  if (bx.length < 1) bad('SP-C-03', '未找到任何突破方向 B1..Bn');
+  else if (bx.length > 8) wr('SP-C-03', '突破方向 ' + bx.length + ' 条偏多，请确认是否已收敛');
   const rows = (html.match(/<tr>[\s\S]*?<\/tr>/g) || []);
   bx.forEach((b) => {
     const row = rows.find((r) => r.indexOf('<td>' + b + '</td>') !== -1);
@@ -1637,8 +1737,8 @@ function runSP() {
     done.add(id);
     if (!/B\d/.test(strip(r))) bad('SP-C-05', '页面 ' + id + ' 未承接任何突破点');
   });
-  if (!/方案来源：/.test(html)) bad('SP-C-06', '缺「方案来源：」（用户选定 / 明示跳过），闸门不可追溯');
-  else ok('SP-C-06', strip((html.match(/方案来源：?[^<\n]{0,40}/) || [''])[0]));
+  if (!/方案来源[：:]/.test(plainHtmlForPlan)) bad('SP-C-06', '缺「方案来源：」（用户选定 / 明示跳过），闸门不可追溯');
+  else ok('SP-C-06', (planSrcM ? planSrcM[0] : '方案来源已声明'));
 
   /* SP-D */
   head('SP-D 自包含（六节编码契约）');

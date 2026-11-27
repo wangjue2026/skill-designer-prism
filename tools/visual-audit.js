@@ -55,14 +55,21 @@ const SPACING_PROPS = ['padding', 'padding-top', 'padding-right', 'padding-botto
   'gap', 'row-gap', 'column-gap'];
 const SPACING_WHITE = /(^|[\s,>+~])(th|td|\.tag|\.btn|\.icon)(?![-\w])/;
 
-const SIZE_TOKENS = [12, 14, 16, 20, 24, 30, 36, 48, 56, 64];  // design-typography §2.3
-const WEIGHTS = [400, 600];                                     // §2.2（禁 500 / 700）
+const SIZE_TOKENS = [12, 14, 16, 20, 24, 30, 36, 48, 56, 64];  // design-typography §2.3 & tokens-cheatsheet
+const WEIGHTS = [400, 500, 600, 700];                           // 对齐 tokens-cheatsheet（Regular 400 / Medium 500 / Semibold 600 / Bold 700）
 
-const RADIUS_OK = [0, 2];                                       // atomic-spacing §3.1
-const SHADOW_TOKENS = {                                         // design-color §1.6（s2 已裁决）
+const RADIUS_OK = [0, 2, 4, 6, 8];                              // 对齐 tokens-cheatsheet（控件 2 / 卡片 4·6 / 浮层 8）
+const SHADOW_TOKENS = {                                         // 对齐 design-color §1.6 + tokens-cheatsheet + visual-styles
   s1: '0 1px 4px rgba(31,35,43,.16)',
   s2: '0 2px 8px rgba(31,35,43,.14)',
   s3: '0 4px 16px rgba(31,35,43,.12)',
+  cs1: '0 1px 3px 0 rgba(15,23,42,0.08), 0 1px 2px 0 rgba(15,23,42,0.04)',
+  cs2: '0 4px 16px 0 rgba(30,35,43,0.12)',
+  cs3: '0 12px 32px 0 rgba(15,23,42,0.18)',
+  doc: '0 1px 3px rgba(15,23,42,0.04)',
+  glow: '0 4px 20px rgba(117,157,218,.15)',
+  drawer: '-4px 0 16px rgba(15,23,42,0.12)',
+  modal: '0 4px 16px rgba(15,23,42,0.14)',
 };
 const AVATAR_WHITE = /(avatar|\.icon|\.logo|\.dot)/i;
 
@@ -81,9 +88,9 @@ const MUST_IDS = ['V-04', 'V-05', 'V-06', 'V-07', 'V-09', 'V-10', 'V-14', 'V-23'
 // --only=V-xx 可单点复现；恢复时把 id 从这里删掉即可。
 const PAUSED_IDS = ['V-26', 'V-27'];
 
-// §1.2 语义色映射表（12 token）+ 品牌蓝三态
-const SEM = ['#cf171d', '#82010e', '#1c6eff', '#12a679', '#6f7785', '#fdaa1d',
-  '#fa721b', '#0ba7b5', '#e8f4ff', '#4fa1ff', '#1458cc', '#ffffff',
+// §1.2 语义色映射表 + tokens-cheatsheet 语义色 + comp-alert 告警色 + 品牌蓝三态
+const SEM = ['#cf171d', '#82010e', '#d9363e', '#1c6eff', '#12a679', '#52c41a', '#6f7785', '#fdaa1d',
+  '#fa721b', '#fa8c16', '#a35f40', '#0ba7b5', '#0ea5e9', '#e8f4ff', '#4fa1ff', '#1458cc', '#ffffff',
   // d30 文字色（标签三元组用）与正文/表头文字
   '#015945', '#872600', '#00258c', '#454c59', '#5e6573', '#2f3540'];
 const REDS = ['#cf171d', '#82010e', '#f52727', '#ff5752'];
@@ -741,7 +748,7 @@ function checkV10(rules, ctx) {
     wOff.forEach((o) => { byW[o.n] = (byW[o.n] || 0) + 1; });
     out.push({
       id: 'V-10', ok: false,
-      msg: `字重 ${Object.keys(byW).join('/')} 出现（只许 400 / 600，共 ${wOff.length} 处，如 ${wOff.slice(0, 3).map((o) => o.sel).join(' / ')}）`,
+      msg: `字重 ${Object.keys(byW).join('/')} 出现（只许 400 / 500 / 600 / 700，共 ${wOff.length} 处，如 ${wOff.slice(0, 3).map((o) => o.sel).join(' / ')}）`,
     });
   }
   // 档数 ≤5 两段同判：这是层级问题，与"字号具体取几"无关
@@ -810,13 +817,41 @@ function checkV12(root) {
   return out.length ? out : [{ id: 'V-12', ok: true, msg: '数值列右对齐 + tabular-nums' }];
 }
 
+function inHighFiZone(el) {
+  let cur = el;
+  while (cur && cur.tag !== '#root') {
+    if (cur.tag === 'svg') return true;
+    if (cur.attrs && (cur.attrs['data-dx'] !== undefined || cur.attrs['data-hero'] !== undefined)) return true;
+    if (cur.cls && (cur.cls.indexOf('dx') >= 0 || cur.cls.indexOf('viz') >= 0 || cur.cls.indexOf('hero') >= 0)) return true;
+    cur = cur.parent;
+  }
+  return false;
+}
+
+function inRefVizGraphic(el) {
+  let inRef = false;
+  let isGraphic = (el.tag === 'svg' || el.tag === 'pre' || el.tag === 'code' || (el.attrs && el.attrs['data-viz-ref-graphic'] !== undefined));
+  let cur = el;
+  while (cur && cur.tag !== '#root') {
+    if (cur.tag === 'svg' || cur.tag === 'pre') isGraphic = true;
+    if (cur.attrs && /^REF\b/i.test(cur.attrs['data-viz'] || '')) inRef = true;
+    cur = cur.parent;
+  }
+  return inRef && isGraphic;
+}
+
 function checkV14(root, rules, ctx) {
+  const profile = (ctx && ctx.profile) || 'wireframe';
+  const isProto = profile === 'sketch' || profile === 'prototype';
   const out = [];
   const bad = {};        // hex|prop -> 处数
   let colored = 0;   // 只作"有没有彩色声明"的存在性判断；彩色块个数不判（2026-11-26 用户裁定取消）
+  let exempted = 0;
   walk(root, (el) => {
     if (el.tag === '#root') return;
     const cs = styleOf(el);
+    // Part1 概念原型高保真区，或 Part2 规范外可视化（data-viz="REF"）内部图形/代码块：按保骨微调协议放宽色板白名单
+    const exemptColor = (isProto && inHighFiZone(el)) || inRefVizGraphic(el);
     ['background-color', 'background', 'color', 'border-color'].forEach((p) => {
       const raw = cs[p];
       if (!raw) return;
@@ -829,6 +864,7 @@ function checkV14(root, rules, ctx) {
           const { s, l } = hsl(rgb);
           const d = (Math.max(rgb[0], rgb[1], rgb[2]) - Math.min(rgb[0], rgb[1], rgb[2])) / 255;
           if (s < 0.18 || d <= 0.047 || l > 0.80) return;
+          if (exemptColor) { exempted++; colored++; return; }
           const h = hex(rgb);
           if (SEM.indexOf(h) < 0) { const k = h + '|' + p + '(渐变)'; bad[k] = (bad[k] || 0) + 1; }
         });
@@ -841,6 +877,7 @@ function checkV14(root, rules, ctx) {
       if (s < 0.18 || d <= 0.047) return;            // 冷调灰（#D3D7DE 这类）不判
       if (l > 0.80) return;                          // 浅底 / 描边色不判
       colored++;
+      if (exemptColor) { exempted++; return; }
       const h = hex(rgb);
       if (SEM.indexOf(h) < 0 && REDS.concat(['#1c6eff']).indexOf(h) < 0) {
         const k = h + '|' + p;
@@ -866,7 +903,7 @@ function checkV14(root, rules, ctx) {
   if (!colored) {
     return [{ id: 'V-14', ok: true, warn: true, msg: '未发现彩色声明（全灰阶），语义色映射未判定' }];
   }
-  return [{ id: 'V-14', ok: true, msg: `语义色全部在映射表内（彩色声明 ${colored} 处）` }];
+  return [{ id: 'V-14', ok: true, msg: `语义色合规（彩色声明 ${colored} 处${exempted ? `，含 Part1 高保真可视化区放宽 ${exempted} 处` : ''}）` }];
 }
 
 function checkV15(root) {
@@ -965,11 +1002,11 @@ function checkV19(rules) {
   const tokenSet = new Set(Object.values(SHADOW_TOKENS).map(canonShadow));
   rules.forEach((r) => {
     const rad = r.decls['border-radius'];
-    if (rad) {
+    if (rad && !/data-viz|ref-viz/i.test(r.selector)) {
       rad.trim().split(/\s+/).forEach((tok) => {
         if (tok === '0' || tok === '0px') return;
         const n = pxNum(tok);
-        if (n !== null) { if (RADIUS_OK.indexOf(n) < 0) out.push({ id: 'V-19', ok: false, msg: `${r.selector}  border-radius:${rad}（合法只有 0 / 2）` }); return; }
+        if (n !== null) { if (RADIUS_OK.indexOf(n) < 0) out.push({ id: 'V-19', ok: false, msg: `${r.selector}  border-radius:${rad}（合法只有 0 / 2 / 4 / 6 / 8）` }); return; }
         if (/^50%$/.test(tok)) { if (!AVATAR_WHITE.test(r.selector)) out.push({ id: 'V-19', ok: false, msg: `${r.selector}  border-radius:50%（只许头像 / 圆形图标）` }); return; }
         out.push({ id: 'V-19', ok: false, msg: `${r.selector}  border-radius:${rad}（非 px / 非 50%）` });
       });
@@ -981,11 +1018,11 @@ function checkV19(rules) {
         const isFocus = /:focus/.test(r.selector);
         const blueGlow = /rgba\((?:28,110,255|24,144,255)/i.test(c) || /var\(--color-blue/.test(c);
         if (isFocus && blueGlow) out.push({ id: 'V-19', ok: false, msg: `${r.selector}  box-shadow:${sh}（禁止 Focus 蓝色外发光）` });
-        else if (!tokenSet.has(c)) out.push({ id: 'V-19', ok: false, msg: `${r.selector}  box-shadow:${sh}（非 s1 / s2 / s3）` });
+        else if (!tokenSet.has(c)) out.push({ id: 'V-19', ok: false, msg: `${r.selector}  box-shadow:${sh}（非资产阴影 token）` });
       }
     }
   });
-  return out.length ? out : [{ id: 'V-19', ok: true, msg: '圆角 ∈ {0,2} / 阴影 ∈ {none,s1,s2,s3}' }];
+  return out.length ? out : [{ id: 'V-19', ok: true, msg: '圆角 ∈ {0,2,4,6,8} / 阴影命中资产 token' }];
 }
 
 function checkV20(root) {
@@ -1661,8 +1698,8 @@ function runChecks(html, only, profile, ctx) {
       });
       return;
     }
-    if (profile === 'sketch' && SKETCH_SKIP.indexOf(id) >= 0) {
-      res.push({ id, ok: true, warn: true, msg: '草图阶段不判（成品精度项；九条必检项不在此列）' });
+    if ((profile === 'sketch' || profile === 'prototype') && SKETCH_SKIP.indexOf(id) >= 0) {
+      res.push({ id, ok: true, warn: true, msg: 'Part1 概念原型阶段不判（成品精度项，留 Part2 线框收敛；7 条人工实证底线红线不在此列）' });
       return;
     }
     res.push.apply(res, CHECKS[id](root, RULES, ctx));

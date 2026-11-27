@@ -44,20 +44,20 @@
 
 #### 🛠️ 一、 容器网格与布局
 - 外层容器使用 `grid grid-cols-4 gap-4 mb-6`；
-- 每个卡片采用 `bg-white border border-[#E2E8F0] rounded-lg p-4.5 shadow-xs hover:shadow-sm transition-all`。
+- 每个卡片采用 `bg-white border border-[#E1E5EB] rounded-[4px] p-4 shadow-sm transition-all`。
 
 ---
 
 #### 🛠️ 二、 卡片内部结构与字阶（自上而下 3 层）
-1. **顶部行 (Header)**：`flex items-center justify-between text-xs text-[#64748B]`
+1. **顶部行 (Header)**：`flex items-center justify-between text-xs text-[#6F7785]`
    - 左侧：指标标题（如“全网平均 TTFB 耗时”）+ 问号说明微图标（带 Tooltip 解释浮层）；
    - 右侧：状态指示徽标（正常时 `w-2 h-2 rounded-full bg-[#12A679]`，异常时 `bg-[#D9363E] animate-pulse`）。
 2. **中间行 (Main Value)**：`mt-2 flex items-baseline gap-1.5`
-   - 主数值：`text-3xl font-bold font-outfit text-[#1E293B] tracking-tight`（如 `68`）；
-   - 物理单位：`text-xs font-medium text-[#64748B]`（如 `ms`，注意数字与单位间留单个半角空格）。
-3. **底部行 (Trend & Comparison)**：`mt-3 pt-3 border-t border-[#F1F5F9] flex items-center justify-between text-[11px]`
-   - 左侧趋势胶囊：上升用 `inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#FEF2F2] text-[#D9363E] font-medium`，文案 `↑ 14.2% 较昨日`；
-   - 右侧辅助基线：`text-[#94A3B8]`（如 `基线: 100ms`）。
+   - 主数值：`text-3xl font-bold font-outfit text-[#2F3540] tabular-nums tracking-tight`（如 `68`）；
+   - 物理单位：`text-xs font-medium text-[#6F7785]`（如 `ms`，注意数字与单位间留单个半角空格）。
+3. **底部行 (Trend & Comparison)**：`mt-3 pt-3 border-t border-[#EDF1F7] flex items-center justify-between text-xs`
+   - 左侧趋势胶囊：上升用 `inline-flex items-center gap-0.5 px-2 py-0.5 rounded-[2px] bg-[#FFF1F0] text-[#D9363E] border border-[#FFA39E] font-medium`，文案 `↑ 14.2% 较昨日`；
+   - 右侧辅助基线：`text-[#A1A7B3]`（如 `基线: 100ms`）。
 
 ---
 
@@ -111,7 +111,7 @@
   - 提取选中的维度（如 `POP=深圳POP` 或 `地域=中国.上海`）；
   - 自动同步至下方分支/用户表格的筛选模型：`branchFilterPop = '深圳POP'`，重置分页 `branchPage = 1`；
 - 表格上方新增 **联动查询生效提示条**：
-  - 样式：`bg-[#EFF6FF] border border-[#BFDBFE] text-xs text-[#1E40AF] px-3 py-1.5 rounded flex items-center justify-between`；
+  - 样式：`bg-[#E8F4FF] border border-[#BAE6FD] text-xs text-[#1C6EFF] px-3 py-1.5 rounded-[2px] flex items-center justify-between`；
   - 文案：`当前已联动过滤：深圳POP 关联线路 · 共筛选出 3 个异常分支`；
   - 右侧提供清晰的 `清除联动 (×)` 按钮。
 ```
