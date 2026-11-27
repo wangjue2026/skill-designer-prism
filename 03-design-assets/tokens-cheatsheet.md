@@ -5,7 +5,7 @@
 > 所有颜色、字号、间距、圆角与投影必须使用本规范中定义的标准值，禁止 AI 随意生成未经定义的随机色值与尺寸。
 >
 > 📚 **深入全量规范查阅**：
-> - 完整全局原子规范库：[`global-styles/`](global-styles/)（包含 [色彩全量矩阵](global-styles/design-color.md)、[原子间距与网格](global-styles/design-atomic-spacing.md)、[排版字阶](global-styles/design-typography.md)、[24栅格布局](global-styles/layout-grid.md)）
+> - 完整全局原子规范库：[`global-styles/`](global-styles/)（包含 [色彩全量矩阵](global-styles/design-color.md)、[原子间距与网格](global-styles/design-atomic-spacing.md)、[排版字阶](global-styles/design-typography.md)、[24栅格布局](global-styles/layout-grid.md)、[交互动效规范](global-styles/design-motion.md)）
 > - 完整基础组件规范库：[`components/`](components/)（包含 20 个基础组件的像素级尺寸、交互态与验收标准）
 
 ---
@@ -106,3 +106,16 @@
 /* 深度浮层投影 (S3) - 全局弹窗 Modal、右侧滑动抽屉 Drawer */
 --seer-dropshadow-s3: 0 12px 32px 0 rgba(15, 23, 42, 0.18);
 ```
+
+---
+
+## 五、 交互动效规范速查 (Motion Tokens · 详见 [`global-styles/design-motion.md`](global-styles/design-motion.md))
+
+| Token 变量名 | 标准值 | 适用场景 |
+| :--- | :--- | :--- |
+| `--motion-dur-fast` | `150ms` | 按钮/行 Hover、Tag 增删、Tooltip、箭头旋转、节点高亮 |
+| `--motion-dur-base` | `220ms` | Tab 切换、下拉面板、弹窗缩放淡入、Toast 提示、联动高亮 |
+| `--motion-dur-slow` | `280ms` | 右侧抽屉滑入/滑出、侧边栏折叠、大面板展开 |
+| `--motion-ease-out` | `cubic-bezier(0.22, 1, 0.36, 1)` | 入场/展开（快启缓停，禁弹性过冲） |
+| `--motion-ease-in` | `cubic-bezier(0.4, 0, 1, 1)` | 退场/收起（加速离场） |
+| `--motion-ease-std` | `cubic-bezier(0.4, 0, 0.2, 1)` | 滑块位移、侧栏宽度、颜色与边框过渡 |

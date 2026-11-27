@@ -131,7 +131,7 @@ bash tools/gate-sp.sh _output/<业务名>/design-spec-<业务名>.html [_output/
 | SP-C 内容 | 目标与场景一一对应 · 无界面词 · 突破点落场景 · 6.2 覆盖全场景 · 页面挂点 · **方案来源留档** |
 | SP-D 自包含 | 六节编码契约（状态机 / 数据口径 / Token / 固定文案 / 验收 / 边界） |
 
-**配套**：`sketch-selfcheck.sh`（EX-1.4-04）、`design-spec-selfcheck.sh`（SP-A / SP-W）。
+**配套**：`sketch-selfcheck.sh`（EX-1.4-04）、`design-spec-selfcheck.sh`（SP-A / SP-W）、`gate-demo.sh` ＋ `demo-smoke.js`（Part3 高保真 Demo 三段门禁：`gate.js demo` 跨文件对账 + `visual-audit.js --profile=demo` 7 条人工实证红线 + Headless 浏览器 0 报错冒烟）。
 
 ### 草图装配器：`sketch-build.js`（母版 + 矩阵 → 静态终稿）
 

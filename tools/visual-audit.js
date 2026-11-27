@@ -81,6 +81,9 @@ const AVATAR_WHITE = /(avatar|\.icon|\.logo|\.dot)/i;
 // 草图与说明书都必须真判，不得靠"草图阶段不判"或"待核"吞掉。
 const SKETCH_SKIP = ['V-01', 'V-02', 'V-03', 'V-08', 'V-11', 'V-12', 'V-13', 'V-16', 'V-19', 'V-21'];
 
+// Part3 Demo 阶段聚焦 7 条人工实证视觉红线（2026-11-27 用户决策 4），其余 V 项暂不阻断。
+const DEMO_ONLY_IDS = ['V-05', 'V-06', 'V-07', 'V-20', 'V-23', 'V-24', 'V-25'];
+
 const MUST_IDS = ['V-04', 'V-05', 'V-06', 'V-07', 'V-09', 'V-10', 'V-14', 'V-23', 'V-25'];
 
 // 暂停检视（2026-11-26 用户裁定）：V-26 形态与关系、V-27 承载空间，两阶段都不判——
@@ -191,6 +194,7 @@ function textOf(el) {
 }
 function ownText(el) { return el.texts.join(' ').replace(/\s+/g, ' ').trim(); }
 function walk(el, fn) {
+  if (el && el.attrs && el.attrs['data-demo-chrome'] === 'true') return;
   fn(el);
   el.children.forEach((c) => walk(c, fn));
 }
@@ -513,7 +517,17 @@ function suspectFilterBars(root, marked) {
   });
 }
 
+function inQueryWidget(el) {
+  let cur = el.parent;
+  while (cur && cur.tag !== '#root') {
+    if (cur.cls && cur.cls.some((c) => ['datefilter', 'prosearch', 'popover-menu', 'wf-datefilter', 'wf-prosearch'].indexOf(c) >= 0)) return true;
+    cur = cur.parent;
+  }
+  return false;
+}
+
 function checkV06(root, rules, ctx) {
+  const isDemo = ctx && ctx.profile === 'demo';
   const out = [];
   let boxes = findAll(root, (el) => el.attrs['data-region'] === 'filter-bar'
     || el.cls.indexOf('filter-bar') >= 0 || el.cls.indexOf('wf-filter-bar') >= 0);
@@ -528,14 +542,16 @@ function checkV06(root, rules, ctx) {
   let rowIssue = false;
   let placeholderOnly = 0;
   const splitSlots = [], rowIssues = [], orderIssues = [];
+  const isRealAct = (el) => isActEl(el) && !(isDemo && (inQueryWidget(el) || el.attrs['data-act'] === 'query' || el.attrs['data-act'] === 'refresh'));
   boxes.forEach((box) => {
-    const ctrls = findAll(box, (el) => ['input', 'select', 'button', 'textarea'].indexOf(el.tag) >= 0
+    const ctrls = findAll(box, (el) => (['input', 'select', 'button', 'textarea'].indexOf(el.tag) >= 0
       || el.attrs['data-act'] !== undefined || el.attrs['data-go'] !== undefined
-      || el.cls.some((c) => ['btn', 'select', 'date', 'search'].indexOf(c) >= 0));
+      || el.cls.some((c) => ['btn', 'select', 'date', 'search'].indexOf(c) >= 0))
+      && !(isDemo && inQueryWidget(el)));
     // ① 两段式：动作与查询不得挤在同一个子容器里（左按钮区 / 右查询区）
     const kids = (box.children || []).filter((k) => k.tag);
     kids.forEach((k) => {
-      const hasAct = isActEl(k) || findAll(k, isActEl).length > 0;
+      const hasAct = isRealAct(k) || findAll(k, isRealAct).length > 0;
       const hasQuery = isQueryEl(k) || findAll(k, isQueryEl).length > 0;
       if (hasAct && hasQuery) splitSlots.push(`${describe(k)}(在 ${describe(box)} 内)`);
     });
@@ -601,7 +617,8 @@ function checkV06(root, rules, ctx) {
   }];
 }
 
-function checkV07(root) {
+function checkV07(root, rules, ctx) {
+  const isDemo = ctx && ctx.profile === 'demo';
   const acts = findAll(root, (el) => el.attrs['data-act']);
   const byAct = {};
   acts.forEach((el) => {
@@ -613,6 +630,10 @@ function checkV07(root) {
     const regions = [...new Set(byAct[a].map(regionOf))];
     if (regions.length > 1) out.push({ id: 'V-07', ok: false, msg: `data-act="${a}" 出现在 ${regions.length} 区（${regions.join(' / ')}）` });
   });
+  if (isDemo) {
+    if (out.some((o) => !o.ok)) return out.filter((o) => !o.ok);
+    return [{ id: 'V-07', ok: true, msg: `Demo 动作归属一致（已核验 ${acts.length} 个 data-act 无跨区散落）` }];
+  }
   // 动作控件口径：按钮 / .btn* / data-act / data-go（下钻链接也是动作）
   const actions = findAll(root, isActEl);
   const unmarked = actions.filter((el) => !el.attrs['data-act']);
@@ -1156,16 +1177,45 @@ function checkV23(root, rules, ctx) {
 }
 
 function checkV24(root, ctx) {
+  const isDemo = ctx && ctx.profile === 'demo';
   const out = [];
   const cards = findAll(root, (el) => el.cls.some((c) => ['card', 'wf-card', 'kpi-card'].indexOf(c) >= 0));
   if (cards.length < 2) return [{ id: 'V-24', ok: true, warn: true, msg: '卡片 <2，不判' }];
 
-  // ① 静态：操作顺序 / 槽位签名
-  const sigs = cards.map((c) => findAll(c, (el) => el.tag === 'button' || el.cls.some((x) => /^btn/.test(x)))
-    .map((b) => [...b.cls].sort().join('.')).join('|'));
-  const uniq = [...new Set(sigs)];
-  if (uniq.length > 1) {
-    out.push({ id: 'V-24', ok: false, msg: `卡片操作顺序不一致（${uniq.length} 种签名）` });
+  // ① 静态：操作顺序 / 槽位签名（Demo 模式仅比对同一网格容器内的同类卡片，避免把桑基/表格/抽屉等异构区块误判为同类卡）
+  if (isDemo) {
+    const byParent = new Map();
+    cards.forEach((c) => {
+      if (!c.parent) return;
+      const arr = byParent.get(c.parent) || [];
+      arr.push(c);
+      byParent.set(c.parent, arr);
+    });
+    let checkedGroups = 0;
+    byParent.forEach((group) => {
+      if (group.length < 2) return;
+      const opsGroups = group.map((c) => findAll(c, (el) => el.tag === 'button' || el.cls.some((x) => /^btn/.test(x))));
+      // 仅当组内卡片同构（类名完全一致且均有相同结构）时比较操作顺序
+      const cardClsSet = new Set(group.map((c) => [...c.cls].sort().join('.')));
+      const withOps = opsGroups.filter((g) => g.length > 0);
+      if (cardClsSet.size > 1 || withOps.length < 2) return;
+      if (group.some((c) => c.attrs['data-viz'] || c.attrs['data-dx'] || findAll(c, (x) => x.tag === 'table').length > 0)) return;
+      checkedGroups++;
+      const sigs = group.map((c) => findAll(c, (el) => el.tag === 'button' || el.cls.some((x) => /^btn/.test(x)))
+        .map((b) => [...b.cls].sort().join('.')).join('|'));
+      const uniq = [...new Set(sigs)];
+      if (uniq.length > 1) out.push({ id: 'V-24', ok: false, msg: `同类卡片组操作顺序不一致（${uniq.length} 种签名）` });
+    });
+    if (!checkedGroups && !out.length) {
+      return [{ id: 'V-24', ok: true, msg: 'Demo 无异序同类操作卡片组（异构功能区块已豁免）' }];
+    }
+  } else {
+    const sigs = cards.map((c) => findAll(c, (el) => el.tag === 'button' || el.cls.some((x) => /^btn/.test(x)))
+      .map((b) => [...b.cls].sort().join('.')).join('|'));
+    const uniq = [...new Set(sigs)];
+    if (uniq.length > 1) {
+      out.push({ id: 'V-24', ok: false, msg: `卡片操作顺序不一致（${uniq.length} 种签名）` });
+    }
   }
 
   // ② 量测：顺序一致时，主操作的实际位置必须对齐（左缘 / 右缘极差 ≤2px）
@@ -1640,7 +1690,7 @@ const CHECKS = {
   'V-04': (root, rules, ctx) => checkV04(root, rules, ctx),
   'V-05': (root, rules, ctx) => checkV05(ctx),
   'V-06': (root, rules, ctx) => checkV06(root, rules, ctx),
-  'V-07': (root) => checkV07(root),
+  'V-07': (root, rules, ctx) => checkV07(root, rules, ctx),
   'V-08': (root, rules) => checkV08(rules),
   'V-09': (root, rules, ctx) => checkV09(root, rules, ctx),
   'V-10': (root, rules, ctx) => checkV10(rules, ctx),
@@ -1700,6 +1750,10 @@ function runChecks(html, only, profile, ctx) {
     }
     if ((profile === 'sketch' || profile === 'prototype') && SKETCH_SKIP.indexOf(id) >= 0) {
       res.push({ id, ok: true, warn: true, msg: 'Part1 概念原型阶段不判（成品精度项，留 Part2 线框收敛；7 条人工实证底线红线不在此列）' });
+      return;
+    }
+    if (profile === 'demo' && DEMO_ONLY_IDS.indexOf(id) < 0) {
+      res.push({ id, ok: true, warn: true, msg: 'Part3 Demo 阶段暂不判（当前仅关注 7 条人工实证红线：V-05/06/07/20/23/24/25）' });
       return;
     }
     res.push.apply(res, CHECKS[id](root, RULES, ctx));
@@ -1830,7 +1884,7 @@ async function main() {
   if (argv.indexOf('--doc-check') >= 0) return docCheck();
   const file = argv.find((a) => !a.startsWith('--'));
   if (!file) {
-    console.error('用法：node tools/visual-audit.js <产物.html> --profile=sketch|wireframe [--only=V-08,V-19] [--no-measure] [--measure-fail]');
+    console.error('用法：node tools/visual-audit.js <产物.html> --profile=sketch|wireframe|demo [--only=V-08,V-19] [--no-measure] [--measure-fail]');
     console.error('     node tools/visual-audit.js --selftest');
     console.error('     node tools/visual-audit.js --doc-check');
     process.exit(2);

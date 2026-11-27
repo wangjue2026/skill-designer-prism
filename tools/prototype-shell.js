@@ -51,7 +51,7 @@ const PROTOTYPE_CSS = `
     margin: 0;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 24px 72px; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 24px 24px 72px; }
 
   /* 页头与概览区（轻量去框线） */
   .doc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }

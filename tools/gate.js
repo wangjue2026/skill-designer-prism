@@ -1741,7 +1741,7 @@ function runSP() {
   else ok('SP-C-06', (planSrcM ? planSrcM[0] : '方案来源已声明'));
 
   /* SP-D */
-  head('SP-D 自包含（六节编码契约）');
+  head('SP-D 自包含（六节编码契约 · 含结构化交互表与动效微契约）');
   const NEED = [
     ['SP-D-01', /交互逻辑与状态机/, '①交互逻辑与状态机'],
     ['SP-D-01', /数据口径与演示数据集/, '②数据口径与演示数据集'],
@@ -1753,9 +1753,149 @@ function runSP() {
   const miss = NEED.filter((x) => !x[1].test(html)).map((x) => x[2]);
   if (miss.length) bad('SP-D-01', '缺编码契约：' + miss.join('、'));
   else ok('SP-D-01', '六节编码契约齐备');
-  wr('SP-D-02~06', '人检：状态机逐页边界 / 每个数字有真源 / 责任边界句逐字 / 自测步骤可照做 / 不做清单齐');
+  // SP-D-02 机检增强：Part3 交互与动效供给校验（要求结构化交互表覆盖页面 + 动效声明）
+  const spTailIdx = html.search(/交互逻辑与状态机/);
+  const spTail = spTailIdx >= 0 ? html.slice(spTailIdx) : '';
+  const hasInteractTable = /<table[^>]*>[\s\S]*?(触发元素|交互动作|系统响应|联动目标)[\s\S]*?<\/table>/i.test(spTail);
+  const pageIdsInSpec = Array.from(new Set((html.match(/id="(page-\d+)"/gi) || []).map((m) => m.match(/page-\d+/i)[0].toUpperCase())));
+  const missingPageInInteract = hasInteractTable
+    ? pageIdsInSpec.filter((pid) => !new RegExp(pid.replace('-', '[-_]?'), 'i').test(spTail))
+    : [];
+  const hasMotionSpec = /(design-motion|motion-dur|动效|transition|translateX|cubic-bezier|\d+ms)/i.test(spTail);
+  if (!hasInteractTable) {
+    bad('SP-D-02', '① 交互逻辑与状态机缺少结构化交互行为表（<table> 需含触发元素/交互动作/系统响应与联动目标列，供 Part3 Demo 直接还原）');
+  } else if (missingPageInInteract.length) {
+    bad('SP-D-02', '交互行为表漏覆盖页面：' + missingPageInInteract.join('、') + '（每页均须有交互与联动条目）');
+  } else {
+    ok('SP-D-02', `结构化交互行为表已覆及全部 ${pageIdsInSpec.length} 个页面`);
+  }
+  if (!hasMotionSpec) {
+    bad('SP-D-03', '③ 组件、Token 与全局样式缺少动效微契约（须引用 design-motion.md 并声明抽屉/弹窗/Tab/Toast 等动效时长与过渡）');
+  } else {
+    ok('SP-D-03', '已包含动效微契约声明（供 Part3 Demo 落地）');
+  }
+  wr('SP-D-04~06', '人检：每个数字有真源 / 责任边界句逐字 / 自测步骤可照做 / 不做清单齐');
 
   return finish('SP');
+}
+
+/* ============================ DEMO (Part3 EX-6.0) ============================ */
+function runDemo() {
+  const demoFile = process.argv[3];
+  const specFile = process.argv[4];
+  const demo = readOrDie(demoFile, 'node tools/gate.js demo <demo.html> <design-spec.html>');
+  const spec = readOrDie(specFile, 'node tools/gate.js demo <demo.html> <design-spec.html>');
+
+  console.log('============================================================');
+  console.log(' 织雨 · Part3 高保真 Demo 准出门禁 EX-6.0（口径见 准出门禁总表.md）');
+  console.log(' Demo 文件: ' + demoFile);
+  console.log(' 对账依据: ' + specFile);
+  console.log('============================================================');
+
+  const demoNoStyle = demo.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+
+  // 1. 页面全量承接对账（EX-6.0-01）
+  head('EX-6.0-01/02 页面与框架套头全量承接对账');
+  const specPages = Array.from(new Set((spec.match(/<h5[^>]*id="(page-\d+)"/gi) || [])
+    .map((m) => m.match(/page-\d+/i)[0].toUpperCase())));
+  const demoPages = Array.from(new Set((demo.match(/data-demo-page="(page-\d+)"/gi) || [])
+    .map((m) => m.match(/page-\d+/i)[0].toUpperCase())));
+  const missPages = specPages.filter((p) => demoPages.indexOf(p) === -1);
+  if (specPages.length === 0) {
+    wr('EX-6.0-01', '说明书未提取到 h5#page-0x，跳过页面跨文件对账');
+  } else if (missPages.length) {
+    bad('EX-6.0-01', `页面遗漏（说明书 ${specPages.length} 页，Demo 缺 ${missPages.join('、')}；请为每页/抽屉/弹窗挂 data-demo-page="Page-0x"）`);
+  } else {
+    ok('EX-6.0-01', `全部 ${specPages.length} 个页面（${specPages.join(' / ')}）均在 Demo 中有 data-demo-page 承载`);
+  }
+
+  // 2. 页内子 Tab 全量承接防缩水对账（EX-6.0-07）
+  head('EX-6.0-07 页内子 Tab 全量还原与防缩水对账');
+  const specTabMatches = [];
+  const specTabRe = /<button[^>]*data-wf-tab="([^"]+)"[^>]*>([\s\S]*?)<\/button>/gi;
+  let tm;
+  while ((tm = specTabRe.exec(spec)) !== null) {
+    const label = strip(tm[2]);
+    const baseLabel = label.replace(/[（(]\s*\d+[^）)]*[）)]/g, '').trim();
+    specTabMatches.push({ id: tm[1], label, baseLabel });
+  }
+  const demoTabLabels = [];
+  const demoTabRe = /data-demo-tab="([^"]+)"[^>]*>([\s\S]*?)<\/button>/gi;
+  while ((tm = demoTabRe.exec(demo)) !== null) {
+    demoTabLabels.push({ id: tm[1], label: strip(tm[2]) });
+  }
+  const demoPaneIds = Array.from(new Set((demo.match(/data-demo-pane="([^"]+)"/gi) || [])
+    .map((m) => m.match(/data-demo-pane="([^"]+)"/i)[1])));
+  if (specTabMatches.length === 0) {
+    ok('EX-6.0-07', '说明书无页内子 Tab，无需子 Tab 对账');
+  } else {
+    const missTabs = specTabMatches.filter((st) =>
+      !demoTabLabels.some((dt) => dt.id === st.id || dt.label.includes(st.baseLabel))
+    );
+    const emptyPanes = [];
+    const paneRe = /data-demo-pane="([^"]+)"[^>]*>([\s\S]*?)(?=<div[^>]*data-demo-pane=|<\/div>\s*<!--\s*\/demo-tabs)/gi;
+    // 轻量检测：检查每个 data-demo-tab 是否有对应 data-demo-pane，且无“暂无更多演示数据/敬请期待”敷衍文案
+    const missPanes = demoTabLabels.filter((dt) => demoPaneIds.indexOf(dt.id) === -1).map((dt) => dt.label);
+    const fakeShell = /(暂无更多演示数据|敬请期待|其余同上|此处略)/.test(demoNoStyle);
+    if (missTabs.length) {
+      bad('EX-6.0-07', '页内子 Tab 遗漏：' + missTabs.map((t) => t.label).join('、'));
+    } else if (missPanes.length) {
+      bad('EX-6.0-07', '子 Tab 缺少对应 data-demo-pane 面板：' + missPanes.join('、'));
+    } else if (fakeShell) {
+      bad('EX-6.0-07', '检测到“暂无更多演示数据 / 敬请期待 / 其余同上”空壳敷衍文案，违反子 Tab 全量还原铁律');
+    } else {
+      ok('EX-6.0-07', `全部 ${specTabMatches.length} 个页内子 Tab（${specTabMatches.map((t) => t.label).join(' / ')}）均已还原且无空壳文案`);
+    }
+  }
+
+  // 3. 可视化件全量承接对账（EX-6.0-06 / 09）
+  head('EX-6.0-06/09 可视化件（VIZ-* 与 REF）全量落地对账');
+  const specBodyOnly = spec
+    .replace(/<details[^>]*class="[^"]*sec-fold[^"]*"[^>]*>[\s\S]*?<\/details>/gi, '')
+    .replace(/<code[^>]*>[\s\S]*?<\/code>/gi, '');
+  const specViz = (specBodyOnly.match(/data-viz="([^"]+)"/gi) || []).map((m) => m.match(/data-viz="([^"]+)"/i)[1]);
+  const demoViz = (demo.match(/data-viz="([^"]+)"/gi) || []).map((m) => m.match(/data-viz="([^"]+)"/i)[1]);
+  if (specViz.length === 0) {
+    ok('EX-6.0-06', '说明书无可视化件声明');
+  } else if (demoViz.length < specViz.length) {
+    bad('EX-6.0-06', `可视化件数量不足（说明书 ${specViz.length} 件 [${specViz.join(', ')}]，Demo 仅 ${demoViz.length} 件）`);
+  } else {
+    ok('EX-6.0-06', `可视化件数量齐全（Demo ${demoViz.length} 件 ≥ 说明书 ${specViz.length} 件：${specViz.join(' / ')}）`);
+  }
+
+  // 4. 按钮禁红与视觉降噪（EX-6.0-04）
+  head('EX-6.0-04 视觉降噪与按钮禁红安全带');
+  const redBtn = /class="[^"]*(btn-danger|danger-btn)[^"]*"/i.test(demoNoStyle)
+    || /<button[^>]*style="[^"]*background(?:-color)?\s*:\s*(?:#cf171d|#d9363e|#f52727|red)[^"]*"/i.test(demoNoStyle);
+  if (redBtn) bad('EX-6.0-04', '检测到红色实心危险按钮，违反全系统按钮禁红铁律');
+  else ok('EX-6.0-04', '无红色实心按钮，符合柔和语义降噪规范');
+
+  // 5. 演示态切换器与异常兜底（EX-6.0-05）
+  head('EX-6.0-05 异常安全带与演示态切换器');
+  const hasChrome = /data-demo-chrome="true"/i.test(demo);
+  const hasStates = /(data-demo-state=|empty|skeleton|degraded)/i.test(demo);
+  if (!hasChrome || !hasStates) {
+    bad('EX-6.0-05', '缺少内置可折叠「演示态切换器」（需挂 data-demo-chrome="true" 及 data-demo-state 状态切换按钮，支持预览空态/骨架态/降级态）');
+  } else {
+    ok('EX-6.0-05', '已内置可折叠演示态切换器（data-demo-chrome="true"），支持多异常态实时演练');
+  }
+
+  // 6. 交互行为与动效落地（EX-6.0-10）
+  head('EX-6.0-10 真实交互闭环、动效 Token 与零死链校验');
+  const hasMotionVars = /--motion-dur-/.test(demo) && /prefers-reduced-motion/.test(demo);
+  const hasAppState = /AppState|addEventListener/.test(demo);
+  const deadHref = /href\s*=\s*["']#["']/i.test(demoNoStyle);
+  if (!hasMotionVars) {
+    bad('EX-6.0-10', '缺少 design-motion.md 标准动效 Token（--motion-dur-* 与 prefers-reduced-motion 降级）');
+  } else if (!hasAppState) {
+    bad('EX-6.0-10', '未检测到交互状态机或事件绑定逻辑，疑似静态壳');
+  } else if (deadHref) {
+    bad('EX-6.0-10', '检测到 href="#" 空锚点，违反零死按钮铁律（请改用 button 语义或真实交互事件）');
+  } else {
+    ok('EX-6.0-10', '已接入 design-motion.md 动效 Token + 响应式交互脚本，且无 href="#" 死链');
+  }
+
+  return finish('EX-6.0 (Demo)');
 }
 
 function finish(tag) {
@@ -1770,7 +1910,8 @@ function finish(tag) {
 
 if (MODE === 'ex') runEX();
 else if (MODE === 'sp') runSP();
+else if (MODE === 'demo') runDemo();
 else {
-  console.log('用法: node tools/gate.js <ex|sp> <环节|说明书> <文件> [上游文件]');
+  console.log('用法: node tools/gate.js <ex|sp|demo> <参数...>');
   process.exit(2);
 }

@@ -318,6 +318,12 @@ WF_RESULT=$(node -e '
     errors.push("【提示条】普通/告警提示条带了边框；comp-alert.md 规定无边框");
   }
 
+  // 7j 表格列设置规范（comp-table.md §1.4.11）：idux 表格无独立「列设置」工具栏按钮，必须收在表头最右侧 40px「···」更多列（数据行留白）
+  const badColBtn = btns.filter(b => /^(列设置|自定义列|字段设置|列配置)$/.test(b.text));
+  if (badColBtn.length) {
+    errors.push("【表格列设置】工具栏检出独立按钮「" + badColBtn[0].text + "」；按 comp-table.md §1.4.11，idux 表格无独立列设置按钮，须统一收在表头最右侧 40px「···」更多列（内容区单元格留白）");
+  }
+
   if (errors.length > 0) console.log("FAIL|" + [...new Set(errors)].join("；"));
   else console.log("PASS|表单与组件结构硬指标全绿（左右结构 / 星号占位 / 容器档位与选型 / 三段分区 / 按钮 / 提示条）");
 ' "$SPEC")
